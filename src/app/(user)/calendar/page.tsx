@@ -41,10 +41,10 @@ export default function CalendarPage() {
     return entries.find(e => e.entry_date === dateStr)
   }
 
-  const getMoodEmoji = (moodScore: number | null) => {
+  const getMoodIcon = (moodScore: number | null) => {
     if (!moodScore) return null
     const mood = MOOD_LEVELS.find(m => m.value === moodScore)
-    return mood?.emoji
+    return mood ? mood.Icon : null
   }
 
   return (
@@ -86,7 +86,7 @@ export default function CalendarPage() {
             ))}
             {days.map(day => {
               const entry = getEntryForDate(day)
-              const mood = entry ? getMoodEmoji(entry.mood_score) : null
+              const MoodIcon = entry ? getMoodIcon(entry.mood_score) : null
               const today = isToday(day)
 
               return (
@@ -101,7 +101,11 @@ export default function CalendarPage() {
                   `}
                 >
                   <div className="text-sm text-gray-700">{format(day, 'd')}</div>
-                  {mood && <div className="text-2xl mt-1">{mood}</div>}
+                  {MoodIcon && (
+                    <div className="mt-1 flex justify-center">
+                      <MoodIcon className="w-5 h-5 text-gray-600" />
+                    </div>
+                  )}
                 </a>
               )
             })}
@@ -114,7 +118,7 @@ export default function CalendarPage() {
         <div className="flex flex-wrap gap-4">
           {MOOD_LEVELS.map(level => (
             <div key={level.value} className="flex items-center gap-2">
-              <span className="text-2xl">{level.emoji}</span>
+              <level.Icon className="w-5 h-5 text-gray-600" />
               <span className="text-sm text-gray-600">{level.value}/5</span>
             </div>
           ))}

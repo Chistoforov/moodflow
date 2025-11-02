@@ -6,9 +6,18 @@ import { perplexityService } from '@/lib/integrations/perplexity'
 import { telegramService } from '@/lib/integrations/telegram'
 
 export async function GET(request: NextRequest) {
-  // Verify cron secret
+  // Verify cron secret - support both Vercel cron header and Bearer token
+  const vercelCronHeader = request.headers.get('x-vercel-cron')
   const authHeader = request.headers.get('authorization')
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  const cronSecret = process.env.CRON_SECRET
+
+  // Vercel automatically adds x-vercel-cron header for scheduled cron jobs
+  // For manual calls, use Bearer token
+  const isAuthorized = 
+    vercelCronHeader === '1' || 
+    (cronSecret && authHeader === `Bearer ${cronSecret}`)
+
+  if (!isAuthorized) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

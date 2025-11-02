@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { Calendar, BarChart3, Stethoscope, Check } from 'lucide-react'
 
 export default function HomePage() {
   return (
@@ -27,110 +28,116 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className="mt-20 grid md:grid-cols-3 gap-8">
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <div className="text-4xl mb-4">📅</div>
-            <h3 className="text-xl font-semibold mb-2">Календарь настроения</h3>
-            <p className="text-gray-600">
+        <div className="mt-16 grid md:grid-cols-3 gap-6">
+          <div className="bg-white rounded-lg shadow-lg p-5">
+            <div className="mb-3">
+              <Calendar className="w-10 h-10 text-indigo-600" />
+            </div>
+            <h3 className="text-lg font-semibold mb-2 text-gray-900">Календарь настроения</h3>
+            <p className="text-sm text-gray-600">
               Отслеживайте свое настроение каждый день и находите паттерны
             </p>
           </div>
 
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <div className="text-4xl mb-4">🤖</div>
-            <h3 className="text-xl font-semibold mb-2">ИИ-анализ</h3>
-            <p className="text-gray-600">
+          <div className="bg-white rounded-lg shadow-lg p-5">
+            <div className="mb-3">
+              <BarChart3 className="w-10 h-10 text-indigo-600" />
+            </div>
+            <h3 className="text-lg font-semibold mb-2 text-gray-900">Анализ состояния</h3>
+            <p className="text-sm text-gray-600">
               Получайте еженедельные отчеты с анализом вашего состояния
             </p>
           </div>
 
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <div className="text-4xl mb-4">👨‍⚕️</div>
-            <h3 className="text-xl font-semibold mb-2">Психологи</h3>
-            <p className="text-gray-600">
+          <div className="bg-white rounded-lg shadow-lg p-5">
+            <div className="mb-3">
+              <Stethoscope className="w-10 h-10 text-indigo-600" />
+            </div>
+            <h3 className="text-lg font-semibold mb-2 text-gray-900">Психологи</h3>
+            <p className="text-sm text-gray-600">
               Профессиональные рекомендации и поддержка в любое время
             </p>
           </div>
         </div>
 
-        <div className="mt-20 text-center">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8">
+        <div className="mt-16 text-center">
+          <h2 className="text-3xl font-bold text-gray-900 mb-6">
             Выберите подходящий тариф
           </h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-white rounded-lg shadow-lg p-8 border-2 border-gray-200">
-              <h3 className="text-2xl font-bold mb-4">Бесплатно</h3>
-              <div className="text-4xl font-bold mb-6">0 ₽</div>
-              <ul className="text-left space-y-3 mb-8">
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="bg-white rounded-lg shadow-lg p-5 border-2 border-gray-200">
+              <h3 className="text-xl font-bold mb-3 text-gray-900">Бесплатно</h3>
+              <div className="text-3xl font-bold mb-4 text-gray-900">0 ₽</div>
+              <ul className="text-left space-y-2 mb-6 text-sm text-gray-700">
                 <li className="flex items-center">
-                  <span className="text-green-500 mr-2">✓</span>
+                  <Check className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" />
                   Календарь настроения
                 </li>
                 <li className="flex items-center">
-                  <span className="text-green-500 mr-2">✓</span>
+                  <Check className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" />
                   Заметки и аудио
                 </li>
                 <li className="flex items-center">
-                  <span className="text-green-500 mr-2">✓</span>
-                  Авто-анализ от ИИ
+                  <Check className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" />
+                  Анализ состояния
                 </li>
               </ul>
               <Link
                 href="/login"
-                className="block w-full px-6 py-3 text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100 font-medium text-center"
+                className="block w-full px-6 py-2.5 text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100 font-medium text-center text-sm"
               >
                 Начать
               </Link>
             </div>
 
-            <div className="bg-white rounded-lg shadow-xl p-8 border-2 border-indigo-500 transform scale-105">
-              <div className="bg-indigo-500 text-white text-sm font-bold py-1 px-4 rounded-full inline-block mb-4">
+            <div className="bg-white rounded-lg shadow-xl p-5 border-2 border-indigo-500 transform scale-105">
+              <div className="bg-indigo-500 text-white text-xs font-bold py-1 px-3 rounded-full inline-block mb-3">
                 Популярный
               </div>
-              <h3 className="text-2xl font-bold mb-4">Подписка</h3>
-              <div className="text-4xl font-bold mb-6">990 ₽<span className="text-lg text-gray-500">/мес</span></div>
-              <ul className="text-left space-y-3 mb-8">
+              <h3 className="text-xl font-bold mb-3 text-gray-900">Подписка</h3>
+              <div className="text-3xl font-bold mb-4 text-gray-900">990 ₽<span className="text-base text-gray-600">/мес</span></div>
+              <ul className="text-left space-y-2 mb-6 text-sm text-gray-700">
                 <li className="flex items-center">
-                  <span className="text-green-500 mr-2">✓</span>
+                  <Check className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" />
                   Всё из бесплатного
                 </li>
                 <li className="flex items-center">
-                  <span className="text-green-500 mr-2">✓</span>
+                  <Check className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" />
                   Рекомендации психолога
                 </li>
                 <li className="flex items-center">
-                  <span className="text-green-500 mr-2">✓</span>
+                  <Check className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" />
                   Недельные отчёты
                 </li>
               </ul>
               <Link
                 href="/login"
-                className="block w-full px-6 py-3 text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 font-medium text-center"
+                className="block w-full px-6 py-2.5 text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 font-medium text-center text-sm"
               >
                 Выбрать
               </Link>
             </div>
 
-            <div className="bg-white rounded-lg shadow-lg p-8 border-2 border-gray-200">
-              <h3 className="text-2xl font-bold mb-4">Личный психолог</h3>
-              <div className="text-4xl font-bold mb-6">4990 ₽<span className="text-lg text-gray-500">/мес</span></div>
-              <ul className="text-left space-y-3 mb-8">
+            <div className="bg-white rounded-lg shadow-lg p-5 border-2 border-gray-200">
+              <h3 className="text-xl font-bold mb-3 text-gray-900">Личный психолог</h3>
+              <div className="text-3xl font-bold mb-4 text-gray-900">4990 ₽<span className="text-base text-gray-600">/мес</span></div>
+              <ul className="text-left space-y-2 mb-6 text-sm text-gray-700">
                 <li className="flex items-center">
-                  <span className="text-green-500 mr-2">✓</span>
+                  <Check className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" />
                   Всё из подписки
                 </li>
                 <li className="flex items-center">
-                  <span className="text-green-500 mr-2">✓</span>
+                  <Check className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" />
                   Постоянный чат
                 </li>
                 <li className="flex items-center">
-                  <span className="text-green-500 mr-2">✓</span>
+                  <Check className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" />
                   Приоритетная поддержка
                 </li>
               </ul>
               <Link
                 href="/login"
-                className="block w-full px-6 py-3 text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100 font-medium text-center"
+                className="block w-full px-6 py-2.5 text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100 font-medium text-center text-sm"
               >
                 Выбрать
               </Link>

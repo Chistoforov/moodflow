@@ -19,7 +19,7 @@ export class TelegramService {
         reply_markup: {
           inline_keyboard: [[
             {
-              text: '📱 Открыть MoodFlow',
+              text: 'Открыть MoodFlow',
               url: url
             }
           ]]
@@ -36,7 +36,7 @@ export class TelegramService {
     recommendationId: string
   ): Promise<void> {
     const url = `${process.env.NEXT_PUBLIC_APP_URL}/recommendations/${recommendationId}`
-    const message = '📝 *Новая рекомендация от психолога!*\n\nПосмотрите, что для вас подготовили.'
+    const message = '*Новая рекомендация от психолога!*\n\nПосмотрите, что для вас подготовили.'
     
     await this.sendNotification(telegramId, message, url)
   }
@@ -46,7 +46,7 @@ export class TelegramService {
     summaryId: string
   ): Promise<void> {
     const url = `${process.env.NEXT_PUBLIC_APP_URL}/summaries/${summaryId}`
-    const message = '📊 *Готов ваш еженедельный отчёт!*\n\nПосмотрите анализ вашего настроения за неделю.'
+    const message = '*Готов ваш еженедельный отчёт!*\n\nПосмотрите анализ вашего настроения за неделю.'
     
     await this.sendNotification(telegramId, message, url)
   }

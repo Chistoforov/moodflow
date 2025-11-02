@@ -1,7 +1,9 @@
+import { type LucideIcon } from 'lucide-react'
+
 export interface MoodLevel {
   value: number
   label: string
-  emoji: string
+  Icon: LucideIcon
   color: string
 }
 

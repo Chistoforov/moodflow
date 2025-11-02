@@ -101,7 +101,9 @@ export default function EntryPage() {
                     : 'border-gray-200 hover:border-gray-300'
                 }`}
               >
-                <div className="text-4xl mb-2">{level.emoji}</div>
+                <div className="mb-2 flex justify-center">
+                  <level.Icon className={`w-8 h-8 ${moodScore === level.value ? 'text-indigo-600' : 'text-gray-400'}`} />
+                </div>
                 <div className="text-sm font-medium">{level.value}/5</div>
               </button>
             ))}

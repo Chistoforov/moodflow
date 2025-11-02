@@ -1,9 +1,18 @@
-export const MOOD_LEVELS = [
-  { value: 1, label: '😢', emoji: '😢', color: 'bg-red-500' },
-  { value: 2, label: '😕', emoji: '😕', color: 'bg-orange-500' },
-  { value: 3, label: '😐', emoji: '😐', color: 'bg-yellow-500' },
-  { value: 4, label: '🙂', emoji: '🙂', color: 'bg-green-500' },
-  { value: 5, label: '😄', emoji: '😄', color: 'bg-emerald-500' },
+import { Frown, Meh, Smile, Laugh, TrendingDown, type LucideIcon } from 'lucide-react'
+
+export interface MoodLevelConfig {
+  value: number
+  label: string
+  Icon: LucideIcon
+  color: 'bg-red-500' | 'bg-orange-500' | 'bg-yellow-500' | 'bg-green-500' | 'bg-emerald-500'
+}
+
+export const MOOD_LEVELS: MoodLevelConfig[] = [
+  { value: 1, label: 'Очень плохо', Icon: Frown, color: 'bg-red-500' },
+  { value: 2, label: 'Плохо', Icon: TrendingDown, color: 'bg-orange-500' },
+  { value: 3, label: 'Нейтрально', Icon: Meh, color: 'bg-yellow-500' },
+  { value: 4, label: 'Хорошо', Icon: Smile, color: 'bg-green-500' },
+  { value: 5, label: 'Отлично', Icon: Laugh, color: 'bg-emerald-500' },
 ]
 
 export const FACTORS = [
