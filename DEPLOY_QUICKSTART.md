@@ -75,7 +75,6 @@ CRON_SECRET=ваш_секретный_ключ
    - **Site URL**: `https://moodflow-six.vercel.app`
    - **Redirect URLs**: добавьте:
      ```
-     https://moodflow-six.vercel.app/auth/callback
      https://moodflow-six.vercel.app/api/auth/callback
      https://moodflow-six.vercel.app/**
      ```

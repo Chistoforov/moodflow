@@ -128,7 +128,6 @@ vercel --prod
    - Добавьте `https://moodflow-six.vercel.app` в **Site URL**
    - Добавьте в **Redirect URLs**:
      ```
-     https://moodflow-six.vercel.app/auth/callback
      https://moodflow-six.vercel.app/api/auth/callback
      ```
 
@@ -143,7 +142,6 @@ vercel --prod
    - Site URL: `https://moodflow-six.vercel.app`
    - Redirect URLs: добавьте:
      ```
-     https://moodflow-six.vercel.app/auth/callback
      https://moodflow-six.vercel.app/api/auth/callback
      https://moodflow-six.vercel.app/**
      ```

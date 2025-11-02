@@ -204,7 +204,9 @@ vercel env add NEXT_PUBLIC_SUPABASE_ANON_KEY
 
 1. Проверьте настройки Email provider в Supabase
 2. Убедитесь, что в Authentication → URL Configuration правильно указан Site URL
-3. Добавьте `http://localhost:3000/**` в Redirect URLs
+3. Добавьте в Redirect URLs:
+   - `http://localhost:3000/api/auth/callback`
+   - `http://localhost:3000/**`
 
 ## 📞 Поддержка
 
