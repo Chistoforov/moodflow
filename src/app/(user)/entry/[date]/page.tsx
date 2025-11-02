@@ -122,25 +122,25 @@ export default function EntryPage() {
 
         <div className="space-y-6">
           {/* Mood Selection */}
-          <div className="rounded-2xl shadow-sm p-8" style={{ backgroundColor: '#F5F1EB' }}>
+          <div className="rounded-2xl shadow-sm p-6 sm:p-8" style={{ backgroundColor: '#F5F1EB' }}>
             <h2 className="text-xl font-semibold mb-6 text-center" style={{ color: '#8B3A3A' }}>
               Настроение
             </h2>
-            <div className="flex justify-between gap-3">
+            <div className="flex justify-center flex-wrap gap-3 sm:gap-4 max-w-2xl mx-auto">
               {MOOD_LEVELS.map(level => (
                 <button
                   key={level.value}
                   onClick={() => setMoodScore(level.value)}
-                  className="flex-1 p-6 rounded-xl transition-all"
+                  className="flex flex-col items-center p-4 sm:p-6 rounded-xl transition-all min-w-[70px] sm:min-w-[90px]"
                   style={{
                     backgroundColor: moodScore === level.value ? '#E8E2D5' : 'transparent',
                     border: moodScore === level.value ? '2px solid #8B3A3A' : '2px solid transparent',
                   }}
                 >
-                  <div className="mb-3 flex justify-center">
+                  <div className="mb-2 sm:mb-3 flex justify-center">
                     <MoodSymbol score={level.value} selected={moodScore === level.value} />
                   </div>
-                  <div className="text-xs font-medium" style={{ color: '#8B3A3A' }}>
+                  <div className="text-xs font-medium text-center" style={{ color: '#8B3A3A' }}>
                     {level.label}
                   </div>
                 </button>

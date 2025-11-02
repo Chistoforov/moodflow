@@ -52,21 +52,23 @@ export default function LoginPage() {
   // Показываем загрузку пока проверяем сессию
   if (checkingSession) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#E8E2D5' }}>
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-          <p className="mt-4 text-gray-600">Проверка сессии...</p>
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: '#8B3A3A' }}></div>
+          <p className="mt-4" style={{ color: '#8B3A3A' }}>Проверка сессии...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow">
+    <div className="min-h-screen flex items-center justify-center px-4" style={{ backgroundColor: '#E8E2D5' }}>
+      <div className="max-w-md w-full space-y-8 p-8 rounded-2xl" style={{ backgroundColor: '#F5F1EB' }}>
         <div>
-          <h2 className="text-3xl font-bold text-gray-900 text-center">MoodFlow</h2>
-          <p className="mt-2 text-center text-gray-600">
+          <h2 className="handwritten text-5xl font-bold text-center mb-4" style={{ color: '#8B3A3A' }}>
+            MoodFlow
+          </h2>
+          <p className="text-center text-lg" style={{ color: '#8B3A3A' }}>
             Войдите в свой аккаунт
           </p>
         </div>
@@ -82,7 +84,12 @@ export default function LoginPage() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+              className="appearance-none rounded-xl relative block w-full px-4 py-3 border-2 focus:outline-none focus:ring-2 transition-all"
+              style={{
+                backgroundColor: '#E8E2D5',
+                borderColor: '#C8BEB0',
+                color: '#8B3A3A',
+              }}
               placeholder="Email адрес"
             />
           </div>
@@ -91,14 +98,26 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+              className="group relative w-full flex justify-center py-3 px-4 border-none font-medium rounded-full disabled:opacity-50 transition-all"
+              style={{
+                backgroundColor: '#8B3A3A',
+                color: '#E8E2D5',
+              }}
+              onMouseEnter={(e) => {
+                if (!loading) {
+                  e.currentTarget.style.backgroundColor = '#6B1F1F'
+                }
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#8B3A3A'
+              }}
             >
               {loading ? 'Отправка...' : 'Войти'}
             </button>
           </div>
 
           {message && (
-            <div className="text-center text-sm text-gray-600">
+            <div className="text-center" style={{ color: '#8B3A3A' }}>
               {message}
             </div>
           )}

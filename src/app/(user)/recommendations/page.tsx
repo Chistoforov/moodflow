@@ -47,29 +47,29 @@ export default function RecommendationsPage() {
   }
 
   const getTypeBadge = (type: string) => {
-    const colors = {
-      weekly: 'bg-blue-100 text-blue-800',
-      personal: 'bg-purple-100 text-purple-800',
-      ai: 'bg-green-100 text-green-800',
+    const styles = {
+      weekly: { backgroundColor: '#D4C8B5', color: '#8B3A3A' },
+      personal: { backgroundColor: '#C8BEB0', color: '#8B3A3A' },
+      ai: { backgroundColor: '#E8E2D5', color: '#8B3A3A' },
     }
-    return colors[type as keyof typeof colors] || 'bg-gray-100 text-gray-800'
+    return styles[type as keyof typeof styles] || { backgroundColor: '#F5F1EB', color: '#8B3A3A' }
   }
 
   return (
     <div className="px-4 sm:px-0">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Рекомендации</h1>
-        <p className="mt-2 text-gray-600">
+        <h1 className="text-4xl font-bold" style={{ color: '#8B3A3A' }}>Рекомендации</h1>
+        <p className="mt-3 text-lg" style={{ color: '#8B3A3A' }}>
           Персональные советы от психологов и ИИ-анализ
         </p>
       </div>
 
       {loading ? (
-        <div className="text-center py-12">Загрузка...</div>
+        <div className="text-center py-12" style={{ color: '#8B3A3A' }}>Загрузка...</div>
       ) : recommendations.length === 0 ? (
-        <div className="bg-white rounded-lg shadow p-8 text-center">
-          <p className="text-gray-500">Пока нет рекомендаций</p>
-          <p className="text-sm text-gray-400 mt-2">
+        <div className="rounded-2xl shadow-sm p-8 text-center" style={{ backgroundColor: '#F5F1EB' }}>
+          <p className="text-lg" style={{ color: '#8B3A3A' }}>Пока нет рекомендаций</p>
+          <p className="mt-2" style={{ color: '#8B3A3A', opacity: 0.7 }}>
             Продолжайте вести дневник, и скоро появятся персональные советы
           </p>
         </div>
@@ -78,26 +78,29 @@ export default function RecommendationsPage() {
           {recommendations.map(rec => (
             <div
               key={rec.id}
-              className={`bg-white rounded-lg shadow p-6 ${
-                !rec.read_status ? 'border-l-4 border-indigo-500' : ''
+              className={`rounded-2xl shadow-sm p-6 ${
+                !rec.read_status ? 'border-l-4' : ''
               }`}
+              style={{
+                backgroundColor: '#F5F1EB',
+                borderLeftColor: !rec.read_status ? '#8B3A3A' : 'transparent',
+              }}
             >
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
                   {rec.title && (
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    <h3 className="text-xl font-semibold mb-3" style={{ color: '#8B3A3A' }}>
                       {rec.title}
                     </h3>
                   )}
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <span
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTypeBadge(
-                        rec.recommendation_type
-                      )}`}
+                      className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
+                      style={getTypeBadge(rec.recommendation_type)}
                     >
                       {getTypeLabel(rec.recommendation_type)}
                     </span>
-                    <span className="text-sm text-gray-500">
+                    <span style={{ color: '#8B3A3A', opacity: 0.7 }}>
                       {format(new Date(rec.created_at), 'dd MMMM yyyy', {
                         locale: ru,
                       })}
@@ -105,13 +108,19 @@ export default function RecommendationsPage() {
                   </div>
                 </div>
                 {!rec.read_status && (
-                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                  <span 
+                    className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ml-2"
+                    style={{
+                      backgroundColor: '#8B3A3A',
+                      color: '#E8E2D5',
+                    }}
+                  >
                     Новое
                   </span>
                 )}
               </div>
               <div className="prose prose-sm max-w-none">
-                <p className="text-gray-700 whitespace-pre-wrap">{rec.text}</p>
+                <p className="whitespace-pre-wrap leading-relaxed" style={{ color: '#8B3A3A' }}>{rec.text}</p>
               </div>
             </div>
           ))}

@@ -4,12 +4,12 @@ export default function UsersPage() {
   return (
     <div className="px-4 sm:px-0">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Пользователи</h1>
+        <h1 className="text-4xl font-bold" style={{ color: '#8B3A3A' }}>Пользователи</h1>
       </div>
 
-      <div className="bg-white rounded-lg shadow">
-        <div className="px-4 py-5 sm:p-6">
-          <p className="text-gray-500">Список пользователей будет здесь</p>
+      <div className="rounded-2xl shadow-sm" style={{ backgroundColor: '#F5F1EB' }}>
+        <div className="px-8 py-6">
+          <p style={{ color: '#8B3A3A' }}>Список пользователей будет здесь</p>
         </div>
       </div>
     </div>

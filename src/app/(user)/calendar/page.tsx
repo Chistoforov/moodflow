@@ -75,14 +75,6 @@ export default function CalendarPage() {
 
   return (
     <div className="min-h-screen px-4 sm:px-0" style={{ backgroundColor: '#E8E2D5' }}>
-      <style jsx global>{`
-        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;600;700&display=swap');
-        
-        .handwritten {
-          font-family: 'Dancing Script', cursive;
-        }
-      `}</style>
-      
       <div className="max-w-2xl mx-auto py-8">
         {/* Название месяца в стиле рукописи */}
         <div className="text-center mb-16">

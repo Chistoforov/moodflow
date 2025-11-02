@@ -1,7 +1,7 @@
-import Link from 'next/link'
 import { Calendar, BarChart3, Stethoscope, Check } from 'lucide-react'
 import { createServerClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import StyledLink from '@/components/shared/StyledLink'
 
 export default async function HomePage() {
   // Проверяем, авторизован ли пользователь
@@ -13,144 +13,208 @@ export default async function HomePage() {
     redirect('/calendar')
   }
   return (
-    <div className="min-h-screen bg-gradient-to-b from-indigo-100 to-white">
+    <div className="min-h-screen" style={{ backgroundColor: '#E8E2D5' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center">
-          <h1 className="text-5xl font-bold text-gray-900 mb-4">
+          <h1 className="handwritten text-7xl font-bold mb-4" style={{ color: '#8B3A3A' }}>
             MoodFlow
           </h1>
-          <p className="text-xl text-gray-600 mb-8">
+          <p className="text-xl mb-8" style={{ color: '#8B3A3A' }}>
             Ваш персональный дневник настроения с поддержкой психологов
           </p>
           <div className="flex justify-center gap-4">
-            <Link
+            <StyledLink
               href="/login"
-              className="px-8 py-3 text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 font-medium"
+              className="px-8 py-3 rounded-full font-medium transition-all"
+              style={{
+                backgroundColor: '#8B3A3A',
+                color: '#E8E2D5',
+              }}
+              hoverStyle={{
+                backgroundColor: '#6B1F1F',
+                color: '#E8E2D5',
+              }}
             >
               Войти
-            </Link>
-            <Link
+            </StyledLink>
+            <StyledLink
               href="/calendar"
-              className="px-8 py-3 text-indigo-600 bg-white border-2 border-indigo-600 rounded-lg hover:bg-indigo-50 font-medium"
+              className="px-8 py-3 rounded-full font-medium transition-all border-2"
+              style={{
+                color: '#8B3A3A',
+                backgroundColor: 'transparent',
+                borderColor: '#8B3A3A',
+              }}
+              hoverStyle={{
+                color: '#8B3A3A',
+                backgroundColor: '#D4C8B5',
+                borderColor: '#8B3A3A',
+              }}
             >
               Попробовать
-            </Link>
+            </StyledLink>
           </div>
         </div>
 
         <div className="mt-16 grid md:grid-cols-3 gap-6">
-          <div className="bg-white rounded-lg shadow-lg p-5">
-            <div className="mb-3">
-              <Calendar className="w-10 h-10 text-indigo-600" />
+          <div className="rounded-2xl shadow-sm p-8" style={{ backgroundColor: '#F5F1EB' }}>
+            <div className="mb-4">
+              <Calendar className="w-12 h-12" style={{ color: '#8B3A3A' }} />
             </div>
-            <h3 className="text-lg font-semibold mb-2 text-gray-900">Календарь настроения</h3>
-            <p className="text-sm text-gray-600">
+            <h3 className="text-xl font-semibold mb-3" style={{ color: '#8B3A3A' }}>Календарь настроения</h3>
+            <p className="text-base" style={{ color: '#8B3A3A' }}>
               Отслеживайте свое настроение каждый день и находите паттерны
             </p>
           </div>
 
-          <div className="bg-white rounded-lg shadow-lg p-5">
-            <div className="mb-3">
-              <BarChart3 className="w-10 h-10 text-indigo-600" />
+          <div className="rounded-2xl shadow-sm p-8" style={{ backgroundColor: '#F5F1EB' }}>
+            <div className="mb-4">
+              <BarChart3 className="w-12 h-12" style={{ color: '#8B3A3A' }} />
             </div>
-            <h3 className="text-lg font-semibold mb-2 text-gray-900">Анализ состояния</h3>
-            <p className="text-sm text-gray-600">
+            <h3 className="text-xl font-semibold mb-3" style={{ color: '#8B3A3A' }}>Анализ состояния</h3>
+            <p className="text-base" style={{ color: '#8B3A3A' }}>
               Получайте еженедельные отчеты с анализом вашего состояния
             </p>
           </div>
 
-          <div className="bg-white rounded-lg shadow-lg p-5">
-            <div className="mb-3">
-              <Stethoscope className="w-10 h-10 text-indigo-600" />
+          <div className="rounded-2xl shadow-sm p-8" style={{ backgroundColor: '#F5F1EB' }}>
+            <div className="mb-4">
+              <Stethoscope className="w-12 h-12" style={{ color: '#8B3A3A' }} />
             </div>
-            <h3 className="text-lg font-semibold mb-2 text-gray-900">Психологи</h3>
-            <p className="text-sm text-gray-600">
+            <h3 className="text-xl font-semibold mb-3" style={{ color: '#8B3A3A' }}>Психологи</h3>
+            <p className="text-base" style={{ color: '#8B3A3A' }}>
               Профессиональные рекомендации и поддержка в любое время
             </p>
           </div>
         </div>
 
         <div className="mt-16 text-center">
-          <h2 className="text-3xl font-bold text-gray-900 mb-6">
+          <h2 className="text-4xl font-bold mb-8" style={{ color: '#8B3A3A' }}>
             Выберите подходящий тариф
           </h2>
           <div className="grid md:grid-cols-3 gap-6">
-            <div className="bg-white rounded-lg shadow-lg p-5 border-2 border-gray-200">
-              <h3 className="text-xl font-bold mb-3 text-gray-900">Бесплатно</h3>
-              <div className="text-3xl font-bold mb-4 text-gray-900">0 ₽</div>
-              <ul className="text-left space-y-2 mb-6 text-sm text-gray-700">
+            <div className="rounded-2xl shadow-sm p-8 border-2" style={{ 
+              backgroundColor: '#F5F1EB',
+              borderColor: '#C8BEB0'
+            }}>
+              <h3 className="text-2xl font-bold mb-4" style={{ color: '#8B3A3A' }}>Бесплатно</h3>
+              <div className="text-4xl font-bold mb-6" style={{ color: '#8B3A3A' }}>0 ₽</div>
+              <ul className="text-left space-y-3 mb-8">
                 <li className="flex items-center">
-                  <Check className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" />
-                  Календарь настроения
+                  <Check className="w-5 h-5 mr-3 flex-shrink-0" style={{ color: '#8B3A3A' }} />
+                  <span style={{ color: '#8B3A3A' }}>Календарь настроения</span>
                 </li>
                 <li className="flex items-center">
-                  <Check className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" />
-                  Заметки и аудио
+                  <Check className="w-5 h-5 mr-3 flex-shrink-0" style={{ color: '#8B3A3A' }} />
+                  <span style={{ color: '#8B3A3A' }}>Заметки и аудио</span>
                 </li>
                 <li className="flex items-center">
-                  <Check className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" />
-                  Анализ состояния
+                  <Check className="w-5 h-5 mr-3 flex-shrink-0" style={{ color: '#8B3A3A' }} />
+                  <span style={{ color: '#8B3A3A' }}>Анализ состояния</span>
                 </li>
               </ul>
-              <Link
+              <StyledLink
                 href="/login"
-                className="block w-full px-6 py-2.5 text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100 font-medium text-center text-sm"
+                className="block w-full px-6 py-3 rounded-full font-medium text-center transition-all border-2"
+                style={{
+                  color: '#8B3A3A',
+                  backgroundColor: 'transparent',
+                  borderColor: '#8B3A3A',
+                }}
+                hoverStyle={{
+                  color: '#8B3A3A',
+                  backgroundColor: '#D4C8B5',
+                  borderColor: '#8B3A3A',
+                }}
               >
                 Начать
-              </Link>
+              </StyledLink>
             </div>
 
-            <div className="bg-white rounded-lg shadow-xl p-5 border-2 border-indigo-500 transform scale-105">
-              <div className="bg-indigo-500 text-white text-xs font-bold py-1 px-3 rounded-full inline-block mb-3">
+            <div className="rounded-2xl shadow-xl p-8 border-2 transform scale-105" style={{ 
+              backgroundColor: '#F5F1EB',
+              borderColor: '#8B3A3A'
+            }}>
+              <div className="text-sm font-bold py-2 px-4 rounded-full inline-block mb-4" style={{
+                backgroundColor: '#8B3A3A',
+                color: '#E8E2D5'
+              }}>
                 Популярный
               </div>
-              <h3 className="text-xl font-bold mb-3 text-gray-900">Подписка</h3>
-              <div className="text-3xl font-bold mb-4 text-gray-900">990 ₽<span className="text-base text-gray-600">/мес</span></div>
-              <ul className="text-left space-y-2 mb-6 text-sm text-gray-700">
+              <h3 className="text-2xl font-bold mb-4" style={{ color: '#8B3A3A' }}>Подписка</h3>
+              <div className="text-4xl font-bold mb-2" style={{ color: '#8B3A3A' }}>
+                990 ₽
+                <span className="text-lg font-normal"> /мес</span>
+              </div>
+              <ul className="text-left space-y-3 mb-8 mt-6">
                 <li className="flex items-center">
-                  <Check className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" />
-                  Всё из бесплатного
+                  <Check className="w-5 h-5 mr-3 flex-shrink-0" style={{ color: '#8B3A3A' }} />
+                  <span style={{ color: '#8B3A3A' }}>Всё из бесплатного</span>
                 </li>
                 <li className="flex items-center">
-                  <Check className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" />
-                  Рекомендации психолога
+                  <Check className="w-5 h-5 mr-3 flex-shrink-0" style={{ color: '#8B3A3A' }} />
+                  <span style={{ color: '#8B3A3A' }}>Рекомендации психолога</span>
                 </li>
                 <li className="flex items-center">
-                  <Check className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" />
-                  Недельные отчёты
+                  <Check className="w-5 h-5 mr-3 flex-shrink-0" style={{ color: '#8B3A3A' }} />
+                  <span style={{ color: '#8B3A3A' }}>Недельные отчёты</span>
                 </li>
               </ul>
-              <Link
+              <StyledLink
                 href="/login"
-                className="block w-full px-6 py-2.5 text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 font-medium text-center text-sm"
+                className="block w-full px-6 py-3 rounded-full font-medium text-center transition-all"
+                style={{
+                  backgroundColor: '#8B3A3A',
+                  color: '#E8E2D5',
+                }}
+                hoverStyle={{
+                  backgroundColor: '#6B1F1F',
+                  color: '#E8E2D5',
+                }}
               >
                 Выбрать
-              </Link>
+              </StyledLink>
             </div>
 
-            <div className="bg-white rounded-lg shadow-lg p-5 border-2 border-gray-200">
-              <h3 className="text-xl font-bold mb-3 text-gray-900">Личный психолог</h3>
-              <div className="text-3xl font-bold mb-4 text-gray-900">4990 ₽<span className="text-base text-gray-600">/мес</span></div>
-              <ul className="text-left space-y-2 mb-6 text-sm text-gray-700">
+            <div className="rounded-2xl shadow-sm p-8 border-2" style={{ 
+              backgroundColor: '#F5F1EB',
+              borderColor: '#C8BEB0'
+            }}>
+              <h3 className="text-2xl font-bold mb-4" style={{ color: '#8B3A3A' }}>Личный психолог</h3>
+              <div className="text-4xl font-bold mb-2" style={{ color: '#8B3A3A' }}>
+                4990 ₽
+                <span className="text-lg font-normal"> /мес</span>
+              </div>
+              <ul className="text-left space-y-3 mb-8 mt-6">
                 <li className="flex items-center">
-                  <Check className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" />
-                  Всё из подписки
+                  <Check className="w-5 h-5 mr-3 flex-shrink-0" style={{ color: '#8B3A3A' }} />
+                  <span style={{ color: '#8B3A3A' }}>Всё из подписки</span>
                 </li>
                 <li className="flex items-center">
-                  <Check className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" />
-                  Постоянный чат
+                  <Check className="w-5 h-5 mr-3 flex-shrink-0" style={{ color: '#8B3A3A' }} />
+                  <span style={{ color: '#8B3A3A' }}>Постоянный чат</span>
                 </li>
                 <li className="flex items-center">
-                  <Check className="w-4 h-4 text-green-500 mr-2 flex-shrink-0" />
-                  Приоритетная поддержка
+                  <Check className="w-5 h-5 mr-3 flex-shrink-0" style={{ color: '#8B3A3A' }} />
+                  <span style={{ color: '#8B3A3A' }}>Приоритетная поддержка</span>
                 </li>
               </ul>
-              <Link
+              <StyledLink
                 href="/login"
-                className="block w-full px-6 py-2.5 text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100 font-medium text-center text-sm"
+                className="block w-full px-6 py-3 rounded-full font-medium text-center transition-all border-2"
+                style={{
+                  color: '#8B3A3A',
+                  backgroundColor: 'transparent',
+                  borderColor: '#8B3A3A',
+                }}
+                hoverStyle={{
+                  color: '#8B3A3A',
+                  backgroundColor: '#D4C8B5',
+                  borderColor: '#8B3A3A',
+                }}
               >
                 Выбрать
-              </Link>
+              </StyledLink>
             </div>
           </div>
         </div>
