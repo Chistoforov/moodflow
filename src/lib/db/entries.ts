@@ -5,7 +5,7 @@ type DailyEntry = Database['public']['Tables']['daily_entries']['Row']
 type DailyEntryInsert = Database['public']['Tables']['daily_entries']['Insert']
 
 export async function getEntriesForUser(userId: string, limit = 30) {
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   
   const { data, error } = await supabase
     .from('daily_entries')
@@ -20,7 +20,7 @@ export async function getEntriesForUser(userId: string, limit = 30) {
 }
 
 export async function getEntryByDate(userId: string, date: string) {
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   
   const { data, error } = await supabase
     .from('daily_entries')
@@ -35,23 +35,25 @@ export async function getEntryByDate(userId: string, date: string) {
 }
 
 export async function upsertEntry(entry: DailyEntryInsert) {
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   
   const { data, error } = await supabase
     .from('daily_entries')
-    .upsert(entry)
+    .upsert(entry as any)
     .select()
-    .single()
+    .maybeSingle()
 
   if (error) throw error
+  if (!data) throw new Error('Failed to upsert entry')
   return data as DailyEntry
 }
 
 export async function deleteEntry(entryId: string) {
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   
   const { error } = await supabase
     .from('daily_entries')
+    // @ts-expect-error - Type inference issue with @supabase/ssr
     .update({ is_deleted: true })
     .eq('id', entryId)
 

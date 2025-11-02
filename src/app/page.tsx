@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation'
 
 export default async function HomePage() {
   // Проверяем, авторизован ли пользователь
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   const { data: { session } } = await supabase.auth.getSession()
   
   // Если пользователь авторизован, перенаправляем на календарь

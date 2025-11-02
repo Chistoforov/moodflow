@@ -1,12 +1,13 @@
 import { createServerClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import type { Database } from '@/types/database'
 
 export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   const { data: { session } } = await supabase.auth.getSession()
 
   if (!session) {
@@ -14,13 +15,16 @@ export default async function AdminLayout({
   }
 
   // Check if user is admin
-  const { data: psychologist } = await supabase
+  const { data, error } = await supabase
     .from('psychologists')
-    .select('role, active')
+    .select('*')
     .eq('user_id', session.user.id)
-    .single()
+    .maybeSingle()
 
-  if (!psychologist || !psychologist.active) {
+  type Psychologist = Database['public']['Tables']['psychologists']['Row']
+  const psychologist = data as Psychologist | null
+
+  if (error || !psychologist || !psychologist.active) {
     redirect('/')
   }
 

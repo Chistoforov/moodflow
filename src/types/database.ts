@@ -29,6 +29,23 @@ export interface Database {
         Insert: Omit<Database['public']['Tables']['users']['Row'], 'id' | 'created_at' | 'updated_at'>
         Update: Partial<Database['public']['Tables']['users']['Insert']>
       }
+      psychologists: {
+        Row: {
+          id: string
+          user_id: string | null
+          email: string
+          full_name: string
+          role: 'admin' | 'psychologist'
+          bio: string | null
+          specialization: string[] | null
+          active: boolean
+          created_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: Omit<Database['public']['Tables']['psychologists']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Database['public']['Tables']['psychologists']['Insert']>
+      }
       daily_entries: {
         Row: {
           id: string
@@ -47,6 +64,36 @@ export interface Database {
         }
         Insert: Omit<Database['public']['Tables']['daily_entries']['Row'], 'id' | 'created_at' | 'updated_at'>
         Update: Partial<Database['public']['Tables']['daily_entries']['Insert']>
+      }
+      weekly_summaries: {
+        Row: {
+          id: string
+          user_id: string
+          week_start: string
+          week_end: string
+          summary_text: string | null
+          key_themes: string[] | null
+          mood_trend: string | null
+          perplexity_request_id: string | null
+          perplexity_response: Json | null
+          status: 'pending' | 'processing' | 'completed' | 'failed'
+          error_message: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          user_id: string
+          week_start: string
+          week_end: string
+          summary_text?: string | null
+          key_themes?: string[] | null
+          mood_trend?: string | null
+          perplexity_request_id?: string | null
+          perplexity_response?: Json | null
+          status?: 'pending' | 'processing' | 'completed' | 'failed'
+          error_message?: string | null
+        }
+        Update: Partial<Database['public']['Tables']['weekly_summaries']['Insert']>
       }
       recommendations: {
         Row: {

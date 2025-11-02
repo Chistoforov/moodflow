@@ -1,23 +1,26 @@
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { createRouteHandlerClient } from '@/lib/supabase/route-handler'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import type { Database } from '@/types/database'
 
 export async function GET(request: NextRequest) {
-  const supabase = createRouteHandlerClient({ cookies })
+  const supabase = await createRouteHandlerClient()
   const { data: { session } } = await supabase.auth.getSession()
 
   if (!session) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const { data: user } = await supabase
+  const { data: userData, error: userError } = await supabase
     .from('users')
-    .select('id')
+    .select('*')
     .eq('sso_uid', session.user.id)
-    .single()
+    .maybeSingle()
 
-  if (!user) {
+  type User = Database['public']['Tables']['users']['Row']
+  const user = userData as User | null
+
+  if (userError || !user) {
     return NextResponse.json({ error: 'User not found' }, { status: 404 })
   }
 
@@ -36,7 +39,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const supabase = createRouteHandlerClient({ cookies })
+  const supabase = await createRouteHandlerClient()
   const { data: { session } } = await supabase.auth.getSession()
 
   if (!session) {
@@ -46,13 +49,16 @@ export async function POST(request: NextRequest) {
   const body = await request.json()
   const { entry_date, mood_score, text_entry, factors } = body
 
-  const { data: user } = await supabase
+  const { data: userData, error: userError } = await supabase
     .from('users')
-    .select('id')
+    .select('*')
     .eq('sso_uid', session.user.id)
-    .single()
+    .maybeSingle()
 
-  if (!user) {
+  type User = Database['public']['Tables']['users']['Row']
+  const user = userData as User | null
+
+  if (userError || !user) {
     return NextResponse.json({ error: 'User not found' }, { status: 404 })
   }
 
@@ -64,9 +70,9 @@ export async function POST(request: NextRequest) {
       mood_score,
       text_entry,
       factors,
-    })
+    } as any)
     .select()
-    .single()
+    .maybeSingle()
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })
