@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday } from 'date-fns'
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday, getDay } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { MOOD_LEVELS } from '@/lib/utils/constants'
 
@@ -9,6 +9,28 @@ interface Entry {
   id: string
   entry_date: string
   mood_score: number | null
+}
+
+// Стильная иконка настроения
+const MoodSymbol = ({ score }: { score: number }) => {
+  const symbols = [
+    { symbol: '✦', size: 'text-lg', color: '#8B3A3A' }, // 1 - очень плохо
+    { symbol: '◐', size: 'text-xl', color: '#9B4A4A' }, // 2 - плохо  
+    { symbol: '○', size: 'text-xl', color: '#A85F5F' }, // 3 - нейтрально
+    { symbol: '◉', size: 'text-xl', color: '#B87474' }, // 4 - хорошо
+    { symbol: '♥', size: 'text-xl', color: '#8B3A3A' }, // 5 - отлично
+  ]
+  
+  const mood = symbols[score - 1] || symbols[2]
+  
+  return (
+    <span 
+      className={`${mood.size} font-serif`}
+      style={{ color: mood.color }}
+    >
+      {mood.symbol}
+    </span>
+  )
 }
 
 export default function CalendarPage() {
@@ -35,93 +57,184 @@ export default function CalendarPage() {
   const monthStart = startOfMonth(currentMonth)
   const monthEnd = endOfMonth(currentMonth)
   const days = eachDayOfInterval({ start: monthStart, end: monthEnd })
+  
+  // Добавляем пустые клетки в начало для выравнивания по дням недели
+  const firstDayOfWeek = getDay(monthStart)
+  const emptyDays = firstDayOfWeek === 0 ? 6 : firstDayOfWeek - 1
 
   const getEntryForDate = (date: Date) => {
     const dateStr = format(date, 'yyyy-MM-dd')
     return entries.find(e => e.entry_date === dateStr)
   }
 
-  const getMoodIcon = (moodScore: number | null) => {
-    if (!moodScore) return null
-    const mood = MOOD_LEVELS.find(m => m.value === moodScore)
-    return mood ? mood.Icon : null
+  const changeMonth = (increment: number) => {
+    const newDate = new Date(currentMonth)
+    newDate.setMonth(newDate.getMonth() + increment)
+    setCurrentMonth(newDate)
   }
 
   return (
-    <div className="px-4 sm:px-0">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Календарь настроения</h1>
-        <p className="mt-2 text-gray-600">
-          Отслеживайте свое настроение каждый день
-        </p>
-      </div>
+    <div className="min-h-screen px-4 sm:px-0" style={{ backgroundColor: '#E8E2D5' }}>
+      <style jsx global>{`
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;600;700&display=swap');
+        
+        .handwritten {
+          font-family: 'Dancing Script', cursive;
+        }
+      `}</style>
+      
+      <div className="max-w-2xl mx-auto py-8">
+        {/* Название месяца в стиле рукописи */}
+        <div className="text-center mb-16">
+          <h1 
+            className="handwritten text-7xl mb-4"
+            style={{ color: '#8B3A3A' }}
+          >
+            {format(currentMonth, 'LLLL', { locale: ru })}
+          </h1>
+        </div>
 
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="flex items-center justify-between mb-6">
+        {/* Навигация */}
+        <div className="flex items-center justify-between mb-8 px-4">
           <button
-            onClick={() => setCurrentMonth(new Date(currentMonth.setMonth(currentMonth.getMonth() - 1)))}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+            onClick={() => changeMonth(-1)}
+            className="px-6 py-2 text-base font-medium transition-all rounded-full border-2"
+            style={{ 
+              color: '#8B3A3A',
+              borderColor: '#8B3A3A',
+              backgroundColor: 'transparent'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#8B3A3A'
+              e.currentTarget.style.color = '#E8E2D5'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent'
+              e.currentTarget.style.color = '#8B3A3A'
+            }}
           >
-            Назад
+            ←
           </button>
-          <h2 className="text-xl font-semibold capitalize">
-            {format(currentMonth, 'LLLL yyyy', { locale: ru })}
-          </h2>
           <button
-            onClick={() => setCurrentMonth(new Date(currentMonth.setMonth(currentMonth.getMonth() + 1)))}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+            onClick={() => changeMonth(1)}
+            className="px-6 py-2 text-base font-medium transition-all rounded-full border-2"
+            style={{ 
+              color: '#8B3A3A',
+              borderColor: '#8B3A3A',
+              backgroundColor: 'transparent'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#8B3A3A'
+              e.currentTarget.style.color = '#E8E2D5'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent'
+              e.currentTarget.style.color = '#8B3A3A'
+            }}
           >
-            Вперед
+            →
           </button>
         </div>
 
-        {loading ? (
-          <div className="text-center py-12">Загрузка...</div>
-        ) : (
-          <div className="grid grid-cols-7 gap-2">
-            {['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'].map(day => (
-              <div key={day} className="text-center font-medium text-gray-500 py-2">
-                {day}
+        {/* Календарь */}
+        <div className="rounded-2xl p-8" style={{ backgroundColor: '#E8E2D5' }}>
+          {loading ? (
+            <div className="text-center py-12" style={{ color: '#8B3A3A' }}>
+              Загрузка...
+            </div>
+          ) : (
+            <>
+              {/* Дни недели */}
+              <div className="grid grid-cols-7 gap-4 mb-6">
+                {['ВС', 'ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ'].map((day, index) => (
+                  <div 
+                    key={day} 
+                    className="text-center font-semibold text-sm uppercase tracking-wider"
+                    style={{ color: '#8B3A3A' }}
+                  >
+                    {day}
+                  </div>
+                ))}
+              </div>
+              
+              {/* Дни месяца */}
+              <div className="grid grid-cols-7 gap-4">
+                {/* Пустые клетки для выравнивания */}
+                {Array.from({ length: emptyDays }).map((_, index) => (
+                  <div key={`empty-${index}`} className="aspect-square" />
+                ))}
+                
+                {days.map(day => {
+                  const entry = getEntryForDate(day)
+                  const today = isToday(day)
+
+                  return (
+                    <a
+                      key={day.toString()}
+                      href={`/entry/${format(day, 'yyyy-MM-dd')}`}
+                      className="aspect-square flex flex-col items-center justify-center rounded-xl transition-all relative"
+                      style={{
+                        backgroundColor: today ? '#D4C8B5' : 'transparent',
+                        border: today ? '2px solid #8B3A3A' : 'none',
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!today) {
+                          e.currentTarget.style.backgroundColor = '#D4C8B5'
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!today) {
+                          e.currentTarget.style.backgroundColor = 'transparent'
+                        }
+                      }}
+                    >
+                      <div 
+                        className="text-lg font-medium mb-1"
+                        style={{ color: '#8B3A3A' }}
+                      >
+                        {format(day, 'd')}
+                      </div>
+                      {entry && entry.mood_score && (
+                        <div className="flex justify-center">
+                          <MoodSymbol score={entry.mood_score} />
+                        </div>
+                      )}
+                    </a>
+                  )
+                })}
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Год внизу */}
+        <div className="text-center mt-16">
+          <p 
+            className="text-3xl font-bold tracking-wider"
+            style={{ color: '#8B3A3A' }}
+          >
+            {format(currentMonth, 'yyyy')}
+          </p>
+        </div>
+
+        {/* Легенда */}
+        <div className="mt-12 rounded-2xl p-6" style={{ backgroundColor: '#F5F1EB' }}>
+          <h3 
+            className="font-semibold mb-4 text-lg"
+            style={{ color: '#8B3A3A' }}
+          >
+            Легенда настроения
+          </h3>
+          <div className="flex flex-wrap gap-6">
+            {MOOD_LEVELS.map(level => (
+              <div key={level.value} className="flex items-center gap-3">
+                <MoodSymbol score={level.value} />
+                <span className="text-sm" style={{ color: '#8B3A3A' }}>
+                  {level.label}
+                </span>
               </div>
             ))}
-            {days.map(day => {
-              const entry = getEntryForDate(day)
-              const MoodIcon = entry ? getMoodIcon(entry.mood_score) : null
-              const today = isToday(day)
-
-              return (
-                <a
-                  key={day.toString()}
-                  href={`/entry/${format(day, 'yyyy-MM-dd')}`}
-                  className={`
-                    aspect-square p-2 text-center rounded-lg border
-                    ${today ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200'}
-                    ${entry ? 'bg-gray-50' : 'bg-white'}
-                    hover:bg-gray-100 transition-colors
-                  `}
-                >
-                  <div className="text-sm text-gray-700">{format(day, 'd')}</div>
-                  {MoodIcon && (
-                    <div className="mt-1 flex justify-center">
-                      <MoodIcon className="w-5 h-5 text-gray-600" />
-                    </div>
-                  )}
-                </a>
-              )
-            })}
           </div>
-        )}
-      </div>
-
-      <div className="mt-6 bg-white rounded-lg shadow p-6">
-        <h3 className="font-semibold text-gray-900 mb-4">Легенда</h3>
-        <div className="flex flex-wrap gap-4">
-          {MOOD_LEVELS.map(level => (
-            <div key={level.value} className="flex items-center gap-2">
-              <level.Icon className="w-5 h-5 text-gray-600" />
-              <span className="text-sm text-gray-600">{level.value}/5</span>
-            </div>
-          ))}
         </div>
       </div>
     </div>

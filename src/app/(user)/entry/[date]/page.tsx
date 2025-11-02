@@ -4,6 +4,31 @@ import { useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { MOOD_LEVELS, FACTORS } from '@/lib/utils/constants'
 
+// Стильная иконка настроения
+const MoodSymbol = ({ score, selected }: { score: number; selected: boolean }) => {
+  const symbols = [
+    { symbol: '✦', size: 'text-3xl', color: '#8B3A3A' }, // 1 - очень плохо
+    { symbol: '◐', size: 'text-4xl', color: '#9B4A4A' }, // 2 - плохо  
+    { symbol: '○', size: 'text-4xl', color: '#A85F5F' }, // 3 - нейтрально
+    { symbol: '◉', size: 'text-4xl', color: '#B87474' }, // 4 - хорошо
+    { symbol: '♥', size: 'text-4xl', color: '#8B3A3A' }, // 5 - отлично
+  ]
+  
+  const mood = symbols[score - 1] || symbols[2]
+  
+  return (
+    <span 
+      className={`${mood.size} font-serif transition-all`}
+      style={{ 
+        color: selected ? mood.color : '#C8BEB0',
+        transform: selected ? 'scale(1.1)' : 'scale(1)'
+      }}
+    >
+      {mood.symbol}
+    </span>
+  )
+}
+
 export default function EntryPage() {
   const params = useParams()
   const router = useRouter()
@@ -76,87 +101,136 @@ export default function EntryPage() {
   }
 
   if (loading) {
-    return <div className="text-center py-12">Загрузка...</div>
+    return (
+      <div className="min-h-screen px-4 sm:px-0" style={{ backgroundColor: '#E8E2D5' }}>
+        <div className="text-center py-12" style={{ color: '#8B3A3A' }}>Загрузка...</div>
+      </div>
+    )
   }
 
   return (
-    <div className="px-4 sm:px-0 max-w-3xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Запись за {date}</h1>
-        <p className="mt-2 text-gray-600">Как вы себя чувствуете сегодня?</p>
-      </div>
+    <div className="min-h-screen px-4 sm:px-0" style={{ backgroundColor: '#E8E2D5' }}>
+      <div className="max-w-3xl mx-auto py-8">
+        <div className="mb-8 text-center">
+          <h1 className="text-3xl font-bold mb-2" style={{ color: '#8B3A3A' }}>
+            Запись за {date}
+          </h1>
+          <p className="text-lg" style={{ color: '#8B3A3A' }}>
+            Как вы себя чувствуете сегодня?
+          </p>
+        </div>
 
-      <div className="space-y-6">
-        {/* Mood Selection */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Настроение</h2>
-          <div className="flex justify-between gap-2">
-            {MOOD_LEVELS.map(level => (
-              <button
-                key={level.value}
-                onClick={() => setMoodScore(level.value)}
-                className={`flex-1 p-4 rounded-lg border-2 transition-all ${
-                  moodScore === level.value
-                    ? 'border-indigo-500 bg-indigo-50'
-                    : 'border-gray-200 hover:border-gray-300'
-                }`}
-              >
-                <div className="mb-2 flex justify-center">
-                  <level.Icon className={`w-8 h-8 ${moodScore === level.value ? 'text-indigo-600' : 'text-gray-400'}`} />
-                </div>
-                <div className="text-sm font-medium text-gray-700">{level.value}/5</div>
-              </button>
-            ))}
+        <div className="space-y-6">
+          {/* Mood Selection */}
+          <div className="rounded-2xl shadow-sm p-8" style={{ backgroundColor: '#F5F1EB' }}>
+            <h2 className="text-xl font-semibold mb-6 text-center" style={{ color: '#8B3A3A' }}>
+              Настроение
+            </h2>
+            <div className="flex justify-between gap-3">
+              {MOOD_LEVELS.map(level => (
+                <button
+                  key={level.value}
+                  onClick={() => setMoodScore(level.value)}
+                  className="flex-1 p-6 rounded-xl transition-all"
+                  style={{
+                    backgroundColor: moodScore === level.value ? '#E8E2D5' : 'transparent',
+                    border: moodScore === level.value ? '2px solid #8B3A3A' : '2px solid transparent',
+                  }}
+                >
+                  <div className="mb-3 flex justify-center">
+                    <MoodSymbol score={level.value} selected={moodScore === level.value} />
+                  </div>
+                  <div className="text-xs font-medium" style={{ color: '#8B3A3A' }}>
+                    {level.label}
+                  </div>
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
 
-        {/* Factors */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Факторы</h2>
-          <div className="flex flex-wrap gap-2">
-            {FACTORS.map(factor => (
-              <button
-                key={factor.value}
-                onClick={() => toggleFactor(factor.value)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                  selectedFactors.includes(factor.value)
-                    ? 'bg-indigo-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                {factor.label}
-              </button>
-            ))}
+          {/* Factors */}
+          <div className="rounded-2xl shadow-sm p-8" style={{ backgroundColor: '#F5F1EB' }}>
+            <h2 className="text-xl font-semibold mb-6" style={{ color: '#8B3A3A' }}>
+              Факторы
+            </h2>
+            <div className="flex flex-wrap gap-3">
+              {FACTORS.map(factor => (
+                <button
+                  key={factor.value}
+                  onClick={() => toggleFactor(factor.value)}
+                  className="px-5 py-2 rounded-full text-sm font-medium transition-all"
+                  style={{
+                    backgroundColor: selectedFactors.includes(factor.value) ? '#8B3A3A' : '#E8E2D5',
+                    color: selectedFactors.includes(factor.value) ? '#E8E2D5' : '#8B3A3A',
+                    border: `2px solid ${selectedFactors.includes(factor.value) ? '#8B3A3A' : '#C8BEB0'}`,
+                  }}
+                >
+                  {factor.label}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
 
-        {/* Text Entry */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Заметки</h2>
-          <textarea
-            value={textEntry}
-            onChange={(e) => setTextEntry(e.target.value)}
-            placeholder="Напишите о своих мыслях и чувствах..."
-            rows={8}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none placeholder:text-gray-500"
-          />
-        </div>
+          {/* Text Entry */}
+          <div className="rounded-2xl shadow-sm p-8" style={{ backgroundColor: '#F5F1EB' }}>
+            <h2 className="text-xl font-semibold mb-6" style={{ color: '#8B3A3A' }}>
+              Заметки
+            </h2>
+            <textarea
+              value={textEntry}
+              onChange={(e) => setTextEntry(e.target.value)}
+              placeholder="Напишите о своих мыслях и чувствах..."
+              rows={8}
+              className="w-full px-4 py-3 rounded-xl resize-none focus:outline-none focus:ring-2 transition-all"
+              style={{
+                backgroundColor: '#E8E2D5',
+                color: '#8B3A3A',
+                border: '2px solid #C8BEB0',
+                fontFamily: 'Georgia, serif',
+              }}
+            />
+          </div>
 
-        {/* Actions */}
-        <div className="flex justify-end gap-4">
-          <button
-            onClick={() => router.push('/calendar')}
-            className="px-6 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-          >
-            Отмена
-          </button>
-          <button
-            onClick={handleSave}
-            disabled={saving || !moodScore}
-            className="px-6 py-2 text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {saving ? 'Сохранение...' : 'Сохранить'}
-          </button>
+          {/* Actions */}
+          <div className="flex justify-end gap-4">
+            <button
+              onClick={() => router.push('/calendar')}
+              className="px-8 py-3 rounded-full font-medium transition-all border-2"
+              style={{
+                color: '#8B3A3A',
+                backgroundColor: 'transparent',
+                borderColor: '#8B3A3A',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#D4C8B5'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent'
+              }}
+            >
+              Отмена
+            </button>
+            <button
+              onClick={handleSave}
+              disabled={saving || !moodScore}
+              className="px-8 py-3 rounded-full font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{
+                backgroundColor: '#8B3A3A',
+                color: '#E8E2D5',
+                border: 'none',
+              }}
+              onMouseEnter={(e) => {
+                if (!saving && moodScore) {
+                  e.currentTarget.style.backgroundColor = '#6B1F1F'
+                }
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#8B3A3A'
+              }}
+            >
+              {saving ? 'Сохранение...' : 'Сохранить'}
+            </button>
+          </div>
         </div>
       </div>
     </div>
