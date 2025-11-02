@@ -8,6 +8,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
+  const [error, setError] = useState('')
   const [checkingSession, setCheckingSession] = useState(true)
   const router = useRouter()
   const supabase = createClient()
@@ -24,12 +25,28 @@ export default function LoginPage() {
       }
     }
     checkSession()
+
+    // Проверяем параметры URL для ошибок
+    const params = new URLSearchParams(window.location.search)
+    const errorParam = params.get('error')
+    if (errorParam) {
+      const errorMessages: Record<string, string> = {
+        'auth_callback_error': 'Ошибка при входе. Попробуйте еще раз.',
+        'unexpected_error': 'Произошла непредвиденная ошибка.',
+        'no_code': 'Неверная ссылка для входа.',
+        'auth_failed': 'Аутентификация не удалась.',
+        'no_user': 'Пользователь не найден.',
+        'callback_failed': 'Ошибка обработки входа.'
+      }
+      setError(errorMessages[errorParam] || 'Произошла ошибка.')
+    }
   }, [router, supabase])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setMessage('')
+    setError('')
 
     try {
       const { error } = await supabase.auth.signInWithOtp({
@@ -43,7 +60,7 @@ export default function LoginPage() {
 
       setMessage('Проверьте почту для входа!')
     } catch (error: any) {
-      setMessage(error.message || 'Ошибка входа')
+      setError(error.message || 'Ошибка входа')
     } finally {
       setLoading(false)
     }
@@ -117,8 +134,14 @@ export default function LoginPage() {
           </div>
 
           {message && (
-            <div className="text-center" style={{ color: '#8B3A3A' }}>
+            <div className="text-center p-3 rounded-lg" style={{ backgroundColor: '#D4E9D4', color: '#2D5016' }}>
               {message}
+            </div>
+          )}
+          
+          {error && (
+            <div className="text-center p-3 rounded-lg" style={{ backgroundColor: '#F8D7DA', color: '#721C24' }}>
+              {error}
             </div>
           )}
         </form>
