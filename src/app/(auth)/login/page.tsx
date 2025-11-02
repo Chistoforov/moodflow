@@ -2,14 +2,29 @@
 
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
+  const [checkingSession, setCheckingSession] = useState(true)
   const router = useRouter()
   const supabase = createClient()
+
+  // Проверяем, авторизован ли пользователь при загрузке страницы
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session) {
+        // Если пользователь уже авторизован, перенаправляем на календарь
+        router.push('/calendar')
+      } else {
+        setCheckingSession(false)
+      }
+    }
+    checkSession()
+  }, [router, supabase])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -32,6 +47,18 @@ export default function LoginPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  // Показываем загрузку пока проверяем сессию
+  if (checkingSession) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+          <p className="mt-4 text-gray-600">Проверка сессии...</p>
+        </div>
+      </div>
+    )
   }
 
   return (

@@ -126,7 +126,11 @@ vercel --prod
 4. **Проверьте Supabase настройки**:
    - В Supabase Dashboard → Authentication → URL Configuration
    - Добавьте `https://moodflow-six.vercel.app` в **Site URL**
-   - Добавьте `https://moodflow-six.vercel.app/api/auth/callback` в **Redirect URLs**
+   - Добавьте в **Redirect URLs**:
+     ```
+     https://moodflow-six.vercel.app/auth/callback
+     https://moodflow-six.vercel.app/api/auth/callback
+     ```
 
 ## 🔒 Настройка Supabase для Production
 
@@ -139,6 +143,7 @@ vercel --prod
    - Site URL: `https://moodflow-six.vercel.app`
    - Redirect URLs: добавьте:
      ```
+     https://moodflow-six.vercel.app/auth/callback
      https://moodflow-six.vercel.app/api/auth/callback
      https://moodflow-six.vercel.app/**
      ```

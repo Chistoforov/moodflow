@@ -37,10 +37,16 @@ export async function middleware(req: NextRequest) {
     }
   }
 
+  // Перенаправление авторизованных пользователей на календарь
+  // если они пытаются попасть на главную страницу или страницу логина
+  if (session && (req.nextUrl.pathname === '/' || req.nextUrl.pathname === '/login')) {
+    return NextResponse.redirect(new URL('/calendar', req.url))
+  }
+
   return res
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/calendar/:path*', '/entry/:path*', '/recommendations/:path*']
+  matcher: ['/', '/login', '/admin/:path*', '/calendar/:path*', '/entry/:path*', '/recommendations/:path*']
 }
 
