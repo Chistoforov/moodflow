@@ -114,7 +114,7 @@ export default function CalendarPage() {
       </div>
 
       <div className="mt-6 bg-white rounded-lg shadow p-6">
-        <h3 className="font-semibold mb-4">Легенда</h3>
+        <h3 className="font-semibold text-gray-900 mb-4">Легенда</h3>
         <div className="flex flex-wrap gap-4">
           {MOOD_LEVELS.map(level => (
             <div key={level.value} className="flex items-center gap-2">

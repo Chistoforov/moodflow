@@ -89,7 +89,7 @@ export default function EntryPage() {
       <div className="space-y-6">
         {/* Mood Selection */}
         <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-lg font-semibold mb-4">Настроение</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Настроение</h2>
           <div className="flex justify-between gap-2">
             {MOOD_LEVELS.map(level => (
               <button
@@ -104,7 +104,7 @@ export default function EntryPage() {
                 <div className="mb-2 flex justify-center">
                   <level.Icon className={`w-8 h-8 ${moodScore === level.value ? 'text-indigo-600' : 'text-gray-400'}`} />
                 </div>
-                <div className="text-sm font-medium">{level.value}/5</div>
+                <div className="text-sm font-medium text-gray-700">{level.value}/5</div>
               </button>
             ))}
           </div>
@@ -112,7 +112,7 @@ export default function EntryPage() {
 
         {/* Factors */}
         <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-lg font-semibold mb-4">Факторы</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Факторы</h2>
           <div className="flex flex-wrap gap-2">
             {FACTORS.map(factor => (
               <button
@@ -132,13 +132,13 @@ export default function EntryPage() {
 
         {/* Text Entry */}
         <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-lg font-semibold mb-4">Заметки</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Заметки</h2>
           <textarea
             value={textEntry}
             onChange={(e) => setTextEntry(e.target.value)}
             placeholder="Напишите о своих мыслях и чувствах..."
             rows={8}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none placeholder:text-gray-500"
           />
         </div>
 

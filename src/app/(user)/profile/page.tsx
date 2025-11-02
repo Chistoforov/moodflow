@@ -21,7 +21,7 @@ export default function ProfilePage() {
 
       <div className="bg-white rounded-lg shadow divide-y">
         <div className="p-6">
-          <h2 className="text-lg font-semibold mb-4">Подписка</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Подписка</h2>
           <div className="space-y-4">
             {Object.entries(SUBSCRIPTION_TIERS).map(([key, tier]) => (
               <div
@@ -29,8 +29,8 @@ export default function ProfilePage() {
                 className="border rounded-lg p-4 hover:border-indigo-500 transition-colors"
               >
                 <div className="flex justify-between items-start mb-2">
-                  <h3 className="font-semibold">{tier.name}</h3>
-                  <span className="text-lg font-bold">
+                  <h3 className="font-semibold text-gray-900">{tier.name}</h3>
+                  <span className="text-lg font-bold text-gray-900">
                     {tier.price === 0 ? 'Бесплатно' : `${tier.price} ₽/мес`}
                   </span>
                 </div>
