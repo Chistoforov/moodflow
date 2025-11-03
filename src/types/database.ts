@@ -114,6 +114,44 @@ export interface Database {
         Insert: Omit<Database['public']['Tables']['recommendations']['Row'], 'id' | 'created_at' | 'updated_at'>
         Update: Partial<Database['public']['Tables']['recommendations']['Insert']>
       }
+      posts: {
+        Row: {
+          id: string
+          title: string
+          slug: string
+          post_type: 'article' | 'video'
+          content: string | null
+          video_url: string | null
+          cover_image_url: string | null
+          excerpt: string | null
+          category: string | null
+          tags: string[] | null
+          author_id: string | null
+          likes_count: number
+          views_count: number
+          published: boolean
+          published_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: Omit<Database['public']['Tables']['posts']['Row'], 'id' | 'created_at' | 'updated_at' | 'likes_count' | 'views_count'>
+        Update: Partial<Database['public']['Tables']['posts']['Insert']>
+      }
+      post_reads: {
+        Row: {
+          id: string
+          user_id: string
+          post_id: string
+          read_at: string
+          created_at: string
+        }
+        Insert: {
+          user_id: string
+          post_id: string
+          read_at?: string
+        }
+        Update: Partial<Database['public']['Tables']['post_reads']['Insert']>
+      }
     }
   }
 }

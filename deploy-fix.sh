@@ -41,3 +41,4 @@ echo "   3. Добавьте Redirect URLs (см. QUICK_FIX_STEPS.md)"
 echo ""
 echo "📖 Подробные инструкции: QUICK_FIX_STEPS.md"
 
+

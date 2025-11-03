@@ -74,8 +74,8 @@ export default function CalendarPage() {
   }
 
   return (
-    <div className="min-h-screen px-4 sm:px-0" style={{ backgroundColor: '#E8E2D5' }}>
-      <div className="max-w-2xl mx-auto py-8">
+    <div className="min-h-screen px-4 sm:px-0 pt-8" style={{ backgroundColor: '#E8E2D5' }}>
+      <div className="max-w-2xl mx-auto">
         {/* Название месяца в стиле рукописи */}
         <div className="text-center mb-16">
           <h1 

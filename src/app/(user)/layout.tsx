@@ -1,6 +1,6 @@
 import { createServerClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import UserNav from '@/components/layout/UserNav'
+import BottomNav from '@/components/layout/BottomNav'
 
 export default async function UserLayout({
   children,
@@ -16,10 +16,24 @@ export default async function UserLayout({
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#E8E2D5' }}>
-      <UserNav />
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+      {/* Логотип сверху */}
+      <header className="shadow-sm" style={{ backgroundColor: '#F5F1EB' }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-center h-16 items-center">
+            <h1 className="handwritten text-3xl font-bold" style={{ color: '#8B3A3A' }}>
+              MoodFlow
+            </h1>
+          </div>
+        </div>
+      </header>
+      
+      {/* Контент с отступом снизу для нижнего меню */}
+      <main className="max-w-7xl mx-auto pb-24">
         {children}
       </main>
+      
+      {/* Нижнее меню */}
+      <BottomNav />
     </div>
   )
 }

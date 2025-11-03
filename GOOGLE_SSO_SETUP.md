@@ -169,3 +169,4 @@ console.log(user?.user_metadata) // имя, email, аватар из Google
 
 После настройки magic link больше не будет работать, только Google SSO.
 
+
