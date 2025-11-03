@@ -10,7 +10,18 @@ export default function BottomNav() {
 
   useEffect(() => {
     fetchUnreadCount()
-  }, [])
+    
+    // Слушаем событие обновления счетчика
+    const handleUpdateCount = () => {
+      fetchUnreadCount()
+    }
+    
+    window.addEventListener('updateUnreadCount', handleUpdateCount)
+    
+    return () => {
+      window.removeEventListener('updateUnreadCount', handleUpdateCount)
+    }
+  }, [pathname])
 
   const fetchUnreadCount = async () => {
     try {

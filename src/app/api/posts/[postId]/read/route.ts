@@ -1,5 +1,6 @@
 import { createRouteHandlerClient } from '@/lib/supabase/route-handler'
 import { NextResponse } from 'next/server'
+import type { Database } from '@/types/database'
 
 export async function POST(
   request: Request,
@@ -16,27 +17,26 @@ export async function POST(
     }
 
     // Получаем user_id из таблицы users
-    const { data: user } = await supabase
+    const { data: user, error: userError } = await supabase
       .from('users')
       .select('id')
       .eq('sso_uid', session.user.id)
-      .single()
+      .single<{ id: string }>()
 
-    if (!user) {
+    if (userError || !user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
     // Отмечаем пост как прочитанный (используем upsert для избежания дубликатов)
-    const { error } = await supabase
-      .from('post_reads')
-      .upsert(
-        { 
-          user_id: user.id, 
-          post_id: postId,
-          read_at: new Date().toISOString()
-        },
-        { onConflict: 'user_id,post_id' }
-      )
+    const postRead = { 
+      user_id: user.id, 
+      post_id: postId,
+      read_at: new Date().toISOString()
+    }
+    
+    const { error } = await (supabase
+      .from('post_reads') as any)
+      .upsert(postRead, { onConflict: 'user_id,post_id' })
 
     if (error) throw error
 

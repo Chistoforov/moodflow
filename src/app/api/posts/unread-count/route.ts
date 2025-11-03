@@ -12,13 +12,13 @@ export async function GET() {
     }
 
     // Получаем user_id из таблицы users
-    const { data: user } = await supabase
+    const { data: user, error: userError } = await supabase
       .from('users')
       .select('id')
       .eq('sso_uid', session.user.id)
-      .single()
+      .single<{ id: string }>()
 
-    if (!user) {
+    if (userError || !user) {
       return NextResponse.json({ unreadCount: 0 })
     }
 

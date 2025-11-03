@@ -12,13 +12,13 @@ export async function GET() {
     }
 
     // Получаем user_id из таблицы users
-    const { data: user } = await supabase
+    const { data: user, error: userError } = await supabase
       .from('users')
       .select('id')
       .eq('sso_uid', session.user.id)
-      .single()
+      .single<{ id: string }>()
 
-    if (!user) {
+    if (userError || !user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
@@ -28,6 +28,14 @@ export async function GET() {
       .select('id, title, excerpt, category, tags, published_at')
       .eq('published', true)
       .order('published_at', { ascending: false })
+      .returns<Array<{
+        id: string
+        title: string
+        excerpt: string | null
+        category: string | null
+        tags: string[] | null
+        published_at: string | null
+      }>>()
 
     if (postsError) throw postsError
 
@@ -36,6 +44,7 @@ export async function GET() {
       .from('post_reads')
       .select('post_id')
       .eq('user_id', user.id)
+      .returns<Array<{ post_id: string }>>()
 
     const readPostIds = new Set(readPosts?.map(r => r.post_id) || [])
 

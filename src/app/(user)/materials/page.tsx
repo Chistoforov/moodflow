@@ -37,17 +37,36 @@ export default function MaterialsPage() {
 
   const openPost = async (postId: string) => {
     try {
+      // Находим пост, чтобы проверить, был ли он непрочитанным
+      const post = posts.find(p => p.id === postId)
+      const wasUnread = post && !post.is_read
+      
+      // ОПТИМИСТИЧНОЕ ОБНОВЛЕНИЕ: Сразу помечаем пост как прочитанный
+      if (wasUnread) {
+        setPosts(posts.map(p => 
+          p.id === postId ? { ...p, is_read: true } : p
+        ))
+        
+        // Сразу отправляем событие для обновления счетчика в BottomNav
+        window.dispatchEvent(new Event('updateUnreadCount'))
+      }
+      
+      // Загружаем полный контент статьи
       const response = await fetch(`/api/posts/${postId}`)
       const data = await response.json()
       setSelectedPost(data.post)
       
-      // Отмечаем пост как прочитанный
-      await fetch(`/api/posts/${postId}/read`, { method: 'POST' })
-      
-      // Обновляем список постов
-      setPosts(posts.map(p => 
-        p.id === postId ? { ...p, is_read: true } : p
-      ))
+      // Отмечаем пост как прочитанный на сервере (в фоне)
+      if (wasUnread) {
+        fetch(`/api/posts/${postId}/read`, { method: 'POST' }).catch(error => {
+          console.error('Failed to mark post as read:', error)
+          // В случае ошибки откатываем изменения
+          setPosts(posts.map(p => 
+            p.id === postId ? { ...p, is_read: false } : p
+          ))
+          window.dispatchEvent(new Event('updateUnreadCount'))
+        })
+      }
     } catch (error) {
       console.error('Failed to open post:', error)
     }
@@ -121,7 +140,7 @@ export default function MaterialsPage() {
               className="prose prose-lg max-w-none"
               style={{ color: '#5C4A42' }}
               dangerouslySetInnerHTML={{ 
-                __html: selectedPost.content.replace(/\n/g, '<br />').replace(/#{1,6}\s(.*?)(<br \/>|$)/g, (_, text) => `<h2 style="color: #8B3A3A; font-weight: 600; font-size: 1.5rem; margin-top: 1.5rem; margin-bottom: 1rem;">${text}</h2>`) 
+                __html: selectedPost.content.replace(/\n/g, '<br />').replace(/#{1,6}\s(.*?)(<br \/>|$)/g, (_: string, text: string) => `<h2 style="color: #8B3A3A; font-weight: 600; font-size: 1.5rem; margin-top: 1.5rem; margin-bottom: 1rem;">${text}</h2>`) 
               }}
             />
 
