@@ -74,19 +74,9 @@ export default function CalendarPage() {
   }
 
   return (
-    <div className="min-h-screen px-4 sm:px-0 pt-8" style={{ backgroundColor: '#E8E2D5' }}>
+    <div className="min-h-screen px-4 sm:px-0 pt-4" style={{ backgroundColor: '#E8E2D5' }}>
       <div className="max-w-2xl mx-auto">
-        {/* Название месяца в стиле рукописи */}
-        <div className="text-center mb-16">
-          <h1 
-            className="handwritten text-7xl mb-4"
-            style={{ color: '#8B3A3A' }}
-          >
-            {format(currentMonth, 'LLLL', { locale: ru })}
-          </h1>
-        </div>
-
-        {/* Навигация */}
+        {/* Компактный заголовок с месяцем, годом и навигацией */}
         <div className="flex items-center justify-between mb-8 px-4">
           <button
             onClick={() => changeMonth(-1)}
@@ -107,6 +97,22 @@ export default function CalendarPage() {
           >
             ←
           </button>
+          
+          <div className="text-center">
+            <h1 
+              className="handwritten text-4xl"
+              style={{ color: '#8B3A3A' }}
+            >
+              {format(currentMonth, 'LLLL', { locale: ru })}
+            </h1>
+            <p 
+              className="text-xl font-semibold mt-1"
+              style={{ color: '#8B3A3A', opacity: 0.8 }}
+            >
+              {format(currentMonth, 'yyyy')}
+            </p>
+          </div>
+
           <button
             onClick={() => changeMonth(1)}
             className="px-6 py-2 text-base font-medium transition-all rounded-full border-2"
@@ -199,18 +205,8 @@ export default function CalendarPage() {
           )}
         </div>
 
-        {/* Год внизу */}
-        <div className="text-center mt-16">
-          <p 
-            className="text-3xl font-bold tracking-wider"
-            style={{ color: '#8B3A3A' }}
-          >
-            {format(currentMonth, 'yyyy')}
-          </p>
-        </div>
-
         {/* Легенда */}
-        <div className="mt-12 rounded-2xl p-6" style={{ backgroundColor: '#F5F1EB' }}>
+        <div className="mt-8 rounded-2xl p-6" style={{ backgroundColor: '#F5F1EB' }}>
           <h3 
             className="font-semibold mb-4 text-lg"
             style={{ color: '#8B3A3A' }}
