@@ -41,14 +41,11 @@ export default function MaterialsPage() {
       const post = posts.find(p => p.id === postId)
       const wasUnread = post && !post.is_read
       
-      // ОПТИМИСТИЧНОЕ ОБНОВЛЕНИЕ: Сразу помечаем пост как прочитанный
+      // ОПТИМИСТИЧНОЕ ОБНОВЛЕНИЕ: Сразу помечаем пост как прочитанный в UI
       if (wasUnread) {
         setPosts(posts.map(p => 
           p.id === postId ? { ...p, is_read: true } : p
         ))
-        
-        // Сразу отправляем событие для обновления счетчика в BottomNav
-        window.dispatchEvent(new Event('updateUnreadCount'))
       }
       
       // Загружаем полный контент статьи
@@ -56,16 +53,19 @@ export default function MaterialsPage() {
       const data = await response.json()
       setSelectedPost(data.post)
       
-      // Отмечаем пост как прочитанный на сервере (в фоне)
+      // Отмечаем пост как прочитанный на сервере И СРАЗУ обновляем счетчик
       if (wasUnread) {
-        fetch(`/api/posts/${postId}/read`, { method: 'POST' }).catch(error => {
+        try {
+          await fetch(`/api/posts/${postId}/read`, { method: 'POST' })
+          // Только после успешной пометки на сервере обновляем счетчик
+          window.dispatchEvent(new Event('updateUnreadCount'))
+        } catch (error) {
           console.error('Failed to mark post as read:', error)
           // В случае ошибки откатываем изменения
           setPosts(posts.map(p => 
             p.id === postId ? { ...p, is_read: false } : p
           ))
-          window.dispatchEvent(new Event('updateUnreadCount'))
-        })
+        }
       }
     } catch (error) {
       console.error('Failed to open post:', error)
