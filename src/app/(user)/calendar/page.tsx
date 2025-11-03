@@ -206,7 +206,7 @@ export default function CalendarPage() {
         </div>
 
         {/* Легенда */}
-        <div className="mt-8 rounded-2xl p-6" style={{ backgroundColor: '#F5F1EB' }}>
+        <div className="mt-6 mb-4 rounded-2xl p-6" style={{ backgroundColor: '#F5F1EB' }}>
           <h3 
             className="font-semibold mb-4 text-lg"
             style={{ color: '#8B3A3A' }}

@@ -28,7 +28,7 @@ export default async function UserLayout({
       </header>
       
       {/* Контент с отступом снизу для нижнего меню */}
-      <main className="max-w-7xl mx-auto pb-24">
+      <main className="max-w-7xl mx-auto pb-20">
         {children}
       </main>
       
