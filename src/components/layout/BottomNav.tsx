@@ -2,18 +2,27 @@
 
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
+import useSWR, { mutate } from 'swr'
+
+// Fetcher функция для SWR
+const fetcher = (url: string) => fetch(url).then(res => res.json())
 
 export default function BottomNav() {
   const pathname = usePathname()
-  const [unreadCount, setUnreadCount] = useState(0)
+  
+  // Используем SWR для кеширования счетчика непрочитанных
+  const { data } = useSWR('/api/posts/unread-count', fetcher, {
+    revalidateOnFocus: false,
+    dedupingInterval: 30000, // Обновлять не чаще раз в 30 секунд
+  })
+  
+  const unreadCount = data?.unreadCount || 0
 
   useEffect(() => {
-    fetchUnreadCount()
-    
-    // Слушаем событие обновления счетчика
+    // Слушаем событие обновления счетчика для принудительного обновления
     const handleUpdateCount = () => {
-      fetchUnreadCount()
+      mutate('/api/posts/unread-count')
     }
     
     window.addEventListener('updateUnreadCount', handleUpdateCount)
@@ -21,17 +30,7 @@ export default function BottomNav() {
     return () => {
       window.removeEventListener('updateUnreadCount', handleUpdateCount)
     }
-  }, [pathname])
-
-  const fetchUnreadCount = async () => {
-    try {
-      const response = await fetch('/api/posts/unread-count')
-      const data = await response.json()
-      setUnreadCount(data.unreadCount || 0)
-    } catch (error) {
-      console.error('Failed to fetch unread count:', error)
-    }
-  }
+  }, [])
 
   const isActive = (path: string) => pathname === path
 

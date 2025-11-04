@@ -1,15 +1,19 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday, getDay } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { MOOD_LEVELS } from '@/lib/utils/constants'
+import useSWR from 'swr'
 
 interface Entry {
   id: string
   entry_date: string
   mood_score: number | null
 }
+
+// Fetcher функция для SWR
+const fetcher = (url: string) => fetch(url).then(res => res.json())
 
 // Стильная иконка настроения
 const MoodSymbol = ({ score }: { score: number }) => {
@@ -35,24 +39,15 @@ const MoodSymbol = ({ score }: { score: number }) => {
 
 export default function CalendarPage() {
   const [currentMonth, setCurrentMonth] = useState(new Date())
-  const [entries, setEntries] = useState<Entry[]>([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    fetchEntries()
-  }, [currentMonth])
-
-  const fetchEntries = async () => {
-    try {
-      const response = await fetch('/api/entries')
-      const data = await response.json()
-      setEntries(data.entries || [])
-    } catch (error) {
-      console.error('Failed to fetch entries:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
+  
+  // Используем SWR для кеширования данных
+  const { data, isLoading } = useSWR('/api/entries', fetcher, {
+    revalidateOnFocus: false, // Не перезагружать при фокусе
+    revalidateOnReconnect: false, // Не перезагружать при реконнекте
+    dedupingInterval: 60000, // Дедупликация запросов в течение 60 секунд
+  })
+  
+  const entries: Entry[] = data?.entries || []
 
   const monthStart = startOfMonth(currentMonth)
   const monthEnd = endOfMonth(currentMonth)
@@ -136,7 +131,7 @@ export default function CalendarPage() {
 
         {/* Календарь */}
         <div className="rounded-2xl p-8" style={{ backgroundColor: '#E8E2D5' }}>
-          {loading ? (
+          {isLoading ? (
             <div className="text-center py-12" style={{ color: '#8B3A3A' }}>
               Загрузка...
             </div>

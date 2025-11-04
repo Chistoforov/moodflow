@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale'
+import useSWR, { mutate } from 'swr'
 
 interface Post {
   id: string
@@ -14,26 +15,19 @@ interface Post {
   is_read: boolean
 }
 
+// Fetcher функция для SWR
+const fetcher = (url: string) => fetch(url).then(res => res.json())
+
 export default function MaterialsPage() {
-  const [posts, setPosts] = useState<Post[]>([])
-  const [loading, setLoading] = useState(true)
   const [selectedPost, setSelectedPost] = useState<any>(null)
-
-  useEffect(() => {
-    fetchPosts()
-  }, [])
-
-  const fetchPosts = async () => {
-    try {
-      const response = await fetch('/api/posts')
-      const data = await response.json()
-      setPosts(data.posts || [])
-    } catch (error) {
-      console.error('Failed to fetch posts:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
+  
+  // Используем SWR для кеширования списка постов
+  const { data, isLoading } = useSWR('/api/posts', fetcher, {
+    revalidateOnFocus: false,
+    dedupingInterval: 60000,
+  })
+  
+  const posts: Post[] = data?.posts || []
 
   const openPost = async (postId: string) => {
     try {
@@ -41,11 +35,13 @@ export default function MaterialsPage() {
       const post = posts.find(p => p.id === postId)
       const wasUnread = post && !post.is_read
       
-      // ОПТИМИСТИЧНОЕ ОБНОВЛЕНИЕ: Сразу помечаем пост как прочитанный в UI
+      // ОПТИМИСТИЧНОЕ ОБНОВЛЕНИЕ: Сразу помечаем пост как прочитанный в кеше SWR
       if (wasUnread) {
-        setPosts(posts.map(p => 
-          p.id === postId ? { ...p, is_read: true } : p
-        ))
+        mutate('/api/posts', {
+          posts: posts.map(p => 
+            p.id === postId ? { ...p, is_read: true } : p
+          )
+        }, false)
       }
       
       // Загружаем полный контент статьи
@@ -57,14 +53,13 @@ export default function MaterialsPage() {
       if (wasUnread) {
         try {
           await fetch(`/api/posts/${postId}/read`, { method: 'POST' })
-          // Только после успешной пометки на сервере обновляем счетчик
+          // Обновляем счетчик непрочитанных и кеш постов
           window.dispatchEvent(new Event('updateUnreadCount'))
+          mutate('/api/posts')
         } catch (error) {
           console.error('Failed to mark post as read:', error)
-          // В случае ошибки откатываем изменения
-          setPosts(posts.map(p => 
-            p.id === postId ? { ...p, is_read: false } : p
-          ))
+          // В случае ошибки откатываем изменения в кеше
+          mutate('/api/posts')
         }
       }
     } catch (error) {
@@ -76,7 +71,7 @@ export default function MaterialsPage() {
     setSelectedPost(null)
   }
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen px-4 pt-8" style={{ backgroundColor: '#E8E2D5' }}>
         <div className="max-w-2xl mx-auto text-center py-12" style={{ color: '#8B3A3A' }}>
