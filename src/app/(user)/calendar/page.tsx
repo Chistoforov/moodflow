@@ -236,32 +236,25 @@ export default function CalendarPage() {
           )}
         </div>
 
-        {/* Легенда */}
+        {/* Аналитика и рекомендации */}
         <div className="mt-6 pb-20 rounded-2xl p-6" style={{ backgroundColor: '#F5F1EB' }}>
           <h3 
-            className="font-semibold mb-6 text-lg text-center"
+            className="font-semibold mb-4 text-lg text-center"
             style={{ color: '#8B3A3A' }}
           >
-            Настроение
+            Аналитика и рекомендации
           </h3>
-          <div className="flex flex-col gap-4">
-            {/* Текст по краям */}
-            <div className="flex justify-between items-center px-2">
-              <span className="text-sm font-medium" style={{ color: '#8B3A3A' }}>
-                очень плохое
-              </span>
-              <span className="text-sm font-medium" style={{ color: '#8B3A3A' }}>
-                Очень хорошее
-              </span>
-            </div>
-            {/* Иконки в центре */}
-            <div className="flex justify-center items-center gap-8">
-              {[1, 2, 3, 4, 5].map(score => (
-                <div key={score}>
-                  <MoodSymbol score={score} size={32} />
-                </div>
-              ))}
-            </div>
+          <div 
+            className="text-center p-4 rounded-lg"
+            style={{ 
+              color: '#8B3A3A',
+              backgroundColor: '#E8E2D5',
+              opacity: 0.8
+            }}
+          >
+            <p className="text-base leading-relaxed">
+              Продолжайте заполнять дневник и скоро вы сможете увидеть выводы и рекомендации
+            </p>
           </div>
         </div>
       </div>

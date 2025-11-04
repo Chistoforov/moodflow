@@ -10,55 +10,70 @@ const MoodSymbol = ({ score, selected, size = 48 }: { score: number; selected: b
   const scale = selected ? 1.1 : 1
   
   const icons = [
-    // 1 - очень плохо (тяжелый дождь с темной тучей)
+    // 1 - очень плохо (туча и молния)
     <svg key="1" width={size} height={size} viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ opacity, transform: `scale(${scale})`, transition: 'all 0.3s' }}>
-      <path d="M46 28C46 26.5 45.5 25 44.5 24C43 21.5 40 20 37 20C36.5 20 36 20 35.5 20.2C34.5 16 30.5 13 26 13C21 13 17 17 17 22C17 22.2 17 22.5 17 22.8C14 23.5 12 26.5 12 30C12 34.5 15.5 38 20 38H44C48.5 38 52 34.5 52 30C52 29 51.5 28.5 51 28C49.5 28 47.5 28 46 28Z" fill="#5A6B7D"/>
-      <rect x="20" y="42" width="2" height="6" rx="1" fill="#4A5A6D"/>
-      <rect x="26" y="42" width="2" height="6" rx="1" fill="#4A5A6D"/>
-      <rect x="32" y="42" width="2" height="6" rx="1" fill="#4A5A6D"/>
-      <rect x="38" y="42" width="2" height="6" rx="1" fill="#4A5A6D"/>
-      <rect x="44" y="42" width="2" height="6" rx="1" fill="#4A5A6D"/>
-      <rect x="23" y="50" width="2" height="4" rx="1" fill="#4A5A6D"/>
-      <rect x="29" y="50" width="2" height="4" rx="1" fill="#4A5A6D"/>
-      <rect x="35" y="50" width="2" height="4" rx="1" fill="#4A5A6D"/>
-      <rect x="41" y="50" width="2" height="4" rx="1" fill="#4A5A6D"/>
+      {/* Темная туча */}
+      <ellipse cx="32" cy="24" rx="18" ry="10" fill="#4A5568"/>
+      <ellipse cx="22" cy="26" rx="12" ry="8" fill="#4A5568"/>
+      <ellipse cx="42" cy="26" rx="12" ry="8" fill="#4A5568"/>
+      {/* Молния */}
+      <path d="M34 30 L30 40 L33 40 L31 50 L38 38 L35 38 L37 30 Z" fill="#FDB022"/>
     </svg>,
-    // 2 - плохо (дождь с серой тучей)
+    // 2 - плохо (туча и дождь)
     <svg key="2" width={size} height={size} viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ opacity, transform: `scale(${scale})`, transition: 'all 0.3s' }}>
-      <path d="M46 28C46 26.5 45.5 25 44.5 24C43 21.5 40 20 37 20C36.5 20 36 20 35.5 20.2C34.5 16 30.5 13 26 13C21 13 17 17 17 22C17 22.2 17 22.5 17 22.8C14 23.5 12 26.5 12 30C12 34.5 15.5 38 20 38H44C48.5 38 52 34.5 52 30C52 29 51.5 28.5 51 28C49.5 28 47.5 28 46 28Z" fill="#8B9AA8"/>
-      <rect x="22" y="42" width="2" height="6" rx="1" fill="#6B7A88"/>
-      <rect x="28" y="42" width="2" height="6" rx="1" fill="#6B7A88"/>
-      <rect x="34" y="42" width="2" height="6" rx="1" fill="#6B7A88"/>
-      <rect x="40" y="42" width="2" height="6" rx="1" fill="#6B7A88"/>
+      {/* Серая туча */}
+      <ellipse cx="32" cy="22" rx="18" ry="10" fill="#718096"/>
+      <ellipse cx="22" cy="24" rx="12" ry="8" fill="#718096"/>
+      <ellipse cx="42" cy="24" rx="12" ry="8" fill="#718096"/>
+      {/* Капли дождя */}
+      <path d="M24 34 L24 42" stroke="#4299E1" strokeWidth="2.5" strokeLinecap="round"/>
+      <path d="M32 36 L32 44" stroke="#4299E1" strokeWidth="2.5" strokeLinecap="round"/>
+      <path d="M40 34 L40 42" stroke="#4299E1" strokeWidth="2.5" strokeLinecap="round"/>
     </svg>,
-    // 3 - нейтрально (облачно)
+    // 3 - нейтрально (солнце и облако)
     <svg key="3" width={size} height={size} viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ opacity, transform: `scale(${scale})`, transition: 'all 0.3s' }}>
-      <path d="M46 28C46 26.5 45.5 25 44.5 24C43 21.5 40 20 37 20C36.5 20 36 20 35.5 20.2C34.5 16 30.5 13 26 13C21 13 17 17 17 22C17 22.2 17 22.5 17 22.8C14 23.5 12 26.5 12 30C12 34.5 15.5 38 20 38H44C48.5 38 52 34.5 52 30C52 29 51.5 28.5 51 28C49.5 28 47.5 28 46 28Z" fill="#B8C5D6"/>
+      {/* Солнце */}
+      <circle cx="38" cy="20" r="9" fill="#FDB022"/>
+      <path d="M38 8 L38 12" stroke="#FDB022" strokeWidth="2.5" strokeLinecap="round"/>
+      <path d="M48 10 L46 14" stroke="#FDB022" strokeWidth="2.5" strokeLinecap="round"/>
+      <path d="M52 20 L48 20" stroke="#FDB022" strokeWidth="2.5" strokeLinecap="round"/>
+      <path d="M48 30 L46 26" stroke="#FDB022" strokeWidth="2.5" strokeLinecap="round"/>
+      {/* Облако */}
+      <ellipse cx="28" cy="32" rx="16" ry="9" fill="#A0AEC0"/>
+      <ellipse cx="18" cy="34" rx="10" ry="7" fill="#A0AEC0"/>
+      <ellipse cx="38" cy="34" rx="10" ry="7" fill="#A0AEC0"/>
     </svg>,
-    // 4 - хорошо (частично облачно)
+    // 4 - хорошо (солнце)
     <svg key="4" width={size} height={size} viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ opacity, transform: `scale(${scale})`, transition: 'all 0.3s' }}>
-      <circle cx="38" cy="20" r="8" fill="#FDB022"/>
-      <path d="M38 8V10" stroke="#FDB022" strokeWidth="2" strokeLinecap="round"/>
-      <path d="M38 30V32" stroke="#FDB022" strokeWidth="2" strokeLinecap="round"/>
-      <path d="M48.5 9.5L47.1 10.9" stroke="#FDB022" strokeWidth="2" strokeLinecap="round"/>
-      <path d="M28.9 29.1L27.5 30.5" stroke="#FDB022" strokeWidth="2" strokeLinecap="round"/>
-      <path d="M50 20H52" stroke="#FDB022" strokeWidth="2" strokeLinecap="round"/>
-      <path d="M24 20H26" stroke="#FDB022" strokeWidth="2" strokeLinecap="round"/>
-      <path d="M48.5 30.5L47.1 29.1" stroke="#FDB022" strokeWidth="2" strokeLinecap="round"/>
-      <path d="M28.9 10.9L27.5 9.5" stroke="#FDB022" strokeWidth="2" strokeLinecap="round"/>
-      <path d="M38 32C38 30.5 37.5 29 36.5 28C35 25.5 32 24 29 24C28.5 24 28 24 27.5 24.2C26.5 22 24 20 21 20C17.5 20 15 22.5 15 26C15 26.2 15 26.4 15 26.6C13 27.2 11.5 29 11.5 31.5C11.5 34.5 14 37 17 37H35C38 37 40.5 34.5 40.5 31.5C40.5 31 40.3 30.5 40 30C39.5 30 38.5 30 38 30V32Z" fill="#E8F0F8"/>
-    </svg>,
-    // 5 - отлично (солнечно)
-    <svg key="5" width={size} height={size} viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ opacity, transform: `scale(${scale})`, transition: 'all 0.3s' }}>
+      {/* Солнце */}
       <circle cx="32" cy="32" r="12" fill="#FDB022"/>
-      <path d="M32 8V14" stroke="#FDB022" strokeWidth="3" strokeLinecap="round"/>
-      <path d="M32 50V56" stroke="#FDB022" strokeWidth="3" strokeLinecap="round"/>
-      <path d="M50.9 13.1L46.6 17.4" stroke="#FDB022" strokeWidth="3" strokeLinecap="round"/>
-      <path d="M17.4 46.6L13.1 50.9" stroke="#FDB022" strokeWidth="3" strokeLinecap="round"/>
-      <path d="M56 32H50" stroke="#FDB022" strokeWidth="3" strokeLinecap="round"/>
-      <path d="M14 32H8" stroke="#FDB022" strokeWidth="3" strokeLinecap="round"/>
-      <path d="M50.9 50.9L46.6 46.6" stroke="#FDB022" strokeWidth="3" strokeLinecap="round"/>
-      <path d="M17.4 17.4L13.1 13.1" stroke="#FDB022" strokeWidth="3" strokeLinecap="round"/>
+      {/* Лучи */}
+      <path d="M32 10 L32 16" stroke="#FDB022" strokeWidth="3" strokeLinecap="round"/>
+      <path d="M32 48 L32 54" stroke="#FDB022" strokeWidth="3" strokeLinecap="round"/>
+      <path d="M10 32 L16 32" stroke="#FDB022" strokeWidth="3" strokeLinecap="round"/>
+      <path d="M48 32 L54 32" stroke="#FDB022" strokeWidth="3" strokeLinecap="round"/>
+      <path d="M16 16 L20 20" stroke="#FDB022" strokeWidth="3" strokeLinecap="round"/>
+      <path d="M44 44 L48 48" stroke="#FDB022" strokeWidth="3" strokeLinecap="round"/>
+      <path d="M48 16 L44 20" stroke="#FDB022" strokeWidth="3" strokeLinecap="round"/>
+      <path d="M20 44 L16 48" stroke="#FDB022" strokeWidth="3" strokeLinecap="round"/>
+    </svg>,
+    // 5 - очень хорошо (солнце и нотка)
+    <svg key="5" width={size} height={size} viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ opacity, transform: `scale(${scale})`, transition: 'all 0.3s' }}>
+      {/* Солнце */}
+      <circle cx="28" cy="28" r="11" fill="#FDB022"/>
+      {/* Лучи */}
+      <path d="M28 8 L28 14" stroke="#FDB022" strokeWidth="2.5" strokeLinecap="round"/>
+      <path d="M28 42 L28 48" stroke="#FDB022" strokeWidth="2.5" strokeLinecap="round"/>
+      <path d="M8 28 L14 28" stroke="#FDB022" strokeWidth="2.5" strokeLinecap="round"/>
+      <path d="M42 28 L48 28" stroke="#FDB022" strokeWidth="2.5" strokeLinecap="round"/>
+      <path d="M14 14 L18 18" stroke="#FDB022" strokeWidth="2.5" strokeLinecap="round"/>
+      <path d="M38 38 L42 42" stroke="#FDB022" strokeWidth="2.5" strokeLinecap="round"/>
+      <path d="M42 14 L38 18" stroke="#FDB022" strokeWidth="2.5" strokeLinecap="round"/>
+      <path d="M18 38 L14 42" stroke="#FDB022" strokeWidth="2.5" strokeLinecap="round"/>
+      {/* Нотка */}
+      <ellipse cx="48" cy="44" rx="4" ry="3" fill="#8B3A3A"/>
+      <rect x="51.5" y="28" width="2.5" height="16" fill="#8B3A3A"/>
+      <path d="M54 28 Q58 26 58 30 L58 38" stroke="#8B3A3A" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
     </svg>
   ]
   
