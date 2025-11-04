@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import useSWR, { mutate } from 'swr'
+import { useSearchParams, useRouter } from 'next/navigation'
 
 interface Post {
   id: string
@@ -19,6 +20,10 @@ interface Post {
 const fetcher = (url: string) => fetch(url).then(res => res.json())
 
 export default function MaterialsPage() {
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const postId = searchParams.get('post')
+  
   const [selectedPost, setSelectedPost] = useState<any>(null)
   
   // Используем SWR для кеширования списка постов
@@ -29,30 +34,39 @@ export default function MaterialsPage() {
   
   const posts: Post[] = data?.posts || []
 
-  const openPost = async (postId: string) => {
+  // Загружаем пост при изменении postId в URL
+  useEffect(() => {
+    if (postId && posts.length > 0) {
+      loadPost(postId)
+    } else {
+      setSelectedPost(null)
+    }
+  }, [postId, posts.length])
+
+  const loadPost = async (id: string) => {
     try {
       // Находим пост, чтобы проверить, был ли он непрочитанным
-      const post = posts.find(p => p.id === postId)
+      const post = posts.find(p => p.id === id)
       const wasUnread = post && !post.is_read
       
       // ОПТИМИСТИЧНОЕ ОБНОВЛЕНИЕ: Сразу помечаем пост как прочитанный в кеше SWR
       if (wasUnread) {
         mutate('/api/posts', {
           posts: posts.map(p => 
-            p.id === postId ? { ...p, is_read: true } : p
+            p.id === id ? { ...p, is_read: true } : p
           )
         }, false)
       }
       
       // Загружаем полный контент статьи
-      const response = await fetch(`/api/posts/${postId}`)
+      const response = await fetch(`/api/posts/${id}`)
       const data = await response.json()
       setSelectedPost(data.post)
       
       // Отмечаем пост как прочитанный на сервере И СРАЗУ обновляем счетчик
       if (wasUnread) {
         try {
-          await fetch(`/api/posts/${postId}/read`, { method: 'POST' })
+          await fetch(`/api/posts/${id}/read`, { method: 'POST' })
           // Обновляем счетчик непрочитанных и кеш постов
           window.dispatchEvent(new Event('updateUnreadCount'))
           mutate('/api/posts')
@@ -67,8 +81,12 @@ export default function MaterialsPage() {
     }
   }
 
+  const openPost = (postId: string) => {
+    router.push(`/materials?post=${postId}`)
+  }
+
   const closePost = () => {
-    setSelectedPost(null)
+    router.push('/materials')
   }
 
   if (isLoading) {
