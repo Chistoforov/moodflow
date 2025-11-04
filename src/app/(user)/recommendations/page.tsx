@@ -56,9 +56,9 @@ export default function RecommendationsPage() {
   }
 
   return (
-    <div className="px-4 sm:px-0">
+    <div className="px-4 sm:px-0 min-h-[calc(100vh-10rem)] py-6">
       <div className="mb-8">
-        <h1 className="text-4xl font-bold" style={{ color: '#8B3A3A' }}>Рекомендации</h1>
+        <h1 className="text-4xl font-bold" style={{ color: '#8B3A3A' }}>Аналитика и рекомендации</h1>
         <p className="mt-3 text-lg" style={{ color: '#8B3A3A' }}>
           Персональные советы от психологов и ИИ-анализ
         </p>
@@ -68,10 +68,7 @@ export default function RecommendationsPage() {
         <div className="text-center py-12" style={{ color: '#8B3A3A' }}>Загрузка...</div>
       ) : recommendations.length === 0 ? (
         <div className="rounded-2xl shadow-sm p-8 text-center" style={{ backgroundColor: '#F5F1EB' }}>
-          <p className="text-lg" style={{ color: '#8B3A3A' }}>Пока нет рекомендаций</p>
-          <p className="mt-2" style={{ color: '#8B3A3A', opacity: 0.7 }}>
-            Продолжайте вести дневник, и скоро появятся персональные советы
-          </p>
+          <p className="text-lg" style={{ color: '#8B3A3A' }}>Продолжайте заполнять дневник и скоро вы сможете увидеть выводы и рекомендации</p>
         </div>
       ) : (
         <div className="space-y-4">
