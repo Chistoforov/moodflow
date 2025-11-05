@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { MOOD_LEVELS, FACTORS } from '@/lib/utils/constants'
+import AudioRecorder from '@/components/entry/AudioRecorder'
+import ProcessingStatus from '@/components/entry/ProcessingStatus'
 
 // Погодные иконки для настроения
 const MoodSymbol = ({ score, selected, size = 48 }: { score: number; selected: boolean; size?: number }) => {
@@ -90,6 +92,9 @@ export default function EntryPage() {
   const [selectedFactors, setSelectedFactors] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [audioUrl, setAudioUrl] = useState<string | null>(null)
+  const [processingStatus, setProcessingStatus] = useState<'pending' | 'processing' | 'completed' | 'failed' | null>(null)
+  const [uploading, setUploading] = useState(false)
 
   useEffect(() => {
     fetchEntry()
@@ -106,6 +111,8 @@ export default function EntryPage() {
         setMoodScore(entry.mood_score)
         setTextEntry(entry.text_entry || '')
         setSelectedFactors(entry.factors || [])
+        setAudioUrl(entry.audio_url)
+        setProcessingStatus(entry.processing_status)
       }
     } catch (error) {
       console.error('Failed to fetch entry:', error)
@@ -149,6 +156,65 @@ export default function EntryPage() {
         ? prev.filter(f => f !== factor)
         : [...prev, factor]
     )
+  }
+
+  const handleAudioRecording = async (audioBlob: Blob) => {
+    setUploading(true)
+    try {
+      const formData = new FormData()
+      formData.append('audio', audioBlob, 'recording.webm')
+      formData.append('date', date)
+
+      const response = await fetch('/api/upload-audio', {
+        method: 'POST',
+        body: formData,
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setAudioUrl(data.audioUrl)
+        setProcessingStatus('pending')
+        
+        // Poll for status updates
+        pollProcessingStatus()
+      } else {
+        throw new Error('Failed to upload audio')
+      }
+    } catch (error) {
+      console.error('Failed to upload audio:', error)
+      alert('Ошибка при загрузке аудио')
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  const pollProcessingStatus = async () => {
+    const pollInterval = setInterval(async () => {
+      try {
+        const response = await fetch('/api/entries')
+        const data = await response.json()
+        const entry = data.entries?.find((e: any) => e.entry_date === date)
+        
+        if (entry) {
+          setProcessingStatus(entry.processing_status)
+          
+          // Stop polling if completed or failed
+          if (entry.processing_status === 'completed' || entry.processing_status === 'failed') {
+            clearInterval(pollInterval)
+            
+            // Update text if transcription completed
+            if (entry.processing_status === 'completed' && entry.text_entry) {
+              setTextEntry(entry.text_entry)
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Failed to poll status:', error)
+      }
+    }, 3000) // Poll every 3 seconds
+
+    // Clear interval after 5 minutes max
+    setTimeout(() => clearInterval(pollInterval), 300000)
   }
 
   if (loading) {
@@ -227,19 +293,53 @@ export default function EntryPage() {
             <h2 className="text-xl font-semibold mb-6" style={{ color: '#8B3A3A' }}>
               Заметки
             </h2>
-            <textarea
-              value={textEntry}
-              onChange={(e) => setTextEntry(e.target.value)}
-              placeholder="Напишите о своих мыслях и чувствах..."
-              rows={8}
-              className="w-full px-4 py-3 rounded-xl resize-none focus:outline-none focus:ring-2 transition-all"
-              style={{
-                backgroundColor: '#E8E2D5',
-                color: '#8B3A3A',
-                border: '2px solid #C8BEB0',
-                fontFamily: 'Georgia, serif',
-              }}
-            />
+            
+            {/* Processing Status */}
+            <ProcessingStatus status={processingStatus} className="mb-4" />
+            
+            {/* Audio Recorder */}
+            <div className="mb-6">
+              <AudioRecorder 
+                onRecordingComplete={handleAudioRecording}
+                disabled={uploading || processingStatus === 'processing'}
+              />
+              {uploading && (
+                <div className="text-center mt-3" style={{ color: '#8B3A3A' }}>
+                  Загрузка...
+                </div>
+              )}
+              {audioUrl && (
+                <div className="mt-4">
+                  <audio 
+                    controls 
+                    src={audioUrl}
+                    className="w-full"
+                    style={{
+                      filter: 'sepia(50%) hue-rotate(320deg) saturate(70%)',
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+
+            <div className="relative">
+              <div className="absolute top-2 right-2 text-xs" style={{ color: '#8B3A3A', opacity: 0.6 }}>
+                или запишите аудио выше
+              </div>
+              <textarea
+                value={textEntry}
+                onChange={(e) => setTextEntry(e.target.value)}
+                placeholder="Напишите о своих мыслях и чувствах..."
+                rows={8}
+                className="w-full px-4 py-3 rounded-xl resize-none focus:outline-none focus:ring-2 transition-all"
+                style={{
+                  backgroundColor: '#E8E2D5',
+                  color: '#8B3A3A',
+                  border: '2px solid #C8BEB0',
+                  fontFamily: 'Georgia, serif',
+                }}
+              />
+            </div>
           </div>
 
           {/* Actions */}

@@ -56,6 +56,7 @@ export interface Database {
           audio_url: string | null
           audio_duration: number | null
           transcript: string | null
+          processing_status: 'pending' | 'processing' | 'completed' | 'failed' | null
           factors: string[] | null
           summary_category: string | null
           is_deleted: boolean
@@ -151,6 +152,30 @@ export interface Database {
           read_at?: string
         }
         Update: Partial<Database['public']['Tables']['post_reads']['Insert']>
+      }
+      audio_entries: {
+        Row: {
+          id: string
+          user_id: string
+          entry_date: string
+          audio_url: string
+          audio_duration: number | null
+          transcript: string | null
+          processing_status: 'pending' | 'processing' | 'completed' | 'failed' | null
+          is_deleted: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          user_id: string
+          entry_date: string
+          audio_url: string
+          audio_duration?: number | null
+          transcript?: string | null
+          processing_status?: 'pending' | 'processing' | 'completed' | 'failed' | null
+          is_deleted?: boolean
+        }
+        Update: Partial<Database['public']['Tables']['audio_entries']['Insert']>
       }
     }
   }

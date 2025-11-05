@@ -5,6 +5,7 @@ import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isTod
 import { ru } from 'date-fns/locale'
 import { MOOD_LEVELS } from '@/lib/utils/constants'
 import useSWR from 'swr'
+import AudioModal from '@/components/entry/AudioModal'
 
 interface Entry {
   id: string
@@ -75,6 +76,7 @@ const MoodSymbol = ({ score, size = 24 }: { score: number; size?: number }) => {
 
 export default function CalendarPage() {
   const [currentMonth, setCurrentMonth] = useState(new Date())
+  const [audioModalDate, setAudioModalDate] = useState<string | null>(null)
   
   // Используем SWR для кеширования данных
   const { data, isLoading } = useSWR('/api/entries', fetcher, {
@@ -196,39 +198,70 @@ export default function CalendarPage() {
                 {days.map(day => {
                   const entry = getEntryForDate(day)
                   const today = isToday(day)
+                  const dateStr = format(day, 'yyyy-MM-dd')
 
                   return (
-                    <a
+                    <div
                       key={day.toString()}
-                      href={`/entry/${format(day, 'yyyy-MM-dd')}`}
-                      className="aspect-square flex flex-col items-center justify-center rounded-xl transition-all relative"
-                      style={{
-                        backgroundColor: today ? '#D4C8B5' : 'transparent',
-                        border: today ? '2px solid #8B3A3A' : 'none',
-                      }}
-                      onMouseEnter={(e) => {
-                        if (!today) {
-                          e.currentTarget.style.backgroundColor = '#D4C8B5'
-                        }
-                      }}
-                      onMouseLeave={(e) => {
-                        if (!today) {
-                          e.currentTarget.style.backgroundColor = 'transparent'
-                        }
-                      }}
+                      className="aspect-square relative"
                     >
-                      <div 
-                        className="text-lg font-medium mb-1"
-                        style={{ color: '#8B3A3A' }}
+                      <a
+                        href={`/entry/${dateStr}`}
+                        className="absolute inset-0 flex flex-col items-center justify-center rounded-xl transition-all"
+                        style={{
+                          backgroundColor: today ? '#D4C8B5' : 'transparent',
+                          border: today ? '2px solid #8B3A3A' : 'none',
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!today) {
+                            e.currentTarget.style.backgroundColor = '#D4C8B5'
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!today) {
+                            e.currentTarget.style.backgroundColor = 'transparent'
+                          }
+                        }}
                       >
-                        {format(day, 'd')}
-                      </div>
-                      {entry && entry.mood_score && (
-                        <div className="flex justify-center">
-                          <MoodSymbol score={entry.mood_score} />
+                        <div 
+                          className="text-lg font-medium mb-1"
+                          style={{ color: '#8B3A3A' }}
+                        >
+                          {format(day, 'd')}
                         </div>
-                      )}
-                    </a>
+                        {entry && entry.mood_score && (
+                          <div className="flex justify-center">
+                            <MoodSymbol score={entry.mood_score} />
+                          </div>
+                        )}
+                      </a>
+                      
+                      {/* Audio button */}
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault()
+                          e.stopPropagation()
+                          setAudioModalDate(dateStr)
+                        }}
+                        className="absolute top-1 right-1 p-1 rounded-full transition-all z-10"
+                        style={{
+                          backgroundColor: 'rgba(139, 58, 58, 0.8)',
+                          color: '#E8E2D5',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = '#8B3A3A'
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = 'rgba(139, 58, 58, 0.8)'
+                        }}
+                        title="Аудиозаписи"
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M12 15C13.66 15 15 13.66 15 12V6C15 4.34 13.66 3 12 3C10.34 3 9 4.34 9 6V12C9 13.66 10.34 15 12 15Z" fill="currentColor"/>
+                          <path d="M17 12C17 14.76 14.76 17 12 17C9.24 17 7 14.76 7 12H5C5 15.53 7.61 18.43 11 18.92V22H13V18.92C16.39 18.43 19 15.53 19 12H17Z" fill="currentColor"/>
+                        </svg>
+                      </button>
+                    </div>
                   )
                 })}
               </div>
@@ -258,6 +291,13 @@ export default function CalendarPage() {
           </div>
         </div>
       </div>
+
+      {/* Audio Modal */}
+      <AudioModal
+        date={audioModalDate || ''}
+        isOpen={!!audioModalDate}
+        onClose={() => setAudioModalDate(null)}
+      />
     </div>
   )
 }

@@ -29,22 +29,42 @@ export class PerplexityService {
 
   async transcribeAudio(req: TranscriptionRequest): Promise<string> {
     try {
-      const response = await fetch(`${this.baseUrl}/transcribe`, {
+      // Use OpenAI Whisper API for transcription
+      const openaiApiKey = process.env.OPENAI_API_KEY
+      if (!openaiApiKey) {
+        throw new Error('OPENAI_API_KEY is not configured')
+      }
+
+      // Download audio file
+      const audioResponse = await fetch(req.audioUrl)
+      const audioBuffer = await audioResponse.arrayBuffer()
+      
+      // Create form data for Whisper API
+      const formData = new FormData()
+      const audioBlob = new Blob([audioBuffer], { type: 'audio/webm' })
+      formData.append('file', audioBlob, 'audio.webm')
+      formData.append('model', 'whisper-1')
+      formData.append('language', req.language || 'ru')
+      formData.append('response_format', 'json')
+
+      const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
-          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${openaiApiKey}`,
         },
-        body: JSON.stringify({
-          audio_url: req.audioUrl,
-          language: req.language || 'ru',
-        }),
+        body: formData,
       })
 
+      if (!response.ok) {
+        const error = await response.text()
+        console.error('OpenAI Whisper API error:', error)
+        throw new Error(`Whisper API failed: ${response.statusText}`)
+      }
+
       const data = await response.json()
-      return data.transcript
+      return data.text
     } catch (error) {
-      console.error('Perplexity transcription error:', error)
+      console.error('Audio transcription error:', error)
       throw new Error('Failed to transcribe audio')
     }
   }
