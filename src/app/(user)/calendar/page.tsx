@@ -5,7 +5,6 @@ import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isTod
 import { ru } from 'date-fns/locale'
 import { MOOD_LEVELS } from '@/lib/utils/constants'
 import useSWR from 'swr'
-import AudioModal from '@/components/entry/AudioModal'
 
 interface Entry {
   id: string
@@ -76,7 +75,6 @@ const MoodSymbol = ({ score, size = 24 }: { score: number; size?: number }) => {
 
 export default function CalendarPage() {
   const [currentMonth, setCurrentMonth] = useState(new Date())
-  const [audioModalDate, setAudioModalDate] = useState<string | null>(null)
   
   // Используем SWR для кеширования данных
   const { data, isLoading } = useSWR('/api/entries', fetcher, {
@@ -107,13 +105,13 @@ export default function CalendarPage() {
   }
 
   return (
-    <div className="min-h-screen px-4 sm:px-0 pt-4" style={{ backgroundColor: '#E8E2D5' }}>
+    <div className="min-h-screen px-2 sm:px-4 pt-4 pb-20" style={{ backgroundColor: '#E8E2D5' }}>
       <div className="max-w-2xl mx-auto">
         {/* Компактный заголовок с месяцем, годом и навигацией */}
-        <div className="flex items-center justify-between mb-8 px-4">
+        <div className="flex items-center justify-between mb-6 sm:mb-8 px-2 sm:px-4">
           <button
             onClick={() => changeMonth(-1)}
-            className="px-6 py-2 text-base font-medium transition-all rounded-full border-2"
+            className="px-4 sm:px-6 py-2 text-base sm:text-lg font-medium transition-all rounded-full border-2 min-w-[44px] min-h-[44px] flex items-center justify-center"
             style={{ 
               color: '#8B3A3A',
               borderColor: '#8B3A3A',
@@ -131,15 +129,15 @@ export default function CalendarPage() {
             ←
           </button>
           
-          <div className="text-center">
+          <div className="text-center px-2">
             <h1 
-              className="handwritten text-4xl"
+              className="handwritten text-3xl sm:text-4xl"
               style={{ color: '#8B3A3A' }}
             >
               {format(currentMonth, 'LLLL', { locale: ru })}
             </h1>
             <p 
-              className="text-xl font-semibold mt-1"
+              className="text-lg sm:text-xl font-semibold mt-1"
               style={{ color: '#8B3A3A', opacity: 0.8 }}
             >
               {format(currentMonth, 'yyyy')}
@@ -148,7 +146,7 @@ export default function CalendarPage() {
 
           <button
             onClick={() => changeMonth(1)}
-            className="px-6 py-2 text-base font-medium transition-all rounded-full border-2"
+            className="px-4 sm:px-6 py-2 text-base sm:text-lg font-medium transition-all rounded-full border-2 min-w-[44px] min-h-[44px] flex items-center justify-center"
             style={{ 
               color: '#8B3A3A',
               borderColor: '#8B3A3A',
@@ -168,7 +166,7 @@ export default function CalendarPage() {
         </div>
 
         {/* Календарь */}
-        <div className="rounded-2xl p-8" style={{ backgroundColor: '#E8E2D5' }}>
+        <div className="rounded-2xl p-4 sm:p-6 md:p-8" style={{ backgroundColor: '#E8E2D5' }}>
           {isLoading ? (
             <div className="text-center py-12" style={{ color: '#8B3A3A' }}>
               Загрузка...
@@ -176,11 +174,11 @@ export default function CalendarPage() {
           ) : (
             <>
               {/* Дни недели */}
-              <div className="grid grid-cols-7 gap-4 mb-6">
+              <div className="grid grid-cols-7 gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-6">
                 {['ВС', 'ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ'].map((day, index) => (
                   <div 
                     key={day} 
-                    className="text-center font-semibold text-sm uppercase tracking-wider"
+                    className="text-center font-semibold text-xs sm:text-sm uppercase tracking-wider"
                     style={{ color: '#8B3A3A' }}
                   >
                     {day}
@@ -189,7 +187,7 @@ export default function CalendarPage() {
               </div>
               
               {/* Дни месяца */}
-              <div className="grid grid-cols-7 gap-4">
+              <div className="grid grid-cols-7 gap-2 sm:gap-3 md:gap-4">
                 {/* Пустые клетки для выравнивания */}
                 {Array.from({ length: emptyDays }).map((_, index) => (
                   <div key={`empty-${index}`} className="aspect-square" />
@@ -235,32 +233,6 @@ export default function CalendarPage() {
                           </div>
                         )}
                       </a>
-                      
-                      {/* Audio button */}
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault()
-                          e.stopPropagation()
-                          setAudioModalDate(dateStr)
-                        }}
-                        className="absolute top-1 right-1 p-1 rounded-full transition-all z-10"
-                        style={{
-                          backgroundColor: 'rgba(139, 58, 58, 0.8)',
-                          color: '#E8E2D5',
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = '#8B3A3A'
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.backgroundColor = 'rgba(139, 58, 58, 0.8)'
-                        }}
-                        title="Аудиозаписи"
-                      >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M12 15C13.66 15 15 13.66 15 12V6C15 4.34 13.66 3 12 3C10.34 3 9 4.34 9 6V12C9 13.66 10.34 15 12 15Z" fill="currentColor"/>
-                          <path d="M17 12C17 14.76 14.76 17 12 17C9.24 17 7 14.76 7 12H5C5 15.53 7.61 18.43 11 18.92V22H13V18.92C16.39 18.43 19 15.53 19 12H17Z" fill="currentColor"/>
-                        </svg>
-                      </button>
                     </div>
                   )
                 })}
@@ -270,34 +242,27 @@ export default function CalendarPage() {
         </div>
 
         {/* Аналитика и рекомендации */}
-        <div className="mt-6 pb-20 rounded-2xl p-6" style={{ backgroundColor: '#F5F1EB' }}>
+        <div className="mt-4 sm:mt-6 rounded-2xl p-4 sm:p-6" style={{ backgroundColor: '#F5F1EB' }}>
           <h3 
-            className="font-semibold mb-4 text-lg text-center"
+            className="font-semibold mb-4 text-base sm:text-lg text-center"
             style={{ color: '#8B3A3A' }}
           >
             Аналитика и рекомендации
           </h3>
           <div 
-            className="text-center p-4 rounded-lg"
+            className="text-center p-3 sm:p-4 rounded-lg"
             style={{ 
               color: '#8B3A3A',
               backgroundColor: '#E8E2D5',
               opacity: 0.8
             }}
           >
-            <p className="text-base leading-relaxed">
+            <p className="text-sm sm:text-base leading-relaxed">
               Продолжайте заполнять дневник и скоро вы сможете увидеть выводы и рекомендации
             </p>
           </div>
         </div>
       </div>
-
-      {/* Audio Modal */}
-      <AudioModal
-        date={audioModalDate || ''}
-        isOpen={!!audioModalDate}
-        onClose={() => setAudioModalDate(null)}
-      />
     </div>
   )
 }

@@ -101,12 +101,12 @@ export default function MaterialsPage() {
 
   if (selectedPost) {
     return (
-      <div className="min-h-screen px-4 pt-8" style={{ backgroundColor: '#E8E2D5' }}>
+      <div className="min-h-screen px-4 pt-4 sm:pt-8 pb-20" style={{ backgroundColor: '#E8E2D5' }}>
         <div className="max-w-2xl mx-auto">
           {/* Кнопка назад */}
           <button
             onClick={closePost}
-            className="mb-6 px-6 py-2 text-base font-medium transition-all rounded-full border-2"
+            className="mb-4 sm:mb-6 px-4 sm:px-6 py-2 text-sm sm:text-base font-medium transition-all rounded-full border-2 min-h-[44px]"
             style={{ 
               color: '#8B3A3A',
               borderColor: '#8B3A3A',
@@ -125,10 +125,10 @@ export default function MaterialsPage() {
           </button>
 
           {/* Статья */}
-          <article className="rounded-2xl p-8 mb-8" style={{ backgroundColor: '#F5F1EB' }}>
+          <article className="rounded-2xl p-4 sm:p-6 md:p-8 mb-8" style={{ backgroundColor: '#F5F1EB' }}>
             <div className="mb-4">
               <span 
-                className="inline-block px-3 py-1 rounded-full text-sm font-medium"
+                className="inline-block px-3 py-1 rounded-full text-xs sm:text-sm font-medium"
                 style={{ 
                   backgroundColor: '#D4C8B5',
                   color: '#8B3A3A'
@@ -139,31 +139,31 @@ export default function MaterialsPage() {
             </div>
 
             <h1 
-              className="text-4xl font-bold mb-4"
+              className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4"
               style={{ color: '#8B3A3A' }}
             >
               {selectedPost.title}
             </h1>
 
-            <div className="mb-6 text-sm" style={{ color: '#A67C6C' }}>
+            <div className="mb-6 text-xs sm:text-sm" style={{ color: '#A67C6C' }}>
               {format(new Date(selectedPost.published_at), 'd MMMM yyyy', { locale: ru })}
             </div>
 
             <div 
-              className="prose prose-lg max-w-none"
+              className="prose prose-sm sm:prose-base md:prose-lg max-w-none"
               style={{ color: '#5C4A42' }}
               dangerouslySetInnerHTML={{ 
-                __html: selectedPost.content.replace(/\n/g, '<br />').replace(/#{1,6}\s(.*?)(<br \/>|$)/g, (_: string, text: string) => `<h2 style="color: #8B3A3A; font-weight: 600; font-size: 1.5rem; margin-top: 1.5rem; margin-bottom: 1rem;">${text}</h2>`) 
+                __html: selectedPost.content.replace(/\n/g, '<br />').replace(/#{1,6}\s(.*?)(<br \/>|$)/g, (_: string, text: string) => `<h2 style="color: #8B3A3A; font-weight: 600; font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 1rem;">${text}</h2>`) 
               }}
             />
 
             {selectedPost.tags && selectedPost.tags.length > 0 && (
-              <div className="mt-8 pt-6 border-t" style={{ borderColor: '#D4C8B5' }}>
+              <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t" style={{ borderColor: '#D4C8B5' }}>
                 <div className="flex flex-wrap gap-2">
                   {selectedPost.tags.map((tag: string) => (
                     <span
                       key={tag}
-                      className="px-3 py-1 rounded-full text-sm"
+                      className="px-3 py-1 rounded-full text-xs sm:text-sm"
                       style={{ 
                         backgroundColor: '#E8E2D5',
                         color: '#8B3A3A'
@@ -182,17 +182,17 @@ export default function MaterialsPage() {
   }
 
   return (
-    <div className="min-h-screen px-4 pt-8" style={{ backgroundColor: '#E8E2D5' }}>
+    <div className="min-h-screen px-4 pt-4 sm:pt-8 pb-20" style={{ backgroundColor: '#E8E2D5' }}>
       <div className="max-w-2xl mx-auto">
         {/* Заголовок */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-8 sm:mb-12">
           <h1 
-            className="handwritten text-6xl mb-4"
+            className="handwritten text-4xl sm:text-5xl md:text-6xl mb-4"
             style={{ color: '#8B3A3A' }}
           >
             Материалы
           </h1>
-          <p className="text-lg" style={{ color: '#A67C6C' }}>
+          <p className="text-base sm:text-lg" style={{ color: '#A67C6C' }}>
             Полезные статьи от наших психологов
           </p>
         </div>
@@ -210,7 +210,7 @@ export default function MaterialsPage() {
               <button
                 key={post.id}
                 onClick={() => openPost(post.id)}
-                className="w-full text-left rounded-2xl p-6 transition-all"
+                className="w-full text-left rounded-2xl p-4 sm:p-6 transition-all"
                 style={{ 
                   backgroundColor: '#F5F1EB',
                   border: '2px solid transparent'
@@ -236,7 +236,7 @@ export default function MaterialsPage() {
                   </span>
                   {!post.is_read && (
                     <div
-                      className="w-2 h-2 rounded-full"
+                      className="w-2 h-2 rounded-full flex-shrink-0"
                       style={{ backgroundColor: '#8B3A3A' }}
                       title="Непрочитанный материал"
                     />
@@ -244,13 +244,13 @@ export default function MaterialsPage() {
                 </div>
 
                 <h2 
-                  className="text-2xl font-bold mb-3"
+                  className="text-xl sm:text-2xl font-bold mb-3"
                   style={{ color: '#8B3A3A' }}
                 >
                   {post.title}
                 </h2>
 
-                <p className="mb-3 line-clamp-2" style={{ color: '#5C4A42' }}>
+                <p className="mb-3 line-clamp-2 text-sm sm:text-base" style={{ color: '#5C4A42' }}>
                   {post.excerpt}
                 </p>
 
@@ -269,7 +269,7 @@ export default function MaterialsPage() {
                   ))}
                 </div>
 
-                <div className="text-sm" style={{ color: '#A67C6C' }}>
+                <div className="text-xs sm:text-sm" style={{ color: '#A67C6C' }}>
                   {format(new Date(post.published_at), 'd MMMM yyyy', { locale: ru })}
                 </div>
               </button>

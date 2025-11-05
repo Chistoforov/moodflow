@@ -22,6 +22,12 @@ const dancingScript = Dancing_Script({
 export const metadata: Metadata = {
   title: "MoodFlow - Дневник настроения",
   description: "Персональный дневник настроения с поддержкой психологов и ИИ-анализом",
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 5,
+    userScalable: true,
+  },
 };
 
 export default function RootLayout({

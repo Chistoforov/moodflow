@@ -62,19 +62,25 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'User not found' }, { status: 404 })
   }
 
+  // Normalize empty strings to null for database compatibility
+  const entryData = {
+    user_id: user.id,
+    entry_date,
+    mood_score: mood_score ?? null,
+    text_entry: text_entry?.trim() || null,
+    factors: factors && factors.length > 0 ? factors : null,
+  }
+
   const { data: entry, error } = await supabase
     .from('daily_entries')
-    .upsert({
-      user_id: user.id,
-      entry_date,
-      mood_score,
-      text_entry,
-      factors,
-    } as any)
+    .upsert(entryData, {
+      onConflict: 'user_id,entry_date',
+    })
     .select()
     .maybeSingle()
 
   if (error) {
+    console.error('Database error:', error)
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 

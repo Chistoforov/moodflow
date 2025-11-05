@@ -120,12 +120,12 @@ export default function AudioRecorder({ onRecordingComplete, disabled = false }:
   }
 
   return (
-    <div className="flex flex-col items-center gap-4">
+    <div className="flex flex-col items-center gap-4 w-full">
       {!isRecording ? (
         <button
           onClick={startRecording}
           disabled={disabled}
-          className="flex items-center gap-2 px-6 py-3 rounded-full font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center gap-2 px-4 sm:px-6 py-3 rounded-full font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base min-h-[44px]"
           style={{
             backgroundColor: '#8B3A3A',
             color: '#E8E2D5',
@@ -149,7 +149,7 @@ export default function AudioRecorder({ onRecordingComplete, disabled = false }:
         <div className="flex flex-col items-center gap-4 w-full">
           <div className="flex items-center gap-3">
             <div className={`w-3 h-3 rounded-full ${isPaused ? 'bg-yellow-500' : 'bg-red-500 animate-pulse'}`}></div>
-            <span className="text-2xl font-mono font-bold" style={{ color: '#8B3A3A' }}>
+            <span className="text-xl sm:text-2xl font-mono font-bold" style={{ color: '#8B3A3A' }}>
               {formatTime(recordingTime)}
             </span>
           </div>
@@ -157,7 +157,7 @@ export default function AudioRecorder({ onRecordingComplete, disabled = false }:
           <div className="flex gap-3">
             <button
               onClick={pauseRecording}
-              className="p-3 rounded-full transition-all"
+              className="p-3 rounded-full transition-all min-w-[44px] min-h-[44px] flex items-center justify-center"
               style={{
                 backgroundColor: '#E8E2D5',
                 color: '#8B3A3A',
@@ -179,7 +179,7 @@ export default function AudioRecorder({ onRecordingComplete, disabled = false }:
 
             <button
               onClick={cancelRecording}
-              className="p-3 rounded-full transition-all"
+              className="p-3 rounded-full transition-all min-w-[44px] min-h-[44px] flex items-center justify-center"
               style={{
                 backgroundColor: '#E8E2D5',
                 color: '#8B3A3A',
@@ -194,7 +194,7 @@ export default function AudioRecorder({ onRecordingComplete, disabled = false }:
 
             <button
               onClick={stopRecording}
-              className="p-3 rounded-full transition-all"
+              className="p-3 rounded-full transition-all min-w-[44px] min-h-[44px] flex items-center justify-center"
               style={{
                 backgroundColor: '#8B3A3A',
                 color: '#E8E2D5',
@@ -217,5 +217,6 @@ export default function AudioRecorder({ onRecordingComplete, disabled = false }:
     </div>
   )
 }
+
 
 

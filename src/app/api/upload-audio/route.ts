@@ -68,8 +68,8 @@ export async function POST(request: NextRequest) {
       .getPublicUrl(fileName)
 
     // Update or create entry with audio_url and set processing_status to 'pending'
-    const { data: entry, error: dbError } = await supabase
-      .from('daily_entries')
+    const { data: entry, error: dbError } = await (supabase
+      .from('daily_entries') as any)
       .upsert({
         user_id: user.id,
         entry_date: date,

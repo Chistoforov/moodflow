@@ -11,3 +11,4 @@ WHERE processing_status IS NOT NULL;
 COMMENT ON COLUMN public.daily_entries.processing_status IS 'Status of audio transcription: pending, processing, completed, failed';
 
 
+

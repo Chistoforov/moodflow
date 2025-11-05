@@ -21,6 +21,7 @@ export async function POST(request: NextRequest) {
     // Update status to 'processing'
     await supabase
       .from('audio_entries')
+      // @ts-expect-error - Supabase typing issue with update method
       .update({ processing_status: 'processing' })
       .eq('id', audioEntryId)
 
@@ -34,6 +35,7 @@ export async function POST(request: NextRequest) {
       // Update audio entry with transcript and set status to 'completed'
       const { data: updatedEntry, error: updateError } = await supabase
         .from('audio_entries')
+        // @ts-expect-error - Supabase typing issue with update method
         .update({
           transcript,
           processing_status: 'completed',
@@ -58,6 +60,7 @@ export async function POST(request: NextRequest) {
       // Update status to 'failed'
       await supabase
         .from('audio_entries')
+        // @ts-expect-error - Supabase typing issue with update method
         .update({ 
           processing_status: 'failed',
         })

@@ -56,10 +56,10 @@ export default function RecommendationsPage() {
   }
 
   return (
-    <div className="px-4 sm:px-0 min-h-[calc(100vh-10rem)] py-6">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold" style={{ color: '#8B3A3A' }}>Аналитика и рекомендации</h1>
-        <p className="mt-3 text-lg" style={{ color: '#8B3A3A' }}>
+    <div className="px-4 sm:px-0 min-h-[calc(100vh-10rem)] py-4 sm:py-6 pb-20">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold" style={{ color: '#8B3A3A' }}>Аналитика и рекомендации</h1>
+        <p className="mt-2 sm:mt-3 text-base sm:text-lg" style={{ color: '#8B3A3A' }}>
           Персональные советы от психологов и ИИ-анализ
         </p>
       </div>
@@ -67,15 +67,15 @@ export default function RecommendationsPage() {
       {loading ? (
         <div className="text-center py-12" style={{ color: '#8B3A3A' }}>Загрузка...</div>
       ) : recommendations.length === 0 ? (
-        <div className="rounded-2xl shadow-sm p-8 text-center" style={{ backgroundColor: '#F5F1EB' }}>
-          <p className="text-lg" style={{ color: '#8B3A3A' }}>Продолжайте заполнять дневник и скоро вы сможете увидеть выводы и рекомендации</p>
+        <div className="rounded-2xl shadow-sm p-6 sm:p-8 text-center" style={{ backgroundColor: '#F5F1EB' }}>
+          <p className="text-base sm:text-lg" style={{ color: '#8B3A3A' }}>Продолжайте заполнять дневник и скоро вы сможете увидеть выводы и рекомендации</p>
         </div>
       ) : (
         <div className="space-y-4">
           {recommendations.map(rec => (
             <div
               key={rec.id}
-              className={`rounded-2xl shadow-sm p-6 ${
+              className={`rounded-2xl shadow-sm p-4 sm:p-6 ${
                 !rec.read_status ? 'border-l-4' : ''
               }`}
               style={{
@@ -83,21 +83,21 @@ export default function RecommendationsPage() {
                 borderLeftColor: !rec.read_status ? '#8B3A3A' : 'transparent',
               }}
             >
-              <div className="flex items-start justify-between mb-4">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-4 gap-3">
                 <div className="flex-1">
                   {rec.title && (
-                    <h3 className="text-xl font-semibold mb-3" style={{ color: '#8B3A3A' }}>
+                    <h3 className="text-lg sm:text-xl font-semibold mb-3" style={{ color: '#8B3A3A' }}>
                       {rec.title}
                     </h3>
                   )}
                   <div className="flex items-center gap-2 flex-wrap">
                     <span
-                      className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
+                      className="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium"
                       style={getTypeBadge(rec.recommendation_type)}
                     >
                       {getTypeLabel(rec.recommendation_type)}
                     </span>
-                    <span style={{ color: '#8B3A3A', opacity: 0.7 }}>
+                    <span className="text-xs sm:text-sm" style={{ color: '#8B3A3A', opacity: 0.7 }}>
                       {format(new Date(rec.created_at), 'dd MMMM yyyy', {
                         locale: ru,
                       })}
@@ -106,7 +106,7 @@ export default function RecommendationsPage() {
                 </div>
                 {!rec.read_status && (
                   <span 
-                    className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ml-2"
+                    className="inline-flex items-center px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium self-start sm:ml-2"
                     style={{
                       backgroundColor: '#8B3A3A',
                       color: '#E8E2D5',
@@ -117,7 +117,7 @@ export default function RecommendationsPage() {
                 )}
               </div>
               <div className="prose prose-sm max-w-none">
-                <p className="whitespace-pre-wrap leading-relaxed" style={{ color: '#8B3A3A' }}>{rec.text}</p>
+                <p className="whitespace-pre-wrap leading-relaxed text-sm sm:text-base" style={{ color: '#8B3A3A' }}>{rec.text}</p>
               </div>
             </div>
           ))}

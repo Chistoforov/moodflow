@@ -190,6 +190,7 @@ export async function DELETE(request: NextRequest) {
     // Soft delete the audio entry
     const { error: dbError } = await supabase
       .from('audio_entries')
+      // @ts-expect-error - Supabase typing issue with update method
       .update({ is_deleted: true })
       .eq('id', id)
       .eq('user_id', user.id) // Ensure user owns this entry

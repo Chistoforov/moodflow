@@ -292,3 +292,4 @@ analytics.track('transcription_completed', {
 **Версия:** 1.0.0
 
 
+

@@ -1,10 +1,20 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { MOOD_LEVELS, FACTORS } from '@/lib/utils/constants'
-import AudioRecorder from '@/components/entry/AudioRecorder'
-import ProcessingStatus from '@/components/entry/ProcessingStatus'
+import ChatMessage from '@/components/entry/ChatMessage'
+import ChatInput from '@/components/entry/ChatInput'
+import AudioRecordModal from '@/components/entry/AudioRecordModal'
+
+interface Message {
+  id: string
+  text: string | null
+  audioUrl?: string | null
+  transcript?: string | null
+  timestamp: string
+  type: 'text' | 'audio'
+}
 
 // Погодные иконки для настроения
 const MoodSymbol = ({ score, selected, size = 48 }: { score: number; selected: boolean; size?: number }) => {
@@ -88,13 +98,13 @@ export default function EntryPage() {
   const date = params.date as string
 
   const [moodScore, setMoodScore] = useState<number | null>(null)
-  const [textEntry, setTextEntry] = useState('')
+  const [messages, setMessages] = useState<Message[]>([])
   const [selectedFactors, setSelectedFactors] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
-  const [audioUrl, setAudioUrl] = useState<string | null>(null)
-  const [processingStatus, setProcessingStatus] = useState<'pending' | 'processing' | 'completed' | 'failed' | null>(null)
-  const [uploading, setUploading] = useState(false)
+  const [isAudioModalOpen, setIsAudioModalOpen] = useState(false)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const chatContainerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     fetchEntry()
@@ -109,10 +119,59 @@ export default function EntryPage() {
       
       if (entry) {
         setMoodScore(entry.mood_score)
-        setTextEntry(entry.text_entry || '')
         setSelectedFactors(entry.factors || [])
-        setAudioUrl(entry.audio_url)
-        setProcessingStatus(entry.processing_status)
+        
+        // Parse messages from text_entry (JSON array)
+        let loadedMessages: Message[] = []
+        if (entry.text_entry) {
+          try {
+            const parsed = JSON.parse(entry.text_entry)
+            if (Array.isArray(parsed)) {
+              loadedMessages = parsed
+            } else if (typeof parsed === 'string') {
+              // Legacy format: single text string
+              // Convert to message format
+              loadedMessages = [{
+                id: `legacy-${entry.id}`,
+                text: parsed,
+                timestamp: entry.created_at || new Date().toISOString(),
+                type: 'text'
+              }]
+            }
+          } catch {
+            // If not JSON, treat as legacy single text entry
+            loadedMessages = [{
+              id: `legacy-${entry.id}`,
+              text: entry.text_entry,
+              timestamp: entry.created_at || new Date().toISOString(),
+              type: 'text'
+            }]
+          }
+        }
+        
+        // Add audio message if audio_url exists and not already in messages
+        if (entry.audio_url) {
+          const hasAudioInMessages = loadedMessages.some(msg => msg.audioUrl === entry.audio_url)
+          if (!hasAudioInMessages) {
+            const audioMessage: Message = {
+              id: `audio-${entry.id}`,
+              text: entry.transcript || null,
+              audioUrl: entry.audio_url,
+              timestamp: entry.created_at || new Date().toISOString(),
+              type: 'audio'
+            }
+            loadedMessages.push(audioMessage)
+          } else {
+            // Update existing audio message with transcript if available
+            loadedMessages = loadedMessages.map(msg => 
+              msg.audioUrl === entry.audio_url && entry.transcript
+                ? { ...msg, text: entry.transcript }
+                : msg
+            )
+          }
+        }
+        
+        setMessages(loadedMessages)
       }
     } catch (error) {
       console.error('Failed to fetch entry:', error)
@@ -121,9 +180,19 @@ export default function EntryPage() {
     }
   }
 
-  const handleSave = async () => {
+  // Scroll to bottom when new messages arrive
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' })
+    }
+  }, [messages])
+
+  const saveMessages = async (messagesToSave: Message[]) => {
     setSaving(true)
     try {
+      // Convert messages to JSON string for storage
+      const textEntryJson = JSON.stringify(messagesToSave)
+
       const response = await fetch('/api/entries', {
         method: 'POST',
         headers: {
@@ -132,34 +201,49 @@ export default function EntryPage() {
         body: JSON.stringify({
           entry_date: date,
           mood_score: moodScore,
-          text_entry: textEntry,
+          text_entry: textEntryJson,
           factors: selectedFactors,
         }),
       })
 
-      if (response.ok) {
-        router.push('/calendar')
-      } else {
-        throw new Error('Failed to save entry')
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || 'Failed to save entry')
       }
     } catch (error) {
       console.error('Failed to save entry:', error)
-      alert('Ошибка при сохранении записи')
+      const errorMessage = error instanceof Error ? error.message : 'Ошибка при сохранении записи'
+      alert(`Ошибка при сохранении записи: ${errorMessage}`)
+      throw error // Re-throw to allow caller to handle
     } finally {
       setSaving(false)
     }
   }
 
-  const toggleFactor = (factor: string) => {
-    setSelectedFactors(prev =>
-      prev.includes(factor)
-        ? prev.filter(f => f !== factor)
-        : [...prev, factor]
-    )
+  const handleSendMessage = async (text: string) => {
+    if (!text.trim()) return
+
+    const newMessage: Message = {
+      id: `msg-${Date.now()}-${Math.random()}`,
+      text: text.trim(),
+      timestamp: new Date().toISOString(),
+      type: 'text'
+    }
+
+    // Optimistically add message to UI
+    const updatedMessages = [...messages, newMessage]
+    setMessages(updatedMessages)
+
+    // Save to backend
+    try {
+      await saveMessages(updatedMessages)
+    } catch (error) {
+      // Revert optimistic update on error
+      setMessages(messages)
+    }
   }
 
   const handleAudioRecording = async (audioBlob: Blob) => {
-    setUploading(true)
     try {
       const formData = new FormData()
       formData.append('audio', audioBlob, 'recording.webm')
@@ -172,49 +256,87 @@ export default function EntryPage() {
 
       if (response.ok) {
         const data = await response.json()
-        setAudioUrl(data.audioUrl)
-        setProcessingStatus('pending')
         
-        // Poll for status updates
-        pollProcessingStatus()
+        // Add audio message to chat
+        const audioMessage: Message = {
+          id: `audio-${Date.now()}-${Math.random()}`,
+          audioUrl: data.audioUrl,
+          text: null,
+          timestamp: new Date().toISOString(),
+          type: 'audio'
+        }
+        
+        // Optimistically add message to UI
+        const updatedMessages = [...messages, audioMessage]
+        setMessages(updatedMessages)
+        
+        // Save to backend
+        try {
+          await saveMessages(updatedMessages)
+        } catch (error) {
+          // Revert optimistic update on error
+          setMessages(messages)
+          throw error
+        }
+        
+        // Close modal
+        setIsAudioModalOpen(false)
+        
+        // Poll for transcription status
+        pollAudioTranscription(data.audioUrl)
       } else {
         throw new Error('Failed to upload audio')
       }
     } catch (error) {
       console.error('Failed to upload audio:', error)
       alert('Ошибка при загрузке аудио')
-    } finally {
-      setUploading(false)
     }
   }
 
-  const pollProcessingStatus = async () => {
+  const pollAudioTranscription = async (audioUrl: string) => {
     const pollInterval = setInterval(async () => {
       try {
         const response = await fetch('/api/entries')
         const data = await response.json()
         const entry = data.entries?.find((e: any) => e.entry_date === date)
         
-        if (entry) {
-          setProcessingStatus(entry.processing_status)
-          
-          // Stop polling if completed or failed
-          if (entry.processing_status === 'completed' || entry.processing_status === 'failed') {
+        if (entry && entry.audio_url === audioUrl) {
+          if (entry.processing_status === 'completed' && entry.transcript) {
+            // Update the audio message with transcript
+            setMessages(prev => {
+              const updated = prev.map(msg => 
+                msg.audioUrl === audioUrl 
+                  ? { ...msg, text: entry.transcript }
+                  : msg
+              )
+              // Save updated messages
+              saveMessages(updated).catch(console.error)
+              return updated
+            })
             clearInterval(pollInterval)
-            
-            // Update text if transcription completed
-            if (entry.processing_status === 'completed' && entry.text_entry) {
-              setTextEntry(entry.text_entry)
-            }
+          } else if (entry.processing_status === 'failed') {
+            clearInterval(pollInterval)
           }
         }
       } catch (error) {
-        console.error('Failed to poll status:', error)
+        console.error('Failed to poll transcription:', error)
       }
-    }, 3000) // Poll every 3 seconds
+    }, 3000)
 
-    // Clear interval after 5 minutes max
+    // Clear after 5 minutes
     setTimeout(() => clearInterval(pollInterval), 300000)
+  }
+
+  const toggleFactor = (factor: string) => {
+    setSelectedFactors(prev =>
+      prev.includes(factor)
+        ? prev.filter(f => f !== factor)
+        : [...prev, factor]
+    )
+  }
+
+  const handleSaveFactors = async () => {
+    await saveMessages(messages)
   }
 
   if (loading) {
@@ -226,38 +348,63 @@ export default function EntryPage() {
   }
 
   return (
-    <div className="min-h-screen px-4 sm:px-0" style={{ backgroundColor: '#E8E2D5' }}>
-      <div className="max-w-3xl mx-auto py-8">
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold mb-2" style={{ color: '#8B3A3A' }}>
-            Запись за {date}
-          </h1>
-          <p className="text-lg" style={{ color: '#8B3A3A' }}>
-            Как вы себя чувствуете сегодня?
-          </p>
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#1E1E1E' }}>
+      {/* Header */}
+      <div className="px-3 sm:px-4 py-3 sm:py-4 border-b" style={{ borderColor: 'rgba(255, 255, 255, 0.1)', backgroundColor: '#1E1E1E' }}>
+        <div className="max-w-3xl mx-auto">
+          <div className="flex items-center justify-between">
+            <button
+              onClick={() => router.push('/calendar')}
+              className="p-2 rounded-full transition-all min-w-[44px] min-h-[44px] flex items-center justify-center"
+              style={{
+                backgroundColor: 'transparent',
+                color: '#FFFFFF',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent'
+              }}
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+            <h1 className="text-base sm:text-lg font-semibold px-2 text-center flex-1" style={{ color: '#FFFFFF' }}>
+              Запись за {date}
+            </h1>
+            <div style={{ width: '44px' }} /> {/* Spacer */}
+          </div>
         </div>
+      </div>
 
-        <div className="space-y-6">
+      {/* Mood and Factors Section */}
+      <div className="px-3 sm:px-4 py-4" style={{ backgroundColor: '#E8E2D5' }}>
+        <div className="max-w-3xl mx-auto space-y-3 sm:space-y-4">
           {/* Mood Selection */}
-          <div className="rounded-2xl shadow-sm p-6 sm:p-8" style={{ backgroundColor: '#F5F1EB' }}>
-            <h2 className="text-xl font-semibold mb-6 text-center" style={{ color: '#8B3A3A' }}>
+          <div className="rounded-2xl shadow-sm p-4 sm:p-6" style={{ backgroundColor: '#F5F1EB' }}>
+            <h2 className="text-base sm:text-lg font-semibold mb-4 text-center" style={{ color: '#8B3A3A' }}>
               Настроение
             </h2>
-            <div className="flex justify-center flex-wrap gap-3 sm:gap-4 max-w-2xl mx-auto">
+            <div className="flex justify-center flex-wrap gap-2 sm:gap-3 max-w-2xl mx-auto">
               {MOOD_LEVELS.map(level => (
                 <button
                   key={level.value}
-                  onClick={() => setMoodScore(level.value)}
-                  className="flex flex-col items-center p-4 sm:p-6 rounded-xl transition-all min-w-[70px] sm:min-w-[90px]"
+                  onClick={() => {
+                    setMoodScore(level.value)
+                    handleSaveFactors()
+                  }}
+                  className="flex flex-col items-center p-2 sm:p-3 md:p-4 rounded-xl transition-all min-w-[56px] sm:min-w-[70px] md:min-w-[80px]"
                   style={{
                     backgroundColor: moodScore === level.value ? '#E8E2D5' : 'transparent',
                     border: moodScore === level.value ? '2px solid #8B3A3A' : '2px solid transparent',
                   }}
                 >
-                  <div className="mb-2 sm:mb-3 flex justify-center">
-                    <MoodSymbol score={level.value} selected={moodScore === level.value} />
+                  <div className="mb-1 sm:mb-2 flex justify-center">
+                    <MoodSymbol score={level.value} selected={moodScore === level.value} size={36} />
                   </div>
-                  <div className="text-xs font-medium text-center" style={{ color: '#8B3A3A' }}>
+                  <div className="text-xs font-medium text-center leading-tight" style={{ color: '#8B3A3A' }}>
                     {level.label}
                   </div>
                 </button>
@@ -266,16 +413,19 @@ export default function EntryPage() {
           </div>
 
           {/* Factors */}
-          <div className="rounded-2xl shadow-sm p-8" style={{ backgroundColor: '#F5F1EB' }}>
-            <h2 className="text-xl font-semibold mb-6" style={{ color: '#8B3A3A' }}>
+          <div className="rounded-2xl shadow-sm p-4 sm:p-6" style={{ backgroundColor: '#F5F1EB' }}>
+            <h2 className="text-base sm:text-lg font-semibold mb-4" style={{ color: '#8B3A3A' }}>
               Факторы
             </h2>
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-2">
               {FACTORS.map(factor => (
                 <button
                   key={factor.value}
-                  onClick={() => toggleFactor(factor.value)}
-                  className="px-5 py-2 rounded-full text-sm font-medium transition-all"
+                  onClick={() => {
+                    toggleFactor(factor.value)
+                    setTimeout(() => handleSaveFactors(), 100)
+                  }}
+                  className="px-3 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-all min-h-[36px]"
                   style={{
                     backgroundColor: selectedFactors.includes(factor.value) ? '#8B3A3A' : '#E8E2D5',
                     color: selectedFactors.includes(factor.value) ? '#E8E2D5' : '#8B3A3A',
@@ -287,100 +437,46 @@ export default function EntryPage() {
               ))}
             </div>
           </div>
-
-          {/* Text Entry */}
-          <div className="rounded-2xl shadow-sm p-8" style={{ backgroundColor: '#F5F1EB' }}>
-            <h2 className="text-xl font-semibold mb-6" style={{ color: '#8B3A3A' }}>
-              Заметки
-            </h2>
-            
-            {/* Processing Status */}
-            <ProcessingStatus status={processingStatus} className="mb-4" />
-            
-            {/* Audio Recorder */}
-            <div className="mb-6">
-              <AudioRecorder 
-                onRecordingComplete={handleAudioRecording}
-                disabled={uploading || processingStatus === 'processing'}
-              />
-              {uploading && (
-                <div className="text-center mt-3" style={{ color: '#8B3A3A' }}>
-                  Загрузка...
-                </div>
-              )}
-              {audioUrl && (
-                <div className="mt-4">
-                  <audio 
-                    controls 
-                    src={audioUrl}
-                    className="w-full"
-                    style={{
-                      filter: 'sepia(50%) hue-rotate(320deg) saturate(70%)',
-                    }}
-                  />
-                </div>
-              )}
-            </div>
-
-            <div>
-              <textarea
-                value={textEntry}
-                onChange={(e) => setTextEntry(e.target.value)}
-                placeholder="Запишите аудио или напишите о своих мыслях и чувствах"
-                rows={8}
-                className="w-full px-4 py-3 rounded-xl resize-none focus:outline-none focus:ring-2 transition-all"
-                style={{
-                  backgroundColor: '#E8E2D5',
-                  color: '#8B3A3A',
-                  border: '2px solid #C8BEB0',
-                  fontFamily: 'Georgia, serif',
-                }}
-              />
-            </div>
-          </div>
-
-          {/* Actions */}
-          <div className="flex justify-end gap-4">
-            <button
-              onClick={() => router.push('/calendar')}
-              className="px-8 py-3 rounded-full font-medium transition-all border-2"
-              style={{
-                color: '#8B3A3A',
-                backgroundColor: 'transparent',
-                borderColor: '#8B3A3A',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#D4C8B5'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'transparent'
-              }}
-            >
-              Отмена
-            </button>
-            <button
-              onClick={handleSave}
-              disabled={saving || (!moodScore && !textEntry.trim())}
-              className="px-8 py-3 rounded-full font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{
-                backgroundColor: '#8B3A3A',
-                color: '#E8E2D5',
-                border: 'none',
-              }}
-              onMouseEnter={(e) => {
-                if (!saving && (moodScore || textEntry.trim())) {
-                  e.currentTarget.style.backgroundColor = '#6B1F1F'
-                }
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#8B3A3A'
-              }}
-            >
-              {saving ? 'Сохранение...' : 'Сохранить'}
-            </button>
-          </div>
         </div>
       </div>
+
+      {/* Chat Messages Area */}
+      <div 
+        ref={chatContainerRef}
+        className="flex-1 overflow-y-auto px-3 sm:px-4 py-4"
+        style={{ backgroundColor: '#1E1E1E' }}
+      >
+        <div className="max-w-3xl mx-auto">
+          {messages.length === 0 ? (
+            <div className="text-center py-12">
+              <p style={{ color: 'rgba(255, 255, 255, 0.5)' }}>
+                Начните писать, чтобы оставить отзыв о своем настроении
+              </p>
+            </div>
+          ) : (
+            messages.map((message) => (
+              <ChatMessage key={message.id} message={message} />
+            ))
+          )}
+          <div ref={messagesEndRef} />
+        </div>
+      </div>
+
+      {/* Chat Input */}
+      <ChatInput
+        onSend={handleSendMessage}
+        onAudioRecord={() => setIsAudioModalOpen(true)}
+        disabled={saving}
+        placeholder="Напишите о своих мыслях и чувствах..."
+      />
+
+      {/* Audio Recording Modal */}
+      <AudioRecordModal
+        isOpen={isAudioModalOpen}
+        onClose={() => setIsAudioModalOpen(false)}
+        onRecordingComplete={handleAudioRecording}
+        disabled={saving}
+      />
     </div>
   )
 }

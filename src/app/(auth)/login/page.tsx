@@ -76,22 +76,22 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4" style={{ backgroundColor: '#E8E2D5' }}>
-      <div className="max-w-md w-full space-y-8 p-8 rounded-2xl" style={{ backgroundColor: '#F5F1EB' }}>
+    <div className="min-h-screen flex items-center justify-center px-4 py-8" style={{ backgroundColor: '#E8E2D5' }}>
+      <div className="max-w-md w-full space-y-6 sm:space-y-8 p-6 sm:p-8 rounded-2xl" style={{ backgroundColor: '#F5F1EB' }}>
         <div>
-          <h2 className="handwritten text-5xl font-bold text-center mb-4" style={{ color: '#8B3A3A' }}>
+          <h2 className="handwritten text-4xl sm:text-5xl font-bold text-center mb-4" style={{ color: '#8B3A3A' }}>
             MoodFlow
           </h2>
-          <p className="text-center text-lg" style={{ color: '#8B3A3A' }}>
+          <p className="text-center text-base sm:text-lg" style={{ color: '#8B3A3A' }}>
             Войдите в свой аккаунт
           </p>
         </div>
         
-        <div className="mt-8 space-y-6">
+        <div className="mt-6 sm:mt-8 space-y-4 sm:space-y-6">
           <button
             onClick={handleGoogleLogin}
             disabled={loading}
-            className="group relative w-full flex items-center justify-center gap-3 py-3 px-4 border-2 font-medium rounded-full disabled:opacity-50 transition-all hover:shadow-lg"
+            className="group relative w-full flex items-center justify-center gap-3 py-3 px-4 border-2 font-medium rounded-full disabled:opacity-50 transition-all hover:shadow-lg text-sm sm:text-base"
             style={{
               backgroundColor: 'white',
               borderColor: '#C8BEB0',
