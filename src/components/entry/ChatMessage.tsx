@@ -30,8 +30,8 @@ export default function ChatMessage({ message }: ChatMessageProps) {
       <div
         className="max-w-[85%] sm:max-w-[80%] rounded-2xl px-3 sm:px-4 py-2 sm:py-2.5 shadow-sm relative"
         style={{
-          backgroundColor: '#2B2B2B',
-          color: '#FFFFFF',
+          backgroundColor: '#F5F1EB',
+          color: '#8B3A3A',
         }}
       >
         {/* Message tail */}
@@ -39,8 +39,8 @@ export default function ChatMessage({ message }: ChatMessageProps) {
           className="absolute left-0 bottom-0 w-0 h-0"
           style={{
             borderLeft: '8px solid transparent',
-            borderRight: '8px solid #2B2B2B',
-            borderBottom: '8px solid #2B2B2B',
+            borderRight: '8px solid #F5F1EB',
+            borderBottom: '8px solid #F5F1EB',
             borderTop: '8px solid transparent',
             transform: 'translateX(-8px)',
           }}
@@ -71,7 +71,7 @@ export default function ChatMessage({ message }: ChatMessageProps) {
           <div className="flex justify-end items-center mt-1">
             <span 
               className="text-xs"
-              style={{ color: 'rgba(255, 255, 255, 0.6)' }}
+              style={{ color: '#A67C6C' }}
             >
               {formatTime(message.timestamp)}
             </span>
@@ -81,7 +81,7 @@ export default function ChatMessage({ message }: ChatMessageProps) {
               height="10" 
               viewBox="0 0 14 10" 
               className="ml-1"
-              style={{ color: '#519EC6' }}
+              style={{ color: '#8B3A3A' }}
               fill="currentColor"
             >
               <path d="M0 5.5L3.5 9L14 0L12.5 0L3.5 7.5L1.5 5.5L0 5.5Z" />

@@ -114,14 +114,14 @@ export default function ChatInput({
       ref={containerRef}
       className="w-full px-3 sm:px-4 py-3 transition-all duration-200"
       style={{
-        backgroundColor: '#1E1E1E',
-        borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+        backgroundColor: '#E8E2D5',
+        borderTop: '1px solid #D4C8B5',
         position: 'fixed',
-        bottom: 0,
+        bottom: '80px', // Выше BottomNav (h-20 = 80px)
         left: 0,
         right: 0,
         transform: keyboardHeight > 0 ? `translateY(-${keyboardHeight}px)` : 'translateY(0)',
-        zIndex: 50,
+        zIndex: 60, // Выше BottomNav (z-50)
       }}
     >
       <div className="max-w-3xl mx-auto flex items-end gap-2">
@@ -132,11 +132,11 @@ export default function ChatInput({
           className="flex-shrink-0 p-2 rounded-full transition-all disabled:opacity-50 disabled:cursor-not-allowed min-w-[44px] min-h-[44px] flex items-center justify-center"
           style={{
             backgroundColor: 'transparent',
-            color: '#FFFFFF',
+            color: '#8B3A3A',
           }}
           onMouseEnter={(e) => {
             if (!disabled) {
-              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'
+              e.currentTarget.style.backgroundColor = 'rgba(139, 58, 58, 0.1)'
             }
           }}
           onMouseLeave={(e) => {
@@ -201,7 +201,7 @@ export default function ChatInput({
           className="flex-shrink-0 p-2 rounded-full transition-all disabled:opacity-50 disabled:cursor-not-allowed min-w-[44px] min-h-[44px] flex items-center justify-center"
           style={{
             backgroundColor: text.trim() ? '#8B3A3A' : 'transparent',
-            color: '#FFFFFF',
+            color: text.trim() ? '#FFFFFF' : '#8B3A3A',
           }}
           onMouseEnter={(e) => {
             if (!disabled && text.trim()) {

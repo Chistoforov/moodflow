@@ -348,9 +348,9 @@ export default function EntryPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#1E1E1E' }}>
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#E8E2D5' }}>
       {/* Header */}
-      <div className="px-3 sm:px-4 py-3 sm:py-4 border-b" style={{ borderColor: 'rgba(255, 255, 255, 0.1)', backgroundColor: '#1E1E1E' }}>
+      <div className="px-3 sm:px-4 py-3 sm:py-4 border-b" style={{ borderColor: '#D4C8B5', backgroundColor: '#F5F1EB' }}>
         <div className="max-w-3xl mx-auto">
           <div className="flex items-center justify-between">
             <button
@@ -358,10 +358,10 @@ export default function EntryPage() {
               className="p-2 rounded-full transition-all min-w-[44px] min-h-[44px] flex items-center justify-center"
               style={{
                 backgroundColor: 'transparent',
-                color: '#FFFFFF',
+                color: '#8B3A3A',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'
+                e.currentTarget.style.backgroundColor = 'rgba(139, 58, 58, 0.1)'
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.backgroundColor = 'transparent'
@@ -371,7 +371,7 @@ export default function EntryPage() {
                 <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </button>
-            <h1 className="text-base sm:text-lg font-semibold px-2 text-center flex-1" style={{ color: '#FFFFFF' }}>
+            <h1 className="text-base sm:text-lg font-semibold px-2 text-center flex-1" style={{ color: '#8B3A3A' }}>
               Запись за {date}
             </h1>
             <div style={{ width: '44px' }} /> {/* Spacer */}
@@ -445,14 +445,14 @@ export default function EntryPage() {
         ref={chatContainerRef}
         className="flex-1 overflow-y-auto px-3 sm:px-4 py-4"
         style={{ 
-          backgroundColor: '#1E1E1E',
-          paddingBottom: '80px', // Space for fixed input field
+          backgroundColor: '#E8E2D5',
+          paddingBottom: '160px', // Space for fixed input field (80px) + BottomNav (80px)
         }}
       >
         <div className="max-w-3xl mx-auto">
           {messages.length === 0 ? (
             <div className="text-center py-12">
-              <p style={{ color: 'rgba(255, 255, 255, 0.5)' }}>
+              <p style={{ color: '#A67C6C' }}>
                 Начните писать, чтобы оставить отзыв о своем настроении
               </p>
             </div>
