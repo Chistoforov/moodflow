@@ -28,14 +28,14 @@ export async function POST(
     }
 
     // Отмечаем пост как прочитанный (используем upsert для избежания дубликатов)
-    const postRead = { 
+    const postRead: Database['public']['Tables']['post_reads']['Insert'] = { 
       user_id: user.id, 
       post_id: postId,
       read_at: new Date().toISOString()
     }
     
-    const { error } = await (supabase
-      .from('post_reads') as any)
+    const { error } = await supabase
+      .from('post_reads')
       .upsert(postRead, { onConflict: 'user_id,post_id' })
 
     if (error) throw error

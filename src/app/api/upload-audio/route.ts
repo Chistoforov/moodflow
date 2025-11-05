@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase/server'
+import type { Database } from '@/types/database'
 
 export const runtime = 'nodejs'
 export const maxDuration = 60 // 60 seconds timeout
@@ -68,15 +69,17 @@ export async function POST(request: NextRequest) {
       .getPublicUrl(fileName)
 
     // Update or create entry with audio_url and set processing_status to 'pending'
-    const { data: entry, error: dbError } = await (supabase
-      .from('daily_entries') as any)
-      .upsert({
-        user_id: user.id,
-        entry_date: date,
-        audio_url: publicUrl,
-        audio_duration: Math.round(file.size / 16000), // Rough estimate
-        processing_status: 'pending',
-      })
+    const entryData: Database['public']['Tables']['daily_entries']['Insert'] = {
+      user_id: user.id,
+      entry_date: date,
+      audio_url: publicUrl,
+      audio_duration: Math.round(file.size / 16000), // Rough estimate
+      processing_status: 'pending',
+    }
+
+    const { data: entry, error: dbError } = await supabase
+      .from('daily_entries')
+      .upsert(entryData)
       .select()
       .single()
 

@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
   }
 
   // Normalize empty strings to null for database compatibility
-  const entryData = {
+  const entryData: Database['public']['Tables']['daily_entries']['Insert'] = {
     user_id: user.id,
     entry_date,
     mood_score: mood_score ?? null,
