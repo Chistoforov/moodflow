@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase/server'
 import type { Database } from '@/types/database'
 
+type DailyEntry = Database['public']['Tables']['daily_entries']['Row']
+
 export const runtime = 'nodejs'
 export const maxDuration = 60 // 60 seconds timeout
 
@@ -75,21 +77,24 @@ export async function POST(request: NextRequest) {
       audio_url: publicUrl,
       audio_duration: Math.round(file.size / 16000), // Rough estimate
       processing_status: 'pending',
+      is_deleted: false,
     }
 
     const { data: entry, error: dbError } = await supabase
       .from('daily_entries')
-      .upsert(entryData)
+      .upsert([entryData] as any)
       .select()
       .single()
 
-    if (dbError) {
+    if (dbError || !entry) {
       console.error('Database error:', dbError)
       return NextResponse.json(
         { error: 'Failed to save entry' },
         { status: 500 }
       )
     }
+
+    const typedEntry = entry as DailyEntry
 
     // Trigger transcription in background (fire and forget)
     fetch(`${request.nextUrl.origin}/api/transcribe`, {
@@ -98,14 +103,14 @@ export async function POST(request: NextRequest) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        entryId: entry.id,
+        entryId: typedEntry.id,
         audioUrl: publicUrl,
       }),
     }).catch(err => console.error('Failed to trigger transcription:', err))
 
     return NextResponse.json({
       success: true,
-      entryId: entry.id,
+      entryId: typedEntry.id,
       audioUrl: publicUrl,
       status: 'pending',
     })

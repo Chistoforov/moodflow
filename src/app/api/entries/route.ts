@@ -69,11 +69,12 @@ export async function POST(request: NextRequest) {
     mood_score: mood_score ?? null,
     text_entry: text_entry?.trim() || null,
     factors: factors && factors.length > 0 ? factors : null,
+    is_deleted: false,
   }
 
   const { data: entry, error } = await supabase
     .from('daily_entries')
-    .upsert(entryData, {
+    .upsert([entryData] as any, {
       onConflict: 'user_id,entry_date',
     })
     .select()

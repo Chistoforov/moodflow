@@ -36,7 +36,7 @@ export async function POST(
     
     const { error } = await supabase
       .from('post_reads')
-      .upsert(postRead, { onConflict: 'user_id,post_id' })
+      .upsert([postRead] as any, { onConflict: 'user_id,post_id' })
 
     if (error) throw error
 

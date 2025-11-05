@@ -63,7 +63,19 @@ export interface Database {
           created_at: string
           updated_at: string
         }
-        Insert: Omit<Database['public']['Tables']['daily_entries']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Insert: {
+          user_id: string
+          entry_date: string
+          mood_score?: number | null
+          text_entry?: string | null
+          audio_url?: string | null
+          audio_duration?: number | null
+          transcript?: string | null
+          processing_status?: 'pending' | 'processing' | 'completed' | 'failed' | null
+          factors?: string[] | null
+          summary_category?: string | null
+          is_deleted?: boolean
+        }
         Update: Partial<Database['public']['Tables']['daily_entries']['Insert']>
       }
       weekly_summaries: {
