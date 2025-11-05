@@ -322,14 +322,11 @@ export default function EntryPage() {
               )}
             </div>
 
-            <div className="relative">
-              <div className="absolute top-2 right-2 text-xs" style={{ color: '#8B3A3A', opacity: 0.6 }}>
-                или запишите аудио выше
-              </div>
+            <div>
               <textarea
                 value={textEntry}
                 onChange={(e) => setTextEntry(e.target.value)}
-                placeholder="Напишите о своих мыслях и чувствах..."
+                placeholder="Запишите аудио или напишите о своих мыслях и чувствах"
                 rows={8}
                 className="w-full px-4 py-3 rounded-xl resize-none focus:outline-none focus:ring-2 transition-all"
                 style={{
@@ -363,7 +360,7 @@ export default function EntryPage() {
             </button>
             <button
               onClick={handleSave}
-              disabled={saving || !moodScore}
+              disabled={saving || (!moodScore && !textEntry.trim())}
               className="px-8 py-3 rounded-full font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               style={{
                 backgroundColor: '#8B3A3A',
@@ -371,7 +368,7 @@ export default function EntryPage() {
                 border: 'none',
               }}
               onMouseEnter={(e) => {
-                if (!saving && moodScore) {
+                if (!saving && (moodScore || textEntry.trim())) {
                   e.currentTarget.style.backgroundColor = '#6B1F1F'
                 }
               }}
