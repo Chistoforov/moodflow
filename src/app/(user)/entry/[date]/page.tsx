@@ -444,7 +444,10 @@ export default function EntryPage() {
       <div 
         ref={chatContainerRef}
         className="flex-1 overflow-y-auto px-3 sm:px-4 py-4"
-        style={{ backgroundColor: '#1E1E1E' }}
+        style={{ 
+          backgroundColor: '#1E1E1E',
+          paddingBottom: '80px', // Space for fixed input field
+        }}
       >
         <div className="max-w-3xl mx-auto">
           {messages.length === 0 ? (
@@ -468,6 +471,14 @@ export default function EntryPage() {
         onAudioRecord={() => setIsAudioModalOpen(true)}
         disabled={saving}
         placeholder="Напишите о своих мыслях и чувствах..."
+        onFocus={() => {
+          // Scroll to bottom when input is focused
+          setTimeout(() => {
+            if (messagesEndRef.current) {
+              messagesEndRef.current.scrollIntoView({ behavior: 'smooth' })
+            }
+          }, 300)
+        }}
       />
 
       {/* Audio Recording Modal */}

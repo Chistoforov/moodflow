@@ -7,26 +7,86 @@ interface ChatInputProps {
   onAudioRecord: () => void
   disabled?: boolean
   placeholder?: string
+  onFocus?: () => void
 }
 
 export default function ChatInput({ 
   onSend, 
   onAudioRecord, 
   disabled = false,
-  placeholder = "Напишите сообщение..."
+  placeholder = "Напишите сообщение...",
+  onFocus
 }: ChatInputProps) {
   const [text, setText] = useState('')
+  const [keyboardHeight, setKeyboardHeight] = useState(0)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
 
+  // Auto-resize textarea
   useEffect(() => {
     if (textareaRef.current) {
-      // Auto-resize textarea
       textareaRef.current.style.height = 'auto'
       const scrollHeight = textareaRef.current.scrollHeight
       const maxHeight = 120 // Max height for 4-5 lines
       textareaRef.current.style.height = `${Math.min(scrollHeight, maxHeight)}px`
     }
   }, [text])
+
+  // Handle keyboard appearance on mobile
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const handleViewportChange = () => {
+      if (typeof window.visualViewport !== 'undefined') {
+        const viewport = window.visualViewport
+        const windowHeight = window.innerHeight
+        const viewportHeight = viewport.height
+        const calculatedKeyboardHeight = windowHeight - viewportHeight
+        
+        // Only update if there's a significant difference (likely keyboard)
+        if (calculatedKeyboardHeight > 50) {
+          setKeyboardHeight(calculatedKeyboardHeight)
+        } else {
+          setKeyboardHeight(0)
+        }
+      }
+    }
+
+    // Use Visual Viewport API if available (modern browsers)
+    if (typeof window.visualViewport !== 'undefined') {
+      window.visualViewport.addEventListener('resize', handleViewportChange)
+      window.visualViewport.addEventListener('scroll', handleViewportChange)
+      handleViewportChange() // Initial check
+      
+      return () => {
+        window.visualViewport?.removeEventListener('resize', handleViewportChange)
+        window.visualViewport?.removeEventListener('scroll', handleViewportChange)
+      }
+    } else {
+      // Fallback for older browsers
+      let initialHeight = window.innerHeight
+      
+      const handleResize = () => {
+        const currentHeight = window.innerHeight
+        const heightDifference = initialHeight - currentHeight
+        
+        // Only set if significant difference (likely keyboard)
+        if (heightDifference > 100) {
+          setKeyboardHeight(heightDifference)
+        } else {
+          setKeyboardHeight(0)
+          initialHeight = currentHeight // Reset baseline when keyboard closes
+        }
+      }
+
+      window.addEventListener('resize', handleResize)
+      handleResize() // Initial check
+      
+      return () => {
+        window.removeEventListener('resize', handleResize)
+      }
+    }
+  }, [])
 
   const handleSend = () => {
     const trimmedText = text.trim()
@@ -48,10 +108,17 @@ export default function ChatInput({
 
   return (
     <div
-      className="sticky bottom-0 w-full px-3 sm:px-4 py-3"
+      ref={containerRef}
+      className="w-full px-3 sm:px-4 py-3 transition-all duration-200"
       style={{
         backgroundColor: '#1E1E1E',
         borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        transform: keyboardHeight > 0 ? `translateY(-${keyboardHeight}px)` : 'translateY(0)',
+        zIndex: 50,
       }}
     >
       <div className="max-w-3xl mx-auto flex items-end gap-2">
@@ -96,8 +163,8 @@ export default function ChatInput({
         <div
           className="flex-1 rounded-2xl px-3 sm:px-4 py-2 flex items-end"
           style={{
-            backgroundColor: '#2B2B2B',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
+            backgroundColor: '#E8E2D5',
+            border: '1px solid #C8BEB0',
           }}
         >
           <textarea
@@ -105,14 +172,21 @@ export default function ChatInput({
             value={text}
             onChange={(e) => setText(e.target.value)}
             onKeyDown={handleKeyDown}
+            onFocus={() => {
+              // Scroll to bottom when input is focused (keyboard appears)
+              setTimeout(() => {
+                if (onFocus) onFocus()
+              }, 300) // Small delay to let keyboard appear
+            }}
             placeholder={placeholder}
             disabled={disabled}
             rows={1}
-            className="w-full resize-none focus:outline-none bg-transparent text-white placeholder-gray-400 text-sm sm:text-base"
+            className="w-full resize-none focus:outline-none bg-transparent text-sm sm:text-base chat-input-textarea"
             style={{
               minHeight: '24px',
               maxHeight: '120px',
               fontFamily: 'inherit',
+              color: '#8B3A3A',
             }}
           />
         </div>
@@ -123,16 +197,16 @@ export default function ChatInput({
           disabled={disabled || !text.trim()}
           className="flex-shrink-0 p-2 rounded-full transition-all disabled:opacity-50 disabled:cursor-not-allowed min-w-[44px] min-h-[44px] flex items-center justify-center"
           style={{
-            backgroundColor: text.trim() ? '#0088CC' : 'transparent',
+            backgroundColor: text.trim() ? '#8B3A3A' : 'transparent',
             color: '#FFFFFF',
           }}
           onMouseEnter={(e) => {
             if (!disabled && text.trim()) {
-              e.currentTarget.style.backgroundColor = '#0077B5'
+              e.currentTarget.style.backgroundColor = '#7A2F2F'
             }
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = text.trim() ? '#0088CC' : 'transparent'
+            e.currentTarget.style.backgroundColor = text.trim() ? '#8B3A3A' : 'transparent'
           }}
           title="Отправить"
         >
