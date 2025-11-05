@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
       .select()
       .single()
 
-    if (dbError) {
+    if (dbError || !audioEntry) {
       console.error('Database error:', dbError)
       return NextResponse.json(
         { error: 'Failed to save audio entry' },
@@ -147,7 +147,7 @@ export async function POST(request: NextRequest) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        audioEntryId: audioEntry.id,
+        audioEntryId: (audioEntry as any).id,
         audioUrl: publicUrl,
       }),
     }).catch(err => console.error('Failed to trigger transcription:', err))
