@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase/server'
+import type { Database } from '@/types/database'
 
 export const runtime = 'nodejs'
 
@@ -127,7 +128,7 @@ export async function POST(request: NextRequest) {
         audio_url: publicUrl,
         audio_duration: Math.round(file.size / 16000), // Rough estimate
         processing_status: 'pending',
-      })
+      } as any)
       .select()
       .single()
 
