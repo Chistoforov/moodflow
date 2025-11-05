@@ -37,8 +37,8 @@ export default function ChatInput({
     if (typeof window === 'undefined') return
 
     const handleViewportChange = () => {
-      if (typeof window.visualViewport !== 'undefined') {
-        const viewport = window.visualViewport
+      const viewport = window.visualViewport
+      if (viewport) {
         const windowHeight = window.innerHeight
         const viewportHeight = viewport.height
         const calculatedKeyboardHeight = windowHeight - viewportHeight
@@ -53,14 +53,17 @@ export default function ChatInput({
     }
 
     // Use Visual Viewport API if available (modern browsers)
-    if (typeof window.visualViewport !== 'undefined') {
-      window.visualViewport.addEventListener('resize', handleViewportChange)
-      window.visualViewport.addEventListener('scroll', handleViewportChange)
+    const viewport = window.visualViewport
+    if (viewport) {
+      viewport.addEventListener('resize', handleViewportChange)
+      viewport.addEventListener('scroll', handleViewportChange)
       handleViewportChange() // Initial check
       
       return () => {
-        window.visualViewport?.removeEventListener('resize', handleViewportChange)
-        window.visualViewport?.removeEventListener('scroll', handleViewportChange)
+        if (viewport) {
+          viewport.removeEventListener('resize', handleViewportChange)
+          viewport.removeEventListener('scroll', handleViewportChange)
+        }
       }
     } else {
       // Fallback for older browsers
