@@ -20,6 +20,11 @@ export default function AudioModal({ date, isOpen, onClose }: AudioModalProps) {
     setUploadError(null)
 
     try {
+      // Validate audio blob
+      if (!audioBlob || audioBlob.size === 0) {
+        throw new Error('Аудиозапись пуста. Попробуйте записать еще раз.')
+      }
+
       // Create form data
       const formData = new FormData()
       formData.append('audio', audioBlob, 'recording.webm')
@@ -32,14 +37,26 @@ export default function AudioModal({ date, isOpen, onClose }: AudioModalProps) {
       })
 
       if (!response.ok) {
-        throw new Error('Failed to upload audio')
+        const errorData = await response.json().catch(() => ({ error: 'Неизвестная ошибка' }))
+        const errorMessage = errorData.error || errorData.message || 'Не удалось загрузить аудиозапись'
+        throw new Error(errorMessage)
+      }
+
+      const result = await response.json()
+      
+      if (!result.success && !result.audioEntry) {
+        throw new Error('Сервер не подтвердил успешное сохранение')
       }
 
       // Trigger refresh of the list
       setRefreshKey(prev => prev + 1)
+      
+      // Clear any previous errors
+      setUploadError(null)
     } catch (error) {
       console.error('Upload error:', error)
-      setUploadError('Не удалось загрузить аудиозапись. Попробуйте еще раз.')
+      const errorMessage = error instanceof Error ? error.message : 'Не удалось загрузить аудиозапись. Попробуйте еще раз.'
+      setUploadError(errorMessage)
     } finally {
       setIsUploading(false)
     }

@@ -35,14 +35,50 @@ export class PerplexityService {
         throw new Error('OPENAI_API_KEY is not configured')
       }
 
-      // Download audio file
-      const audioResponse = await fetch(req.audioUrl)
-      const audioBuffer = await audioResponse.arrayBuffer()
+      // Download audio file with retry logic
+      let audioBuffer: ArrayBuffer
+      let audioType = 'audio/webm'
+      
+      try {
+        const audioResponse = await fetch(req.audioUrl, {
+          headers: {
+            'Accept': 'audio/*',
+          },
+        })
+        
+        if (!audioResponse.ok) {
+          throw new Error(`Failed to download audio: ${audioResponse.status} ${audioResponse.statusText}`)
+        }
+        
+        audioBuffer = await audioResponse.arrayBuffer()
+        audioType = audioResponse.headers.get('content-type') || 'audio/webm'
+      } catch (fetchError) {
+        console.error('Error downloading audio from URL:', fetchError)
+        throw new Error(`Failed to download audio file: ${fetchError instanceof Error ? fetchError.message : 'Unknown error'}`)
+      }
       
       // Create form data for Whisper API
+      // In Node.js, we need to use File or Blob properly
       const formData = new FormData()
-      const audioBlob = new Blob([audioBuffer], { type: 'audio/webm' })
-      formData.append('file', audioBlob, 'audio.webm')
+      
+      // Determine file extension from content type
+      let fileExtension = 'webm'
+      if (audioType.includes('mp4') || audioType.includes('m4a')) {
+        fileExtension = 'm4a'
+      } else if (audioType.includes('wav')) {
+        fileExtension = 'wav'
+      } else if (audioType.includes('ogg')) {
+        fileExtension = 'ogg'
+      } else if (audioType.includes('mp3') || audioType.includes('mpeg')) {
+        fileExtension = 'mp3'
+      }
+      
+      // Create a File-like object for FormData
+      // In Node.js 18+, FormData supports Blob
+      const audioBlob = new Blob([audioBuffer], { type: audioType })
+      const audioFile = new File([audioBlob], `audio.${fileExtension}`, { type: audioType })
+      
+      formData.append('file', audioFile)
       formData.append('model', 'whisper-1')
       formData.append('language', req.language || 'ru')
       formData.append('response_format', 'json')
@@ -56,16 +92,21 @@ export class PerplexityService {
       })
 
       if (!response.ok) {
-        const error = await response.text()
-        console.error('OpenAI Whisper API error:', error)
-        throw new Error(`Whisper API failed: ${response.statusText}`)
+        const errorText = await response.text()
+        console.error('OpenAI Whisper API error:', errorText)
+        throw new Error(`Whisper API failed: ${response.status} ${response.statusText} - ${errorText}`)
       }
 
       const data = await response.json()
+      if (!data.text) {
+        throw new Error('Transcription returned empty text')
+      }
+      
       return data.text
     } catch (error) {
       console.error('Audio transcription error:', error)
-      throw new Error('Failed to transcribe audio')
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      throw new Error(`Failed to transcribe audio: ${errorMessage}`)
     }
   }
 

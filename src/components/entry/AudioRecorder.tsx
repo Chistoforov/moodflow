@@ -4,32 +4,98 @@ import { useState, useRef, useEffect } from 'react'
 
 interface AudioRecorderProps {
   onRecordingComplete: (audioBlob: Blob) => void
+  onCancel?: () => void
+  onPause?: (isPaused: boolean) => void
+  onSend?: () => void
+  onControlsReady?: (controls: { pauseRecording: () => void; cancelRecording: () => void; sendRecording: () => void }) => void
   disabled?: boolean
+  autoStart?: boolean
 }
 
-export default function AudioRecorder({ onRecordingComplete, disabled = false }: AudioRecorderProps) {
+export default function AudioRecorder({ 
+  onRecordingComplete, 
+  onCancel,
+  onPause,
+  onSend,
+  onControlsReady,
+  disabled = false,
+  autoStart = false
+}: AudioRecorderProps) {
   const [isRecording, setIsRecording] = useState(false)
   const [recordingTime, setRecordingTime] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const chunksRef = useRef<Blob[]>([])
   const timerRef = useRef<NodeJS.Timeout | null>(null)
+  const streamRef = useRef<MediaStream | null>(null)
+
+  // Timer effect - starts when recording starts
+  useEffect(() => {
+    if (isRecording && !isPaused) {
+      // Clear any existing timer
+      if (timerRef.current) {
+        clearInterval(timerRef.current)
+      }
+      
+      // Start timer
+      timerRef.current = setInterval(() => {
+        setRecordingTime(prev => prev + 1)
+      }, 1000)
+    } else {
+      // Stop timer when not recording or paused
+      if (timerRef.current) {
+        clearInterval(timerRef.current)
+        timerRef.current = null
+      }
+    }
+
+    return () => {
+      // Cleanup
+      if (timerRef.current) {
+        clearInterval(timerRef.current)
+        timerRef.current = null
+      }
+    }
+  }, [isRecording, isPaused])
+
+  // Expose controls to parent
+  useEffect(() => {
+    if (onControlsReady && isRecording) {
+      onControlsReady({
+        pauseRecording,
+        cancelRecording,
+        sendRecording
+      })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onControlsReady, isRecording])
+
+  // Auto-start recording if autoStart is true
+  useEffect(() => {
+    if (autoStart && !isRecording && !disabled) {
+      startRecording()
+    }
+  }, [autoStart])
 
   useEffect(() => {
     return () => {
-      // Cleanup
+      // Cleanup on unmount
       if (timerRef.current) {
         clearInterval(timerRef.current)
       }
       if (mediaRecorderRef.current && isRecording) {
         mediaRecorderRef.current.stop()
       }
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop())
+      }
     }
-  }, [isRecording])
+  }, [])
 
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      streamRef.current = stream
       
       const mediaRecorder = new MediaRecorder(stream, {
         mimeType: 'audio/webm;codecs=opus'
@@ -49,7 +115,10 @@ export default function AudioRecorder({ onRecordingComplete, disabled = false }:
         onRecordingComplete(audioBlob)
         
         // Stop all tracks
-        stream.getTracks().forEach(track => track.stop())
+        if (streamRef.current) {
+          streamRef.current.getTracks().forEach(track => track.stop())
+          streamRef.current = null
+        }
         
         // Reset state
         setIsRecording(false)
@@ -57,19 +126,34 @@ export default function AudioRecorder({ onRecordingComplete, disabled = false }:
         setIsPaused(false)
         if (timerRef.current) {
           clearInterval(timerRef.current)
+          timerRef.current = null
         }
       }
 
+      // Reset timer and state before starting
+      setRecordingTime(0)
+      setIsPaused(false)
+      
+      // Start recording
       mediaRecorder.start()
       setIsRecording(true)
-
-      // Start timer
-      timerRef.current = setInterval(() => {
-        setRecordingTime(prev => prev + 1)
-      }, 1000)
+      // Timer will start automatically via useEffect when isRecording becomes true
+      
+      // Expose controls immediately after starting recording
+      if (onControlsReady) {
+        onControlsReady({
+          pauseRecording,
+          cancelRecording,
+          sendRecording
+        })
+      }
 
     } catch (error) {
       console.error('Failed to start recording:', error)
+      setIsRecording(false)
+      if (onCancel) {
+        onCancel()
+      }
       alert('Не удалось получить доступ к микрофону. Проверьте разрешения.')
     }
   }
@@ -83,26 +167,39 @@ export default function AudioRecorder({ onRecordingComplete, disabled = false }:
   const pauseRecording = () => {
     if (mediaRecorderRef.current && isRecording) {
       if (isPaused) {
-        mediaRecorderRef.current.resume()
-        // Resume timer
-        timerRef.current = setInterval(() => {
-          setRecordingTime(prev => prev + 1)
-        }, 1000)
+        // Возобновляем запись (снимаем с паузы)
+        if (mediaRecorderRef.current.state === 'paused') {
+          mediaRecorderRef.current.resume()
+        }
+        setIsPaused(false)
+        // Timer will resume automatically via useEffect
+        if (onPause) {
+          onPause(false)
+        }
       } else {
-        mediaRecorderRef.current.pause()
-        // Pause timer
-        if (timerRef.current) {
-          clearInterval(timerRef.current)
+        // Ставим на паузу
+        if (mediaRecorderRef.current.state === 'recording') {
+          mediaRecorderRef.current.pause()
+        }
+        setIsPaused(true)
+        // Timer will pause automatically via useEffect
+        if (onPause) {
+          onPause(true)
         }
       }
-      setIsPaused(!isPaused)
     }
   }
 
   const cancelRecording = () => {
     if (mediaRecorderRef.current) {
-      mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop())
+      if (mediaRecorderRef.current.state !== 'inactive') {
+        mediaRecorderRef.current.stop()
+      }
       mediaRecorderRef.current = null
+    }
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop())
+      streamRef.current = null
     }
     chunksRef.current = []
     setIsRecording(false)
@@ -110,6 +207,23 @@ export default function AudioRecorder({ onRecordingComplete, disabled = false }:
     setIsPaused(false)
     if (timerRef.current) {
       clearInterval(timerRef.current)
+      timerRef.current = null
+    }
+    if (onCancel) {
+      onCancel()
+    }
+  }
+
+  const sendRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      // Останавливаем запись - это вызовет onstop, который вызовет onRecordingComplete
+      if (mediaRecorderRef.current.state === 'recording' || mediaRecorderRef.current.state === 'paused') {
+        mediaRecorderRef.current.stop()
+      }
+      // onSend callback вызывается, но основная логика в onstop
+      if (onSend) {
+        onSend()
+      }
     }
   }
 
@@ -119,101 +233,38 @@ export default function AudioRecorder({ onRecordingComplete, disabled = false }:
     return `${mins}:${secs.toString().padStart(2, '0')}`
   }
 
+  if (!isRecording) {
+    return null
+  }
+
   return (
     <div className="flex flex-col items-center gap-4 w-full">
-      {!isRecording ? (
-        <button
-          onClick={startRecording}
-          disabled={disabled}
-          className="flex items-center gap-2 px-4 sm:px-6 py-3 rounded-full font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base min-h-[44px]"
-          style={{
-            backgroundColor: '#8B3A3A',
-            color: '#E8E2D5',
-          }}
-          onMouseEnter={(e) => {
-            if (!disabled) {
-              e.currentTarget.style.backgroundColor = '#6B1F1F'
-            }
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = '#8B3A3A'
-          }}
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 15C13.66 15 15 13.66 15 12V6C15 4.34 13.66 3 12 3C10.34 3 9 4.34 9 6V12C9 13.66 10.34 15 12 15Z" fill="currentColor"/>
-            <path d="M17 12C17 14.76 14.76 17 12 17C9.24 17 7 14.76 7 12H5C5 15.53 7.61 18.43 11 18.92V22H13V18.92C16.39 18.43 19 15.53 19 12H17Z" fill="currentColor"/>
+      <div className="flex flex-col items-center gap-2">
+        <div className="flex items-center gap-3">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            style={{
+              animation: isPaused ? 'none' : 'heartbeat 1.4s ease-in-out infinite',
+              color: isPaused ? '#FDB022' : '#D0021B',
+            }}
+          >
+            <path
+              d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+              fill="currentColor"
+            />
           </svg>
-          Записать аудио
-        </button>
-      ) : (
-        <div className="flex flex-col items-center gap-4 w-full">
-          <div className="flex items-center gap-3">
-            <div className={`w-3 h-3 rounded-full ${isPaused ? 'bg-yellow-500' : 'bg-red-500 animate-pulse'}`}></div>
-            <span className="text-xl sm:text-2xl font-mono font-bold" style={{ color: '#8B3A3A' }}>
-              {formatTime(recordingTime)}
-            </span>
-          </div>
-          
-          <div className="flex gap-3">
-            <button
-              onClick={pauseRecording}
-              className="p-3 rounded-full transition-all min-w-[44px] min-h-[44px] flex items-center justify-center"
-              style={{
-                backgroundColor: '#E8E2D5',
-                color: '#8B3A3A',
-                border: '2px solid #8B3A3A',
-              }}
-              title={isPaused ? 'Продолжить' : 'Пауза'}
-            >
-              {isPaused ? (
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M8 5V19L19 12L8 5Z" fill="currentColor"/>
-                </svg>
-              ) : (
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M6 4H10V20H6V4Z" fill="currentColor"/>
-                  <path d="M14 4H18V20H14V4Z" fill="currentColor"/>
-                </svg>
-              )}
-            </button>
-
-            <button
-              onClick={cancelRecording}
-              className="p-3 rounded-full transition-all min-w-[44px] min-h-[44px] flex items-center justify-center"
-              style={{
-                backgroundColor: '#E8E2D5',
-                color: '#8B3A3A',
-                border: '2px solid #C8BEB0',
-              }}
-              title="Отменить"
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-              </svg>
-            </button>
-
-            <button
-              onClick={stopRecording}
-              className="p-3 rounded-full transition-all min-w-[44px] min-h-[44px] flex items-center justify-center"
-              style={{
-                backgroundColor: '#8B3A3A',
-                color: '#E8E2D5',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#6B1F1F'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#8B3A3A'
-              }}
-              title="Завершить запись"
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="6" y="6" width="12" height="12" fill="currentColor"/>
-              </svg>
-            </button>
-          </div>
+          <span className="text-2xl sm:text-3xl font-mono font-bold" style={{ color: '#8B3A3A' }}>
+            {formatTime(recordingTime)}
+          </span>
         </div>
-      )}
+        <span className="text-sm" style={{ color: '#8B3A3A', opacity: 0.7 }}>
+          {isPaused ? 'Пауза' : 'Идет запись...'}
+        </span>
+      </div>
     </div>
   )
 }

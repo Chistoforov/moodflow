@@ -7,6 +7,7 @@ import ChatMessage from '@/components/entry/ChatMessage'
 import ChatInput from '@/components/entry/ChatInput'
 import AudioRecordModal from '@/components/entry/AudioRecordModal'
 import DeleteConfirmModal from '@/components/entry/DeleteConfirmModal'
+import ErrorModal from '@/components/entry/ErrorModal'
 
 interface Message {
   id: string
@@ -106,6 +107,7 @@ export default function EntryPage() {
   const [isAudioModalOpen, setIsAudioModalOpen] = useState(false)
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [messageToDelete, setMessageToDelete] = useState<Message | null>(null)
+  const [errorModal, setErrorModal] = useState<{ isOpen: boolean; message: string }>({ isOpen: false, message: '' })
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const chatContainerRef = useRef<HTMLDivElement>(null)
 
@@ -248,6 +250,11 @@ export default function EntryPage() {
 
   const handleAudioRecording = async (audioBlob: Blob) => {
     try {
+      // Validate audio blob
+      if (!audioBlob || audioBlob.size === 0) {
+        throw new Error('Аудиозапись пуста. Попробуйте записать еще раз.')
+      }
+
       const formData = new FormData()
       formData.append('audio', audioBlob, 'recording.webm')
       formData.append('date', date)
@@ -288,11 +295,14 @@ export default function EntryPage() {
         // Poll for transcription status
         pollAudioTranscription(data.audioUrl)
       } else {
-        throw new Error('Failed to upload audio')
+        const errorData = await response.json().catch(() => ({ error: 'Неизвестная ошибка' }))
+        const errorMessage = errorData.error || errorData.message || 'Не удалось загрузить аудиозапись'
+        throw new Error(errorMessage)
       }
     } catch (error) {
       console.error('Failed to upload audio:', error)
-      alert('Ошибка при загрузке аудио')
+      const errorMessage = error instanceof Error ? error.message : 'Ошибка при загрузке аудио'
+      setErrorModal({ isOpen: true, message: errorMessage })
     }
   }
 
@@ -537,6 +547,13 @@ export default function EntryPage() {
         }}
         onConfirm={handleDeleteConfirm}
         messageText={messageToDelete?.text || null}
+      />
+
+      {/* Error Modal */}
+      <ErrorModal
+        isOpen={errorModal.isOpen}
+        onClose={() => setErrorModal({ isOpen: false, message: '' })}
+        message={errorModal.message}
       />
     </div>
   )

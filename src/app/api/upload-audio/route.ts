@@ -3,6 +3,7 @@ import { createServerClient } from '@/lib/supabase/server'
 import type { Database } from '@/types/database'
 
 type DailyEntry = Database['public']['Tables']['daily_entries']['Row']
+type AudioEntry = Database['public']['Tables']['audio_entries']['Row']
 
 export const runtime = 'nodejs'
 export const maxDuration = 60 // 60 seconds timeout
@@ -58,43 +59,75 @@ export async function POST(request: NextRequest) {
 
     if (uploadError) {
       console.error('Upload error:', uploadError)
+      // Return more detailed error message
+      const errorMessage = uploadError.message || 'Failed to upload audio'
       return NextResponse.json(
-        { error: 'Failed to upload audio' },
+        { error: errorMessage, details: uploadError },
         { status: 500 }
       )
     }
 
-    // Get public URL
+    // Get signed URL for better access (works even if bucket is private)
+    const { data: signedUrlData } = await supabase
+      .storage
+      .from('audio-entries')
+      .createSignedUrl(fileName, 3600) // 1 hour expiry
+
+    // Fallback to public URL if signed URL fails
     const { data: { publicUrl } } = supabase
       .storage
       .from('audio-entries')
       .getPublicUrl(fileName)
+    
+    const audioUrl = signedUrlData?.signedUrl || publicUrl
 
-    // Update or create entry with audio_url and set processing_status to 'pending'
-    const entryData: Database['public']['Tables']['daily_entries']['Insert'] = {
+    // Create audio entry record in audio_entries table
+    const audioEntryData: Database['public']['Tables']['audio_entries']['Insert'] = {
       user_id: user.id,
       entry_date: date,
-      audio_url: publicUrl,
+      audio_url: audioUrl,
       audio_duration: Math.round(file.size / 16000), // Rough estimate
       processing_status: 'pending',
       is_deleted: false,
     }
 
-    const { data: entry, error: dbError } = await supabase
+    const { data: audioEntry, error: audioEntryError } = await supabase
+      .from('audio_entries')
+      .insert(audioEntryData as any)
+      .select()
+      .single()
+
+    if (audioEntryError || !audioEntry) {
+      console.error('Database error creating audio entry:', audioEntryError)
+      return NextResponse.json(
+        { error: 'Failed to save audio entry', details: audioEntryError },
+        { status: 500 }
+      )
+    }
+
+    // Also update or create daily entry with audio_url for backward compatibility
+    const entryData: Database['public']['Tables']['daily_entries']['Insert'] = {
+      user_id: user.id,
+      entry_date: date,
+      audio_url: audioUrl,
+      audio_duration: Math.round(file.size / 16000),
+      processing_status: 'pending',
+      is_deleted: false,
+    }
+
+    const { data: dailyEntry, error: dailyEntryError } = await supabase
       .from('daily_entries')
       .upsert([entryData] as any)
       .select()
       .single()
 
-    if (dbError || !entry) {
-      console.error('Database error:', dbError)
-      return NextResponse.json(
-        { error: 'Failed to save entry' },
-        { status: 500 }
-      )
+    if (dailyEntryError) {
+      console.error('Warning: Failed to update daily entry:', dailyEntryError)
+      // Don't fail the request, just log the error
     }
 
-    const typedEntry = entry as DailyEntry
+    const typedAudioEntry = audioEntry as AudioEntry
+    const typedDailyEntry = dailyEntry as DailyEntry | null
 
     // Trigger transcription in background (fire and forget)
     fetch(`${request.nextUrl.origin}/api/transcribe`, {
@@ -103,15 +136,17 @@ export async function POST(request: NextRequest) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        entryId: typedEntry.id,
-        audioUrl: publicUrl,
+        audioEntryId: typedAudioEntry.id,
+        audioUrl: audioUrl,
+        fileName: fileName, // Pass fileName for direct download if needed
       }),
     }).catch(err => console.error('Failed to trigger transcription:', err))
 
     return NextResponse.json({
       success: true,
-      entryId: typedEntry.id,
-      audioUrl: publicUrl,
+      entryId: typedDailyEntry?.id || typedAudioEntry.id,
+      audioEntryId: typedAudioEntry.id,
+      audioUrl: audioUrl,
       status: 'pending',
     })
 
