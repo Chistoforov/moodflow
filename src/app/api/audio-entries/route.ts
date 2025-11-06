@@ -128,11 +128,14 @@ export async function POST(request: NextRequest) {
 
     // Get user from public.users table (not auth.users)
     // This is required because audio_entries.user_id now references public.users(id)
-    const { data: dbUser, error: userError } = await supabase
+    const { data: userData, error: userError } = await supabase
       .from('users')
       .select('id')
       .eq('sso_uid', user.id)
-      .single()
+      .maybeSingle()
+
+    type DbUser = { id: string }
+    const dbUser = userData as DbUser | null
 
     if (userError || !dbUser) {
       console.error('User not found in database:', userError)
@@ -143,6 +146,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create audio entry record - simple INSERT like daily_entries
+    // Note: After migration 018, user_id now references public.users(id)
     const { data: audioEntry, error: dbError } = await supabase
       .from('audio_entries')
       .insert({
@@ -152,7 +156,7 @@ export async function POST(request: NextRequest) {
         audio_duration: Math.round(file.size / 16000),
         processing_status: 'pending',
         is_deleted: false,
-      })
+      } as any)
       .select()
       .single()
 
