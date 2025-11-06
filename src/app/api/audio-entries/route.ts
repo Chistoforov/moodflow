@@ -107,8 +107,15 @@ export async function POST(request: NextRequest) {
 
     if (uploadError) {
       console.error('Upload error:', uploadError)
+      // Return more detailed error message
+      const errorMessage = uploadError.message || 'Failed to upload audio'
+      // Translate common Supabase errors to user-friendly messages
+      let userMessage = errorMessage
+      if (errorMessage.includes('Bucket not found') || errorMessage.includes('bucket')) {
+        userMessage = 'Bucket not found'
+      }
       return NextResponse.json(
-        { error: 'Failed to upload audio' },
+        { error: userMessage, details: uploadError },
         { status: 500 }
       )
     }
