@@ -6,6 +6,7 @@ import { MOOD_LEVELS, FACTORS } from '@/lib/utils/constants'
 import ChatMessage from '@/components/entry/ChatMessage'
 import ChatInput from '@/components/entry/ChatInput'
 import AudioRecordModal from '@/components/entry/AudioRecordModal'
+import DeleteConfirmModal from '@/components/entry/DeleteConfirmModal'
 
 interface Message {
   id: string
@@ -103,6 +104,8 @@ export default function EntryPage() {
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [isAudioModalOpen, setIsAudioModalOpen] = useState(false)
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+  const [messageToDelete, setMessageToDelete] = useState<Message | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const chatContainerRef = useRef<HTMLDivElement>(null)
 
@@ -339,6 +342,38 @@ export default function EntryPage() {
     await saveMessages(messages)
   }
 
+  const handleDeleteClick = (messageId: string) => {
+    const message = messages.find(m => m.id === messageId)
+    if (message) {
+      setMessageToDelete(message)
+      setDeleteModalOpen(true)
+    }
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!messageToDelete) return
+
+    // Store current messages for potential revert
+    const previousMessages = messages
+
+    // Remove message from array
+    const updatedMessages = messages.filter(m => m.id !== messageToDelete.id)
+    setMessages(updatedMessages)
+
+    // Save to backend
+    try {
+      await saveMessages(updatedMessages)
+      setDeleteModalOpen(false)
+      setMessageToDelete(null)
+    } catch (error) {
+      // Revert on error
+      setMessages(previousMessages)
+      alert('Ошибка при удалении сообщения')
+      setDeleteModalOpen(false)
+      setMessageToDelete(null)
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen px-4 sm:px-0" style={{ backgroundColor: '#E8E2D5' }}>
@@ -446,19 +481,23 @@ export default function EntryPage() {
         className="flex-1 overflow-y-auto px-3 sm:px-4 py-4"
         style={{ 
           backgroundColor: '#E8E2D5',
-          paddingBottom: '160px', // Space for fixed input field (80px) + BottomNav (80px)
+          paddingBottom: '100px', // Fixed space before input field (ChatInput height ~80px + 20px margin)
         }}
       >
         <div className="max-w-3xl mx-auto">
           {messages.length === 0 ? (
             <div className="text-center py-12">
               <p style={{ color: '#A67C6C' }}>
-                Начните писать, чтобы оставить отзыв о своем настроении
+                Оставьте голосовое сообщение или напишите отзыв о своем настроении. Дайте волю чувствам!
               </p>
             </div>
           ) : (
             messages.map((message) => (
-              <ChatMessage key={message.id} message={message} />
+              <ChatMessage 
+                key={message.id} 
+                message={message} 
+                onDelete={handleDeleteClick}
+              />
             ))
           )}
           <div ref={messagesEndRef} />
@@ -470,7 +509,7 @@ export default function EntryPage() {
         onSend={handleSendMessage}
         onAudioRecord={() => setIsAudioModalOpen(true)}
         disabled={saving}
-        placeholder="Напишите о своих мыслях и чувствах..."
+        placeholder=""
         onFocus={() => {
           // Scroll to bottom when input is focused
           setTimeout(() => {
@@ -487,6 +526,17 @@ export default function EntryPage() {
         onClose={() => setIsAudioModalOpen(false)}
         onRecordingComplete={handleAudioRecording}
         disabled={saving}
+      />
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmModal
+        isOpen={deleteModalOpen}
+        onClose={() => {
+          setDeleteModalOpen(false)
+          setMessageToDelete(null)
+        }}
+        onConfirm={handleDeleteConfirm}
+        messageText={messageToDelete?.text || null}
       />
     </div>
   )
