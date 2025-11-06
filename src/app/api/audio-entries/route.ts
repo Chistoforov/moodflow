@@ -126,23 +126,37 @@ export async function POST(request: NextRequest) {
       .from('audio-entries')
       .getPublicUrl(fileName)
 
-    // Create new audio entry record
-    const { data: audioEntry, error: dbError } = await supabase
-      .from('audio_entries')
-      .insert({
-        user_id: user.id,
-        entry_date: date,
-        audio_url: publicUrl,
-        audio_duration: Math.round(file.size / 16000), // Rough estimate
-        processing_status: 'pending',
-      } as any)
-      .select()
+    // Create new audio entry record using RPC function
+    // This bypasses RLS issues by using SECURITY DEFINER function from migration 013
+    const { data: entryId, error: dbError } = await supabase
+      .rpc('insert_audio_entry', {
+        p_user_id: user.id,
+        p_entry_date: date,
+        p_audio_url: publicUrl,
+        p_audio_duration: Math.round(file.size / 16000),
+        p_processing_status: 'pending'
+      })
       .single()
 
-    if (dbError || !audioEntry) {
+    if (dbError || !entryId) {
       console.error('Database error:', dbError)
       return NextResponse.json(
-        { error: 'Failed to save audio entry' },
+        { error: 'Failed to save audio entry', details: dbError },
+        { status: 500 }
+      )
+    }
+
+    // Now fetch the created entry to return it
+    const { data: audioEntry, error: fetchError } = await supabase
+      .from('audio_entries')
+      .select('*')
+      .eq('id', entryId)
+      .single()
+
+    if (fetchError || !audioEntry) {
+      console.error('Error fetching created audio entry:', fetchError)
+      return NextResponse.json(
+        { error: 'Failed to fetch audio entry' },
         { status: 500 }
       )
     }

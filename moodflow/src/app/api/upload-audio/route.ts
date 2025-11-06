@@ -13,24 +13,10 @@ export async function POST(request: NextRequest) {
     const supabase = await createServerClient()
     
     // Check authentication
-    const { data: { user: authUser }, error: authError } = await supabase.auth.getUser()
-    if (authError || !authUser) {
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-
-    // Get user from users table (needed for daily_entries which references users.id, not auth.users.id)
-    const { data: userData, error: userError } = await supabase
-      .from('users')
-      .select('id')
-      .eq('sso_uid', authUser.id)
-      .single()
-
-    if (userError || !userData) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 })
-    }
-
-    const userId = (userData as Pick<Database['public']['Tables']['users']['Row'], 'id'>).id // This is users.id, needed for daily_entries
-    const authUserId = authUser.id // This is auth.users.id, needed for audio_entries
 
     // Parse form data
     const formData = await request.formData()
@@ -56,7 +42,7 @@ export async function POST(request: NextRequest) {
     // Generate unique filename
     const timestamp = Date.now()
     const fileExt = file.name.split('.').pop() || 'webm'
-    const fileName = `${authUserId}/${date}/${timestamp}.${fileExt}`
+    const fileName = `${user.id}/${date}/${timestamp}.${fileExt}`
 
     // Convert file to buffer
     const arrayBuffer = await file.arrayBuffer()
@@ -96,10 +82,8 @@ export async function POST(request: NextRequest) {
     const audioUrl = signedUrlData?.signedUrl || publicUrl
 
     // Create audio entry record in audio_entries table
-    // Note: audio_entries.user_id references auth.users(id)
-    // RLS policies should work now with migration 014 (same approach as daily_entries)
     const audioEntryData: Database['public']['Tables']['audio_entries']['Insert'] = {
-      user_id: authUserId,
+      user_id: user.id,
       entry_date: date,
       audio_url: audioUrl,
       audio_duration: Math.round(file.size / 16000), // Rough estimate
@@ -122,9 +106,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Also update or create daily entry with audio_url for backward compatibility
-    // Note: daily_entries.user_id references users(id), not auth.users(id)
     const entryData: Database['public']['Tables']['daily_entries']['Insert'] = {
-      user_id: userId,
+      user_id: user.id,
       entry_date: date,
       audio_url: audioUrl,
       audio_duration: Math.round(file.size / 16000),

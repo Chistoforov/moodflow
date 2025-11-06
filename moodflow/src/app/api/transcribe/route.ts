@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase/server'
 import { perplexityService } from '@/lib/integrations/perplexity'
-import { Database } from '@/types/database'
-
-type AudioEntry = Database['public']['Tables']['audio_entries']['Row']
-type DailyEntry = Database['public']['Tables']['daily_entries']['Row']
-type DailyEntryPartial = Pick<DailyEntry, 'text_entry' | 'audio_url' | 'audio_duration' | 'mood_score' | 'factors'>
 
 export const runtime = 'nodejs'
 export const maxDuration = 300 // 5 minutes for transcription
@@ -56,25 +51,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Type assertion for audioEntry
-    const typedAudioEntry = audioEntry as Pick<AudioEntry, 'user_id' | 'entry_date'>
-    
-    // audio_entries.user_id is auth.users.id, but daily_entries.user_id is users.id
-    // We need to get the users.id from users table using sso_uid
-    const { data: userData, error: userError } = await supabase
-      .from('users')
-      .select('id')
-      .eq('sso_uid', typedAudioEntry.user_id)
-      .single()
-
-    if (userError || !userData) {
-      console.error('Failed to get user from users table:', userError)
-      return NextResponse.json(
-        { error: 'Failed to get user data' },
-        { status: 500 }
-      )
-    }
-
-    const dailyEntryUserId = (userData as { id: string }).id
+    const typedAudioEntry = audioEntry as { user_id: string; entry_date: string }
 
     // Update status to 'processing'
     await supabase
@@ -107,11 +84,10 @@ export async function POST(request: NextRequest) {
       }
 
       // Get current daily entry to update text_entry
-      // Use dailyEntryUserId (users.id) instead of typedAudioEntry.user_id (auth.users.id)
       const { data: dailyEntry, error: dailyEntryError } = await supabase
         .from('daily_entries')
         .select('text_entry, audio_url, audio_duration, mood_score, factors')
-        .eq('user_id', dailyEntryUserId)
+        .eq('user_id', typedAudioEntry.user_id)
         .eq('entry_date', typedAudioEntry.entry_date)
         .maybeSingle()
 
@@ -121,6 +97,13 @@ export async function POST(request: NextRequest) {
       }
 
       // Type assertion for dailyEntry
+      type DailyEntryPartial = {
+        text_entry: string | null
+        audio_url: string | null
+        audio_duration: number | null
+        mood_score: number | null
+        factors: any
+      }
       const typedDailyEntry = dailyEntry as DailyEntryPartial | null
 
       // Parse existing messages or create new array
@@ -149,9 +132,8 @@ export async function POST(request: NextRequest) {
 
       // Update or create daily entry with the new text_entry
       // Preserve existing fields if they exist
-      // Use dailyEntryUserId (users.id) instead of typedAudioEntry.user_id (auth.users.id)
       const dailyEntryData: any = {
-        user_id: dailyEntryUserId,
+        user_id: typedAudioEntry.user_id,
         entry_date: typedAudioEntry.entry_date,
         text_entry: JSON.stringify(messages),
         processing_status: 'completed',
