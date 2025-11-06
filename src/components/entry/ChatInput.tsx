@@ -117,10 +117,9 @@ export default function ChatInput({
         backgroundColor: '#E8E2D5',
         borderTop: '1px solid #D4C8B5',
         position: 'fixed',
-        bottom: '80px', // Выше BottomNav (h-20 = 80px)
+        bottom: keyboardHeight > 0 ? '0px' : '80px', // Над клавиатурой когда открыта, выше BottomNav когда закрыта
         left: 0,
         right: 0,
-        transform: keyboardHeight > 0 ? `translateY(-${keyboardHeight}px)` : 'translateY(0)',
         zIndex: 60, // Выше BottomNav (z-50)
       }}
     >
