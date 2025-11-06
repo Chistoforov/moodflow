@@ -126,37 +126,40 @@ export async function POST(request: NextRequest) {
       .from('audio-entries')
       .getPublicUrl(fileName)
 
-    // Create new audio entry record using RPC function
-    // This bypasses RLS issues by using SECURITY DEFINER function from migration 013
-    const { data: entryId, error: dbError } = await supabase
-      .rpc('insert_audio_entry', {
-        p_user_id: user.id,
-        p_entry_date: date,
-        p_audio_url: publicUrl,
-        p_audio_duration: Math.round(file.size / 16000),
-        p_processing_status: 'pending'
-      })
+    // Get user from public.users table (not auth.users)
+    // This is required because audio_entries.user_id now references public.users(id)
+    const { data: dbUser, error: userError } = await supabase
+      .from('users')
+      .select('id')
+      .eq('sso_uid', user.id)
       .single()
 
-    if (dbError || !entryId) {
-      console.error('Database error:', dbError)
+    if (userError || !dbUser) {
+      console.error('User not found in database:', userError)
       return NextResponse.json(
-        { error: 'Failed to save audio entry', details: dbError },
-        { status: 500 }
+        { error: 'User not found' },
+        { status: 404 }
       )
     }
 
-    // Now fetch the created entry to return it
-    const { data: audioEntry, error: fetchError } = await supabase
+    // Create audio entry record - simple INSERT like daily_entries
+    const { data: audioEntry, error: dbError } = await supabase
       .from('audio_entries')
-      .select('*')
-      .eq('id', entryId)
+      .insert({
+        user_id: dbUser.id,
+        entry_date: date,
+        audio_url: publicUrl,
+        audio_duration: Math.round(file.size / 16000),
+        processing_status: 'pending',
+        is_deleted: false,
+      })
+      .select()
       .single()
 
-    if (fetchError || !audioEntry) {
-      console.error('Error fetching created audio entry:', fetchError)
+    if (dbError || !audioEntry) {
+      console.error('Database error creating audio entry:', dbError)
       return NextResponse.json(
-        { error: 'Failed to fetch audio entry' },
+        { error: 'Failed to save audio entry', details: dbError },
         { status: 500 }
       )
     }
