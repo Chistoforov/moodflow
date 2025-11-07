@@ -16,8 +16,8 @@
 }
 
 html {
-  /* Prevent overscroll on mobile */
-  overscroll-behavior: none;
+  /* Allow pull-to-refresh on mobile */
+  overscroll-behavior: auto;
   /* Fix viewport height on mobile browsers */
   height: 100%;
   /* Ensure smooth scrolling */
@@ -31,8 +31,8 @@ body {
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  /* Allow pull-to-refresh but contain within viewport */
-  overscroll-behavior-y: contain;
+  /* Allow pull-to-refresh on mobile */
+  overscroll-behavior-y: auto;
   /* Important: Keep body scrollable even when keyboard is open */
   position: relative !important;
   overflow: auto !important;
