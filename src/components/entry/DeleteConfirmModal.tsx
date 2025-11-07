@@ -4,7 +4,7 @@ interface DeleteConfirmModalProps {
   isOpen: boolean
   onClose: () => void
   onConfirm: () => void
-  messageText?: string | null
+  messageText?: string
 }
 
 export default function DeleteConfirmModal({

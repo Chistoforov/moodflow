@@ -78,3 +78,4 @@ ON public.audio_entries FOR DELETE
 TO authenticated
 USING (auth.uid() = user_id);
 
+

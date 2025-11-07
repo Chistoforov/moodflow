@@ -55,14 +55,13 @@ export default function ChatInput({
     // Use Visual Viewport API if available (modern browsers)
     const viewport = window.visualViewport
     if (viewport) {
+      // Only listen to resize, NOT scroll - this keeps input fixed when scrolling
       viewport.addEventListener('resize', handleViewportChange)
-      viewport.addEventListener('scroll', handleViewportChange)
       handleViewportChange() // Initial check
       
       return () => {
         if (viewport) {
           viewport.removeEventListener('resize', handleViewportChange)
-          viewport.removeEventListener('scroll', handleViewportChange)
         }
       }
     } else {
@@ -117,10 +116,15 @@ export default function ChatInput({
         backgroundColor: '#E8E2D5',
         borderTop: '1px solid #D4C8B5',
         position: 'fixed',
-        bottom: keyboardHeight > 0 ? '0px' : '80px', // Над клавиатурой когда открыта, выше BottomNav когда закрыта
+        bottom: keyboardHeight > 0 ? `${keyboardHeight}px` : '80px', // Над клавиатурой когда открыта, выше BottomNav когда закрыта
         left: 0,
         right: 0,
         zIndex: 60, // Выше BottomNav (z-50)
+        // Ensure truly fixed positioning on mobile
+        transform: 'translateZ(0)',
+        WebkitTransform: 'translateZ(0)',
+        backfaceVisibility: 'hidden',
+        WebkitBackfaceVisibility: 'hidden',
       }}
     >
       <div className="max-w-3xl mx-auto flex items-end gap-2">
@@ -182,10 +186,10 @@ export default function ChatInput({
             }}
             placeholder={placeholder}
             disabled={disabled}
-            rows={1}
+            rows={2}
             className="w-full resize-none focus:outline-none bg-transparent text-sm sm:text-base chat-input-textarea"
             style={{
-              minHeight: '24px',
+              minHeight: '44px',
               maxHeight: '120px',
               fontFamily: 'inherit',
               color: '#8B3A3A',

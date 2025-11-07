@@ -2,10 +2,9 @@
 
 interface ChatMessage {
   id: string
-  text: string | null
-  audioUrl?: string | null
+  text: string
   timestamp: string
-  type: 'text' | 'audio'
+  type: 'text'
 }
 
 interface ChatMessageProps {
@@ -37,24 +36,9 @@ export default function ChatMessage({ message, onDelete }: ChatMessageProps) {
       >
         {/* Message content */}
         <div className="relative">
-          {message.type === 'audio' && message.audioUrl ? (
-            <div className="mb-2">
-              <audio 
-                controls 
-                src={message.audioUrl}
-                className="w-full"
-                style={{
-                  filter: 'brightness(0.9)',
-                }}
-              />
-            </div>
-          ) : null}
-          
-          {message.text && (
-            <p className="text-sm leading-relaxed mb-1 whitespace-pre-wrap break-words">
-              {message.text}
-            </p>
-          )}
+          <p className="text-sm leading-relaxed mb-1 whitespace-pre-wrap break-words">
+            {message.text}
+          </p>
           
           {/* Timestamp and Delete button */}
           <div className="flex justify-between items-center mt-1">

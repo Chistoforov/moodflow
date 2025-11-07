@@ -11,11 +11,9 @@ import ErrorModal from '@/components/entry/ErrorModal'
 
 interface Message {
   id: string
-  text: string | null
-  audioUrl?: string | null
-  transcript?: string | null
+  text: string
   timestamp: string
-  type: 'text' | 'audio'
+  type: 'text'
 }
 
 // Погодные иконки для настроения
@@ -111,6 +109,12 @@ export default function EntryPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const chatContainerRef = useRef<HTMLDivElement>(null)
 
+  // Format date from YYYY-MM-DD to DD.MM.YYYY
+  const formatDate = (dateStr: string) => {
+    const [year, month, day] = dateStr.split('-')
+    return `${day}.${month}.${year}`
+  }
+
   useEffect(() => {
     fetchEntry()
   }, [date])
@@ -132,7 +136,15 @@ export default function EntryPage() {
           try {
             const parsed = JSON.parse(entry.text_entry)
             if (Array.isArray(parsed)) {
+              // Filter out messages without text and ensure they match our interface
               loadedMessages = parsed
+                .filter((msg: any) => msg.text && typeof msg.text === 'string')
+                .map((msg: any) => ({
+                  id: msg.id || `msg-${Date.now()}-${Math.random()}`,
+                  text: msg.text,
+                  timestamp: msg.timestamp || new Date().toISOString(),
+                  type: 'text' as const
+                }))
             } else if (typeof parsed === 'string') {
               // Legacy format: single text string
               // Convert to message format
@@ -154,28 +166,6 @@ export default function EntryPage() {
           }
         }
         
-        // Add audio message if audio_url exists and not already in messages
-        if (entry.audio_url) {
-          const hasAudioInMessages = loadedMessages.some(msg => msg.audioUrl === entry.audio_url)
-          if (!hasAudioInMessages) {
-            const audioMessage: Message = {
-              id: `audio-${entry.id}`,
-              text: entry.transcript || null,
-              audioUrl: entry.audio_url,
-              timestamp: entry.created_at || new Date().toISOString(),
-              type: 'audio'
-            }
-            loadedMessages.push(audioMessage)
-          } else {
-            // Update existing audio message with transcript if available
-            loadedMessages = loadedMessages.map(msg => 
-              msg.audioUrl === entry.audio_url && entry.transcript
-                ? { ...msg, text: entry.transcript }
-                : msg
-            )
-          }
-        }
-        
         setMessages(loadedMessages)
       }
     } catch (error) {
@@ -185,12 +175,23 @@ export default function EntryPage() {
     }
   }
 
-  // Scroll to bottom when new messages arrive
+  // Auto-scroll to show new messages
   useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' })
+    if (messages.length > 0) {
+      // Delay to ensure DOM is updated and content is rendered
+      setTimeout(() => {
+        // Scroll to bottom of the page to show new message
+        const scrollHeight = document.documentElement.scrollHeight
+        const windowHeight = window.innerHeight
+        const scrollTarget = scrollHeight - windowHeight
+        
+        window.scrollTo({
+          top: scrollTarget,
+          behavior: 'smooth'
+        })
+      }, 150)
     }
-  }, [messages])
+  }, [messages.length])
 
   const saveMessages = async (messagesToSave: Message[]) => {
     setSaving(true)
@@ -255,11 +256,13 @@ export default function EntryPage() {
         throw new Error('Аудиозапись пуста. Попробуйте записать еще раз.')
       }
 
+      // Don't close modal here - let AudioRecordModal handle the animation
+      // setIsAudioModalOpen(false) - REMOVED
+
       const formData = new FormData()
       formData.append('audio', audioBlob, 'recording.webm')
-      formData.append('date', date)
 
-      const response = await fetch('/api/upload-audio', {
+      const response = await fetch('/api/transcribe-audio', {
         method: 'POST',
         body: formData,
       })
@@ -267,77 +270,42 @@ export default function EntryPage() {
       if (response.ok) {
         const data = await response.json()
         
-        // Add audio message to chat
-        const audioMessage: Message = {
-          id: `audio-${Date.now()}-${Math.random()}`,
-          audioUrl: data.audioUrl,
-          text: null,
-          timestamp: new Date().toISOString(),
-          type: 'audio'
+        if (data.transcript) {
+          // Add transcript as a regular text message
+          const textMessage: Message = {
+            id: `msg-${Date.now()}-${Math.random()}`,
+            text: data.transcript,
+            timestamp: new Date().toISOString(),
+            type: 'text'
+          }
+          
+          // Optimistically add message to UI
+          const updatedMessages = [...messages, textMessage]
+          setMessages(updatedMessages)
+          
+          // Save to backend
+          try {
+            await saveMessages(updatedMessages)
+          } catch (error) {
+            // Revert optimistic update on error
+            setMessages(messages)
+            throw error
+          }
+        } else {
+          throw new Error('Не удалось получить транскрипцию')
         }
-        
-        // Optimistically add message to UI
-        const updatedMessages = [...messages, audioMessage]
-        setMessages(updatedMessages)
-        
-        // Save to backend
-        try {
-          await saveMessages(updatedMessages)
-        } catch (error) {
-          // Revert optimistic update on error
-          setMessages(messages)
-          throw error
-        }
-        
-        // Close modal
-        setIsAudioModalOpen(false)
-        
-        // Poll for transcription status
-        pollAudioTranscription(data.audioUrl)
       } else {
         const errorData = await response.json().catch(() => ({ error: 'Неизвестная ошибка' }))
-        const errorMessage = errorData.error || errorData.message || 'Не удалось загрузить аудиозапись'
+        const errorMessage = errorData.error || errorData.message || 'Не удалось распознать аудиозапись'
         throw new Error(errorMessage)
       }
     } catch (error) {
-      console.error('Failed to upload audio:', error)
-      const errorMessage = error instanceof Error ? error.message : 'Ошибка при загрузке аудио'
+      console.error('Failed to transcribe audio:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Ошибка при распознавании аудио'
       setErrorModal({ isOpen: true, message: errorMessage })
+      // Close modal on error
+      setIsAudioModalOpen(false)
     }
-  }
-
-  const pollAudioTranscription = async (audioUrl: string) => {
-    const pollInterval = setInterval(async () => {
-      try {
-        const response = await fetch('/api/entries')
-        const data = await response.json()
-        const entry = data.entries?.find((e: any) => e.entry_date === date)
-        
-        if (entry && entry.audio_url === audioUrl) {
-          if (entry.processing_status === 'completed' && entry.transcript) {
-            // Update the audio message with transcript
-            setMessages(prev => {
-              const updated = prev.map(msg => 
-                msg.audioUrl === audioUrl 
-                  ? { ...msg, text: entry.transcript }
-                  : msg
-              )
-              // Save updated messages
-              saveMessages(updated).catch(console.error)
-              return updated
-            })
-            clearInterval(pollInterval)
-          } else if (entry.processing_status === 'failed') {
-            clearInterval(pollInterval)
-          }
-        }
-      } catch (error) {
-        console.error('Failed to poll transcription:', error)
-      }
-    }, 3000)
-
-    // Clear after 5 minutes
-    setTimeout(() => clearInterval(pollInterval), 300000)
   }
 
   const toggleFactor = (factor: string) => {
@@ -393,140 +361,107 @@ export default function EntryPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#E8E2D5' }}>
-      {/* Header */}
-      <div className="px-3 sm:px-4 py-3 sm:py-4 border-b" style={{ borderColor: '#D4C8B5', backgroundColor: '#F5F1EB' }}>
-        <div className="max-w-3xl mx-auto">
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => router.push('/calendar')}
-              className="p-2 rounded-full transition-all min-w-[44px] min-h-[44px] flex items-center justify-center"
-              style={{
-                backgroundColor: 'transparent',
-                color: '#8B3A3A',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = 'rgba(139, 58, 58, 0.1)'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'transparent'
-              }}
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </button>
-            <h1 className="text-base sm:text-lg font-semibold px-2 text-center flex-1" style={{ color: '#8B3A3A' }}>
-              Запись за {date}
-            </h1>
-            <div style={{ width: '44px' }} /> {/* Spacer */}
-          </div>
-        </div>
-      </div>
-
-      {/* Mood and Factors Section */}
-      <div className="px-3 sm:px-4 py-4" style={{ backgroundColor: '#E8E2D5' }}>
-        <div className="max-w-3xl mx-auto space-y-3 sm:space-y-4">
-          {/* Mood Selection */}
-          <div className="rounded-2xl shadow-sm p-4 sm:p-6" style={{ backgroundColor: '#F5F1EB' }}>
-            <h2 className="text-base sm:text-lg font-semibold mb-4 text-center" style={{ color: '#8B3A3A' }}>
-              Настроение
-            </h2>
-            <div className="flex justify-center flex-wrap gap-2 sm:gap-3 max-w-2xl mx-auto">
-              {MOOD_LEVELS.map(level => (
-                <button
-                  key={level.value}
-                  onClick={() => {
-                    setMoodScore(level.value)
-                    handleSaveFactors()
-                  }}
-                  className="flex flex-col items-center p-2 sm:p-3 md:p-4 rounded-xl transition-all min-w-[56px] sm:min-w-[70px] md:min-w-[80px]"
-                  style={{
-                    backgroundColor: moodScore === level.value ? '#E8E2D5' : 'transparent',
-                    border: moodScore === level.value ? '2px solid #8B3A3A' : '2px solid transparent',
-                  }}
-                >
-                  <div className="mb-1 sm:mb-2 flex justify-center">
-                    <MoodSymbol score={level.value} selected={moodScore === level.value} size={36} />
-                  </div>
-                  <div className="text-xs font-medium text-center leading-tight" style={{ color: '#8B3A3A' }}>
-                    {level.label}
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Factors */}
-          <div className="rounded-2xl shadow-sm p-4 sm:p-6" style={{ backgroundColor: '#F5F1EB' }}>
-            <h2 className="text-base sm:text-lg font-semibold mb-4" style={{ color: '#8B3A3A' }}>
-              Факторы
-            </h2>
-            <div className="flex flex-wrap gap-2">
-              {FACTORS.map(factor => (
-                <button
-                  key={factor.value}
-                  onClick={() => {
-                    toggleFactor(factor.value)
-                    setTimeout(() => handleSaveFactors(), 100)
-                  }}
-                  className="px-3 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-all min-h-[36px]"
-                  style={{
-                    backgroundColor: selectedFactors.includes(factor.value) ? '#8B3A3A' : '#E8E2D5',
-                    color: selectedFactors.includes(factor.value) ? '#E8E2D5' : '#8B3A3A',
-                    border: `2px solid ${selectedFactors.includes(factor.value) ? '#8B3A3A' : '#C8BEB0'}`,
-                  }}
-                >
-                  {factor.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Chat Messages Area */}
+    <div className="relative" style={{ marginTop: '-64px', minHeight: '100vh' }}> {/* Offset the main's paddingTop */}
+      {/* Scrollable content area - naturally scrolls */}
       <div 
         ref={chatContainerRef}
-        className="flex-1 overflow-y-auto px-3 sm:px-4 py-4"
         style={{ 
           backgroundColor: '#E8E2D5',
-          paddingBottom: '100px', // Fixed space before input field (ChatInput height ~80px + 20px margin)
+          minHeight: '100vh',
+          paddingTop: '64px', // Space for fixed header
+          paddingBottom: '180px', // Space for ChatInput (~100px) + BottomNav (80px)
         }}
       >
-        <div className="max-w-3xl mx-auto">
-          {messages.length === 0 ? (
-            <div className="text-center py-12">
-              <p style={{ color: '#A67C6C' }}>
-                Оставьте голосовое сообщение или напишите отзыв о своем настроении. Дайте волю чувствам!
-              </p>
+        {/* Mood and Factors Section */}
+        <div className="px-3 sm:px-4 py-4" style={{ backgroundColor: '#E8E2D5' }}>
+          <div className="max-w-3xl mx-auto space-y-3 sm:space-y-4">
+            {/* Mood Selection */}
+            <div className="rounded-2xl shadow-sm p-4 sm:p-6" style={{ backgroundColor: '#F5F1EB' }}>
+              <h2 className="text-base sm:text-lg font-semibold mb-4 text-center" style={{ color: '#8B3A3A' }}>
+                Настроение на {formatDate(date)}
+              </h2>
+              <div className="flex justify-center flex-wrap gap-2 sm:gap-3 max-w-2xl mx-auto">
+                {MOOD_LEVELS.map(level => (
+                  <button
+                    key={level.value}
+                    onClick={() => {
+                      setMoodScore(level.value)
+                      handleSaveFactors()
+                    }}
+                    className="flex flex-col items-center p-2 sm:p-3 md:p-4 rounded-xl transition-all min-w-[56px] sm:min-w-[70px] md:min-w-[80px]"
+                    style={{
+                      backgroundColor: moodScore === level.value ? '#E8E2D5' : 'transparent',
+                      border: moodScore === level.value ? '2px solid #8B3A3A' : '2px solid transparent',
+                    }}
+                  >
+                    <div className="mb-1 sm:mb-2 flex justify-center">
+                      <MoodSymbol score={level.value} selected={moodScore === level.value} size={36} />
+                    </div>
+                    <div className="text-xs font-medium text-center leading-tight" style={{ color: '#8B3A3A' }}>
+                      {level.label}
+                    </div>
+                  </button>
+                ))}
+              </div>
             </div>
-          ) : (
-            messages.map((message) => (
+
+            {/* Factors */}
+            <div className="rounded-2xl shadow-sm p-4 sm:p-6" style={{ backgroundColor: '#F5F1EB' }}>
+              <h2 className="text-base sm:text-lg font-semibold mb-4" style={{ color: '#8B3A3A' }}>
+                Факторы
+              </h2>
+              <div className="flex flex-wrap gap-2">
+                {FACTORS.map(factor => (
+                  <button
+                    key={factor.value}
+                    onClick={() => {
+                      toggleFactor(factor.value)
+                      setTimeout(() => handleSaveFactors(), 100)
+                    }}
+                    className="px-3 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-all min-h-[36px]"
+                    style={{
+                      backgroundColor: selectedFactors.includes(factor.value) ? '#8B3A3A' : '#E8E2D5',
+                      color: selectedFactors.includes(factor.value) ? '#E8E2D5' : '#8B3A3A',
+                      border: `2px solid ${selectedFactors.includes(factor.value) ? '#8B3A3A' : '#C8BEB0'}`,
+                    }}
+                  >
+                    {factor.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Chat Messages Area */}
+        <div className="px-3 sm:px-4 py-4" style={{ backgroundColor: '#E8E2D5' }}>
+          <div className="max-w-3xl mx-auto">
+            {messages.map((message) => (
               <ChatMessage 
                 key={message.id} 
                 message={message} 
                 onDelete={handleDeleteClick}
               />
-            ))
-          )}
-          <div ref={messagesEndRef} />
+            ))}
+            <div ref={messagesEndRef} />
+          </div>
         </div>
       </div>
 
-      {/* Chat Input */}
+      {/* Chat Input - truly fixed, outside scrollable area */}
       <ChatInput
         onSend={handleSendMessage}
         onAudioRecord={() => setIsAudioModalOpen(true)}
         disabled={saving}
-        placeholder=""
+        placeholder="Оставьте голосовое сообщение или напишите отзыв о своем настроении. Дайте волю чувствам!"
         onFocus={() => {
-          // Scroll to bottom when input is focused
+          // Scroll page to bottom when keyboard appears
           setTimeout(() => {
-            if (messagesEndRef.current) {
-              messagesEndRef.current.scrollIntoView({ behavior: 'smooth' })
-            }
-          }, 300)
+            window.scrollTo({
+              top: document.documentElement.scrollHeight,
+              behavior: 'smooth'
+            })
+          }, 100)
         }}
       />
 
@@ -546,7 +481,7 @@ export default function EntryPage() {
           setMessageToDelete(null)
         }}
         onConfirm={handleDeleteConfirm}
-        messageText={messageToDelete?.text || null}
+        messageText={messageToDelete?.text}
       />
 
       {/* Error Modal */}
