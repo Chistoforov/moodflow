@@ -20,6 +20,8 @@ html {
   overscroll-behavior: none;
   /* Fix viewport height on mobile browsers */
   height: 100%;
+  /* Ensure smooth scrolling */
+  scroll-behavior: smooth;
 }
 
 body {
@@ -31,6 +33,11 @@ body {
   -moz-osx-font-smoothing: grayscale;
   /* Allow pull-to-refresh but contain within viewport */
   overscroll-behavior-y: contain;
+  /* Important: Keep body scrollable even when keyboard is open */
+  position: relative !important;
+  overflow: auto !important;
+  /* Enable momentum scrolling on iOS */
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Mobile touch targets */

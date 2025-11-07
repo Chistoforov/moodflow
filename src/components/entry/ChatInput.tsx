@@ -19,6 +19,7 @@ export default function ChatInput({
 }: ChatInputProps) {
   const [text, setText] = useState('')
   const [keyboardHeight, setKeyboardHeight] = useState(0)
+  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -36,53 +37,87 @@ export default function ChatInput({
   useEffect(() => {
     if (typeof window === 'undefined') return
 
-    const handleViewportChange = () => {
+    const updatePosition = () => {
       const viewport = window.visualViewport
-      if (viewport) {
-        const windowHeight = window.innerHeight
-        const viewportHeight = viewport.height
-        const calculatedKeyboardHeight = windowHeight - viewportHeight
+      if (!viewport || !containerRef.current) return
+
+      const viewportHeight = viewport.height
+      const viewportOffsetTop = viewport.offsetTop || 0
+      const viewportOffsetLeft = viewport.offsetLeft || 0
+      
+      // Detect keyboard by checking if viewport height is significantly smaller
+      const windowHeight = window.innerHeight
+      const keyboardHeight = windowHeight - viewportHeight
+      
+      if (keyboardHeight > 50) {
+        setKeyboardHeight(keyboardHeight)
+        setIsKeyboardOpen(true)
         
-        // Only update if there's a significant difference (likely keyboard)
-        if (calculatedKeyboardHeight > 50) {
-          setKeyboardHeight(calculatedKeyboardHeight)
-        } else {
-          setKeyboardHeight(0)
+        // Вычисляем правильную позицию bottom относительно layout viewport
+        // Visual viewport находится на offsetTop пикселей ниже верха layout viewport
+        // И имеет высоту viewport.height
+        // Чтобы элемент был внизу visual viewport:
+        // bottom = расстояние от низа layout viewport до низа visual viewport
+        // bottom = window.innerHeight - (offsetTop + viewport.height)
+        // Упрощаем: bottom = keyboardHeight - offsetTop
+        const bottomPosition = keyboardHeight - viewportOffsetTop
+        
+        containerRef.current.style.position = 'fixed'
+        containerRef.current.style.bottom = `${bottomPosition}px`
+        containerRef.current.style.left = `${viewportOffsetLeft}px`
+        containerRef.current.style.right = `${-viewportOffsetLeft}px`
+        containerRef.current.style.width = 'auto'
+      } else {
+        setKeyboardHeight(0)
+        setIsKeyboardOpen(false)
+        
+        // Возвращаем обычное позиционирование когда клавиатура закрыта
+        if (containerRef.current) {
+          containerRef.current.style.position = 'fixed'
+          containerRef.current.style.bottom = '80px'
+          containerRef.current.style.left = '0'
+          containerRef.current.style.right = '0'
+          containerRef.current.style.width = '100%'
         }
       }
     }
 
-    // Use Visual Viewport API if available (modern browsers)
     const viewport = window.visualViewport
     if (viewport) {
-      // Only listen to resize, NOT scroll - this keeps input fixed when scrolling
-      viewport.addEventListener('resize', handleViewportChange)
-      handleViewportChange() // Initial check
+      viewport.addEventListener('resize', updatePosition)
+      viewport.addEventListener('scroll', updatePosition)
+      
+      // Также слушаем скролл window для обновления позиции
+      window.addEventListener('scroll', updatePosition)
+      
+      updatePosition()
       
       return () => {
         if (viewport) {
-          viewport.removeEventListener('resize', handleViewportChange)
+          viewport.removeEventListener('resize', updatePosition)
+          viewport.removeEventListener('scroll', updatePosition)
         }
+        window.removeEventListener('scroll', updatePosition)
       }
     } else {
-      // Fallback for older browsers
+      // Fallback для старых браузеров
       let initialHeight = window.innerHeight
       
       const handleResize = () => {
         const currentHeight = window.innerHeight
         const heightDifference = initialHeight - currentHeight
         
-        // Only set if significant difference (likely keyboard)
         if (heightDifference > 100) {
           setKeyboardHeight(heightDifference)
+          setIsKeyboardOpen(true)
         } else {
           setKeyboardHeight(0)
-          initialHeight = currentHeight // Reset baseline when keyboard closes
+          setIsKeyboardOpen(false)
         }
       }
 
       window.addEventListener('resize', handleResize)
-      handleResize() // Initial check
+      handleResize()
       
       return () => {
         window.removeEventListener('resize', handleResize)
@@ -111,20 +146,25 @@ export default function ChatInput({
   return (
     <div
       ref={containerRef}
-      className="w-full px-3 sm:px-4 py-3 transition-all duration-200"
+      className="w-full px-3 sm:px-4 py-3"
       style={{
         backgroundColor: '#E8E2D5',
         borderTop: '1px solid #D4C8B5',
+        // position, bottom, left, right, transform устанавливаются через JS в useEffect
         position: 'fixed',
-        bottom: keyboardHeight > 0 ? `${keyboardHeight}px` : '80px', // Над клавиатурой когда открыта, выше BottomNav когда закрыта
+        bottom: '80px',
         left: 0,
         right: 0,
         zIndex: 60, // Выше BottomNav (z-50)
-        // Ensure truly fixed positioning on mobile
-        transform: 'translateZ(0)',
-        WebkitTransform: 'translateZ(0)',
+        // Обеспечиваем аппаратное ускорение для плавной фиксации
         backfaceVisibility: 'hidden',
         WebkitBackfaceVisibility: 'hidden',
+        perspective: 1000,
+        WebkitPerspective: 1000,
+        // Улучшаем производительность
+        willChange: 'bottom, transform',
+        // Убираем transition для более быстрого обновления позиции
+        transition: 'none',
       }}
     >
       <div className="max-w-3xl mx-auto flex items-end gap-2">
@@ -171,6 +211,7 @@ export default function ChatInput({
           style={{
             backgroundColor: '#E8E2D5',
             border: '1px solid #C8BEB0',
+            touchAction: 'auto', // Allow interaction with textarea
           }}
         >
           <textarea
@@ -193,6 +234,10 @@ export default function ChatInput({
               maxHeight: '120px',
               fontFamily: 'inherit',
               color: '#8B3A3A',
+              overflowY: 'auto',
+              WebkitOverflowScrolling: 'touch',
+              // Позволяем взаимодействие с textarea
+              touchAction: 'manipulation',
             }}
           />
         </div>
