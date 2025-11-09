@@ -24,7 +24,7 @@ export default async function AdminLayout({
   type Psychologist = Database['public']['Tables']['psychologists']['Row']
   const psychologist = data as Psychologist | null
 
-  if (error || !psychologist || !psychologist.active) {
+  if (error || !psychologist || !psychologist.active || psychologist.role !== 'admin') {
     redirect('/')
   }
 
@@ -41,7 +41,7 @@ export default async function AdminLayout({
               </div>
               <div className="hidden sm:ml-8 sm:flex sm:space-x-6">
                 <a
-                  href="/dashboard"
+                  href="/admin/dashboard"
                   className="inline-flex items-center px-3 py-2 text-base font-medium rounded-full transition-all"
                   style={{ color: '#8B3A3A' }}
                   onMouseEnter={(e: any) => {
@@ -54,7 +54,7 @@ export default async function AdminLayout({
                   Dashboard
                 </a>
                 <a
-                  href="/users"
+                  href="/admin/users"
                   className="inline-flex items-center px-3 py-2 text-base font-medium rounded-full transition-all"
                   style={{ color: '#8B3A3A' }}
                   onMouseEnter={(e: any) => {
@@ -65,6 +65,19 @@ export default async function AdminLayout({
                   }}
                 >
                   Пользователи
+                </a>
+                <a
+                  href="/admin/materials"
+                  className="inline-flex items-center px-3 py-2 text-base font-medium rounded-full transition-all"
+                  style={{ color: '#8B3A3A' }}
+                  onMouseEnter={(e: any) => {
+                    e.currentTarget.style.backgroundColor = '#D4C8B5'
+                  }}
+                  onMouseLeave={(e: any) => {
+                    e.currentTarget.style.backgroundColor = 'transparent'
+                  }}
+                >
+                  Материалы
                 </a>
               </div>
             </div>

@@ -39,7 +39,7 @@ export async function middleware(req: NextRequest) {
       return NextResponse.redirect(new URL('/login', req.url))
     }
 
-    // Проверка роли
+    // Проверка роли администратора
     const { data, error } = await supabase
       .from('psychologists')
       .select('*')
@@ -49,7 +49,7 @@ export async function middleware(req: NextRequest) {
     type Psychologist = Database['public']['Tables']['psychologists']['Row']
     const psychologist = data as Psychologist | null
 
-    if (error || !psychologist || !psychologist.active) {
+    if (error || !psychologist || !psychologist.active || psychologist.role !== 'admin') {
       return NextResponse.redirect(new URL('/', req.url))
     }
   }
@@ -57,7 +57,9 @@ export async function middleware(req: NextRequest) {
   // Защита user routes
   if (req.nextUrl.pathname.startsWith('/calendar') || 
       req.nextUrl.pathname.startsWith('/entry') ||
-      req.nextUrl.pathname.startsWith('/recommendations')) {
+      req.nextUrl.pathname.startsWith('/recommendations') ||
+      req.nextUrl.pathname.startsWith('/materials') ||
+      req.nextUrl.pathname.startsWith('/profile')) {
     if (!session) {
       return NextResponse.redirect(new URL('/login', req.url))
     }
@@ -76,11 +78,13 @@ export const config = {
   matcher: [
     '/',
     '/login',
+    '/admin',
     '/admin/:path*',
     '/calendar/:path*',
     '/entry/:path*',
     '/recommendations/:path*',
-    '/profile/:path*'
+    '/profile/:path*',
+    '/materials/:path*'
   ]
 }
 
