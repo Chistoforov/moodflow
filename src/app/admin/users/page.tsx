@@ -5,7 +5,10 @@ import type { Database } from '@/types/database'
 
 export const dynamic = 'force-dynamic'
 
-type User = Database['public']['Tables']['users']['Row']
+type User = Database['public']['Tables']['users']['Row'] & {
+  effective_role?: string
+  psychologist?: Array<{ role: string; active: boolean }> | { role: string; active: boolean }
+}
 type Role = 'free' | 'subscription' | 'personal' | 'admin'
 
 export default function UsersPage() {
@@ -59,8 +62,11 @@ export default function UsersPage() {
   }
 
   const getRoleLabel = (user: User): Role => {
-    // Check if user is in psychologists table (would need to query this)
-    // For now, use subscription_tier
+    // Use effective_role if available (includes admin role from psychologists table)
+    if (user.effective_role) {
+      return user.effective_role as Role
+    }
+    // Fallback to subscription_tier
     return user.subscription_tier as Role
   }
 
