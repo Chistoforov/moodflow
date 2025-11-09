@@ -175,7 +175,7 @@ export default function CalendarPage() {
             <>
               {/* Дни недели */}
               <div className="grid grid-cols-7 gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-6">
-                {['ВС', 'ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ'].map((day, index) => (
+                {['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС'].map((day, index) => (
                   <div 
                     key={day} 
                     className="text-center font-semibold text-xs sm:text-sm uppercase tracking-wider"
