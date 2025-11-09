@@ -69,8 +69,9 @@ export async function GET(request: NextRequest) {
     if (psychologistsError) throw psychologistsError
 
     // Create a map of psychologists by user_id (which matches users.sso_uid)
-    const psychologistMap = new Map(
-      psychologists?.map(p => [p.user_id, p]) || []
+    type PsychologistData = { user_id: string; role: string; active: boolean }
+    const psychologistMap = new Map<string, PsychologistData>(
+      (psychologists as PsychologistData[] | null)?.map(p => [p.user_id, p]) || []
     )
 
     // Transform the data to include role from psychologist table
