@@ -189,6 +189,46 @@ export interface Database {
         }
         Update: Partial<Database['public']['Tables']['audio_entries']['Insert']>
       }
+      monthly_analytics: {
+        Row: {
+          id: string
+          user_id: string
+          year: number
+          month: number
+          week_number: number
+          days_analyzed: number
+          analysis_text: string
+          general_impression: string | null
+          positive_trends: string | null
+          decline_reasons: string | null
+          recommendations: string | null
+          reflection_directions: string | null
+          perplexity_request_id: string | null
+          perplexity_response: Json | null
+          is_final: boolean
+          status: 'pending' | 'processing' | 'completed' | 'failed'
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          user_id: string
+          year: number
+          month: number
+          week_number: number
+          days_analyzed: number
+          analysis_text: string
+          general_impression?: string | null
+          positive_trends?: string | null
+          decline_reasons?: string | null
+          recommendations?: string | null
+          reflection_directions?: string | null
+          perplexity_request_id?: string | null
+          perplexity_response?: Json | null
+          is_final?: boolean
+          status?: 'pending' | 'processing' | 'completed' | 'failed'
+        }
+        Update: Partial<Database['public']['Tables']['monthly_analytics']['Insert']>
+      }
     }
   }
 }

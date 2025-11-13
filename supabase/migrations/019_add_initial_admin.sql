@@ -44,3 +44,6 @@ UPDATE psychologists
 SET role = 'admin', active = true 
 WHERE email = 'site4people@gmail.com';
 
+
+
+

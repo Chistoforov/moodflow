@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 
-export default function AdminRootPage() {
+export default async function AdminRootPage() {
   redirect('/admin/dashboard')
 }
 

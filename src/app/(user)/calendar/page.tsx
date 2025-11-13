@@ -12,6 +12,23 @@ interface Entry {
   mood_score: number | null
 }
 
+interface MonthlyAnalytics {
+  id: string
+  year: number
+  month: number
+  week_number: number
+  days_analyzed: number
+  analysis_text: string
+  general_impression: string | null
+  positive_trends: string | null
+  decline_reasons: string | null
+  recommendations: string | null
+  reflection_directions: string | null
+  is_final: boolean
+  status: string
+  created_at: string
+}
+
 // Fetcher функция для SWR
 const fetcher = (url: string) => fetch(url).then(res => res.json())
 
@@ -75,6 +92,7 @@ const MoodSymbol = ({ score, size = 24 }: { score: number; size?: number }) => {
 
 export default function CalendarPage() {
   const [currentMonth, setCurrentMonth] = useState(new Date())
+  const [isGenerating, setIsGenerating] = useState(false)
   
   // Используем SWR для кеширования данных
   const { data, isLoading } = useSWR('/api/entries', fetcher, {
@@ -84,6 +102,21 @@ export default function CalendarPage() {
   })
   
   const entries: Entry[] = data?.entries || []
+
+  // Fetch analytics for current month
+  const year = currentMonth.getFullYear()
+  const month = currentMonth.getMonth() + 1
+  const { data: analyticsData, mutate: mutateAnalytics } = useSWR(
+    `/api/analytics?year=${year}&month=${month}`,
+    fetcher,
+    {
+      revalidateOnFocus: false,
+      dedupingInterval: 30000,
+    }
+  )
+
+  const analytics: MonthlyAnalytics | null = analyticsData?.analytics || null
+  const hasAnalytics = analyticsData?.hasAnalytics || false
 
   const monthStart = startOfMonth(currentMonth)
   const monthEnd = endOfMonth(currentMonth)
@@ -102,6 +135,39 @@ export default function CalendarPage() {
     const newDate = new Date(currentMonth)
     newDate.setMonth(newDate.getMonth() + increment)
     setCurrentMonth(newDate)
+  }
+
+  const generateAnalytics = async () => {
+    setIsGenerating(true)
+    try {
+      const response = await fetch('/api/analytics/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          year,
+          month,
+        }),
+      })
+
+      const result = await response.json()
+
+      if (response.ok) {
+        // Refresh analytics data
+        await mutateAnalytics()
+        alert(result.isFinal 
+          ? 'Финальная аналитика месяца успешно сгенерирована!' 
+          : `Аналитика за ${result.weekNumber} неделю (${result.daysAnalyzed} дней) успешно сгенерирована!`)
+      } else {
+        alert(result.error || 'Не удалось сгенерировать аналитику')
+      }
+    } catch (error) {
+      console.error('Failed to generate analytics:', error)
+      alert('Произошла ошибка при генерации аналитики')
+    } finally {
+      setIsGenerating(false)
+    }
   }
 
   return (
@@ -243,24 +309,141 @@ export default function CalendarPage() {
 
         {/* Аналитика и рекомендации */}
         <div className="mt-4 sm:mt-6 rounded-2xl p-4 sm:p-6" style={{ backgroundColor: '#F5F1EB' }}>
-          <h3 
-            className="font-semibold mb-4 text-base sm:text-lg text-center"
-            style={{ color: '#8B3A3A' }}
-          >
-            Аналитика и рекомендации
-          </h3>
-          <div 
-            className="text-center p-3 sm:p-4 rounded-lg"
-            style={{ 
-              color: '#8B3A3A',
-              backgroundColor: '#E8E2D5',
-              opacity: 0.8
-            }}
-          >
-            <p className="text-sm sm:text-base leading-relaxed">
-              Продолжайте заполнять дневник и скоро вы сможете увидеть выводы и рекомендации
-            </p>
+          <div className="flex items-center justify-between mb-4">
+            <h3 
+              className="font-semibold text-base sm:text-lg"
+              style={{ color: '#8B3A3A' }}
+            >
+              Аналитика и рекомендации
+            </h3>
+            {!hasAnalytics && (
+              <button
+                onClick={generateAnalytics}
+                disabled={isGenerating || entries.length === 0}
+                className="px-4 py-2 text-sm font-medium transition-all rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  backgroundColor: '#8B3A3A',
+                  color: '#E8E2D5',
+                }}
+              >
+                {isGenerating ? 'Генерация...' : 'Сгенерировать'}
+              </button>
+            )}
           </div>
+
+          {hasAnalytics && analytics ? (
+            <div className="space-y-4">
+              {/* Header */}
+              <div className="flex items-center justify-between p-3 rounded-lg" style={{ backgroundColor: '#E8E2D5' }}>
+                <div>
+                  <p className="text-sm font-medium" style={{ color: '#8B3A3A' }}>
+                    Неделя {analytics.week_number} • {analytics.days_analyzed} {analytics.days_analyzed === 1 ? 'день' : analytics.days_analyzed < 5 ? 'дня' : 'дней'}
+                  </p>
+                  {analytics.is_final && (
+                    <p className="text-xs mt-1" style={{ color: '#8B3A3A', opacity: 0.7 }}>
+                      🎯 Финальная аналитика месяца
+                    </p>
+                  )}
+                </div>
+                {!analytics.is_final && (
+                  <button
+                    onClick={generateAnalytics}
+                    disabled={isGenerating}
+                    className="px-3 py-1.5 text-xs font-medium transition-all rounded-md disabled:opacity-50"
+                    style={{
+                      backgroundColor: '#8B3A3A',
+                      color: '#E8E2D5',
+                    }}
+                  >
+                    {isGenerating ? 'Обновление...' : 'Обновить'}
+                  </button>
+                )}
+              </div>
+
+              {/* Analysis sections */}
+              <div className="space-y-3">
+                {analytics.general_impression && (
+                  <div className="p-4 rounded-lg" style={{ backgroundColor: '#E8E2D5' }}>
+                    <h4 className="font-semibold mb-2 text-sm" style={{ color: '#8B3A3A' }}>
+                      Общее впечатление о периоде
+                    </h4>
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: '#8B3A3A', opacity: 0.9 }}>
+                      {analytics.general_impression}
+                    </p>
+                  </div>
+                )}
+
+                {analytics.positive_trends && (
+                  <div className="p-4 rounded-lg" style={{ backgroundColor: '#E8E2D5' }}>
+                    <h4 className="font-semibold mb-2 text-sm" style={{ color: '#8B3A3A' }}>
+                      ✨ Положительные тенденции
+                    </h4>
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: '#8B3A3A', opacity: 0.9 }}>
+                      {analytics.positive_trends}
+                    </p>
+                  </div>
+                )}
+
+                {analytics.decline_reasons && (
+                  <div className="p-4 rounded-lg" style={{ backgroundColor: '#E8E2D5' }}>
+                    <h4 className="font-semibold mb-2 text-sm" style={{ color: '#8B3A3A' }}>
+                      🔍 Возможные причины спада
+                    </h4>
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: '#8B3A3A', opacity: 0.9 }}>
+                      {analytics.decline_reasons}
+                    </p>
+                  </div>
+                )}
+
+                {analytics.recommendations && (
+                  <div className="p-4 rounded-lg" style={{ backgroundColor: '#E8E2D5' }}>
+                    <h4 className="font-semibold mb-2 text-sm" style={{ color: '#8B3A3A' }}>
+                      💡 Рекомендации и техники
+                    </h4>
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: '#8B3A3A', opacity: 0.9 }}>
+                      {analytics.recommendations}
+                    </p>
+                  </div>
+                )}
+
+                {analytics.reflection_directions && (
+                  <div className="p-4 rounded-lg" style={{ backgroundColor: '#E8E2D5' }}>
+                    <h4 className="font-semibold mb-2 text-sm" style={{ color: '#8B3A3A' }}>
+                      🎯 Направление для размышлений
+                    </h4>
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: '#8B3A3A', opacity: 0.9 }}>
+                      {analytics.reflection_directions}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <p className="text-xs text-center mt-4" style={{ color: '#8B3A3A', opacity: 0.6 }}>
+                Создано: {format(new Date(analytics.created_at), 'dd MMMM yyyy, HH:mm', { locale: ru })}
+              </p>
+            </div>
+          ) : (
+            <div 
+              className="text-center p-3 sm:p-4 rounded-lg"
+              style={{ 
+                color: '#8B3A3A',
+                backgroundColor: '#E8E2D5',
+                opacity: 0.8
+              }}
+            >
+              <p className="text-sm sm:text-base leading-relaxed mb-3">
+                Продолжайте заполнять дневник и скоро вы сможете увидеть выводы и рекомендации
+              </p>
+              {entries.length > 0 && (
+                <p className="text-xs" style={{ opacity: 0.7 }}>
+                  У вас уже есть {entries.filter(e => {
+                    const entryDate = new Date(e.entry_date)
+                    return entryDate.getMonth() === month - 1 && entryDate.getFullYear() === year
+                  }).length} записей за этот месяц
+                </p>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

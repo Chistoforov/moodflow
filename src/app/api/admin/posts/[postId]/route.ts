@@ -4,16 +4,40 @@ import type { Database } from '@/types/database'
 
 // Helper function to check admin role
 async function checkAdminRole(supabase: any, session: any) {
+  // Try to find psychologist by user_id (which references users.sso_uid)
+  // First, get the user's sso_uid from users table
+  const { data: user } = await supabase
+    .from('users')
+    .select('sso_uid')
+    .eq('sso_uid', session.user.id)
+    .maybeSingle()
+
+  if (!user) {
+    console.error('User not found in users table:', session.user.id)
+    return { isAdmin: false, psychologistId: null }
+  }
+
   const { data: psychologist } = await supabase
     .from('psychologists')
     .select('*')
-    .eq('user_id', session.user.id)
+    .eq('user_id', user.sso_uid)
     .maybeSingle()
 
   type Psychologist = Database['public']['Tables']['psychologists']['Row']
   const psychologistData = psychologist as Psychologist | null
 
-  if (!psychologistData || psychologistData.role !== 'admin' || !psychologistData.active) {
+  if (!psychologistData) {
+    console.error('Psychologist not found for user_id:', user.sso_uid)
+    return { isAdmin: false, psychologistId: null }
+  }
+
+  if (psychologistData.role !== 'admin') {
+    console.error('User is not admin:', psychologistData.role)
+    return { isAdmin: false, psychologistId: null }
+  }
+
+  if (!psychologistData.active) {
+    console.error('Admin account is not active')
     return { isAdmin: false, psychologistId: null }
   }
 
@@ -100,13 +124,17 @@ export async function PATCH(
       .select()
       .single()
 
-    if (postError) throw postError
+    if (postError) {
+      console.error('Error updating post:', postError)
+      throw postError
+    }
 
     return NextResponse.json({ post })
   } catch (error) {
     console.error('Error updating post:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Failed to update post'
     return NextResponse.json(
-      { error: 'Failed to update post' },
+      { error: errorMessage, details: error },
       { status: 500 }
     )
   }

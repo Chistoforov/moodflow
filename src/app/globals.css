@@ -175,3 +175,65 @@ button, a {
 .animate-slide-up {
   animation: slide-up 0.4s ease-out 0.1s both;
 }
+
+/* Quill Editor Styles */
+.quill-wrapper .ql-toolbar {
+  border: none !important;
+  border-bottom: 1px solid #D4C8B5 !important;
+  background-color: #FFFFFF !important;
+  position: relative;
+  z-index: 2;
+}
+
+.quill-wrapper .ql-container {
+  border: none !important;
+  font-size: 16px;
+  font-family: Arial, Helvetica, sans-serif;
+  background-color: #FFFFFF !important;
+  min-height: 300px;
+  position: relative;
+  z-index: 1;
+}
+
+.quill-wrapper .ql-editor {
+  min-height: 300px;
+  padding: 16px;
+  color: #8B3A3A;
+}
+
+.quill-wrapper .ql-editor.ql-blank::before {
+  color: rgba(139, 58, 58, 0.5);
+  font-style: normal;
+}
+
+.quill-wrapper .ql-snow .ql-stroke {
+  stroke: #8B3A3A !important;
+}
+
+.quill-wrapper .ql-snow .ql-fill {
+  fill: #8B3A3A !important;
+}
+
+.quill-wrapper .ql-snow .ql-picker-label {
+  color: #8B3A3A !important;
+}
+
+.quill-wrapper .ql-snow .ql-picker-options {
+  background-color: #FFFFFF !important;
+  border: 1px solid #D4C8B5 !important;
+}
+
+.quill-wrapper .ql-toolbar button:hover,
+.quill-wrapper .ql-toolbar button:focus,
+.quill-wrapper .ql-toolbar button.ql-active {
+  background-color: #F5F1EB !important;
+  color: #8B3A3A !important;
+}
+
+.quill-wrapper .ql-toolbar button.ql-active .ql-stroke {
+  stroke: #8B3A3A !important;
+}
+
+.quill-wrapper .ql-toolbar button.ql-active .ql-fill {
+  fill: #8B3A3A !important;
+}

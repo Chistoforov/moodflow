@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Dancing_Script } from "next/font/google";
 import "./globals.css";
+import "react-quill-new/dist/quill.snow.css";
 import SWRProvider from "@/components/providers/SWRProvider";
 
 const geistSans = Geist({

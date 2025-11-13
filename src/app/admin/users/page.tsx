@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import type { Database } from '@/types/database'
 
 export const dynamic = 'force-dynamic'
@@ -143,8 +144,18 @@ export default function UsersPage() {
                   <td className="px-6 py-4 text-sm" style={{ color: '#8B3A3A' }}>
                     {user.email}
                   </td>
-                  <td className="px-6 py-4 text-sm" style={{ color: '#8B3A3A' }}>
-                    {user.full_name || '-'}
+                  <td className="px-6 py-4 text-sm">
+                    {user.full_name ? (
+                      <Link
+                        href={`/admin/users/${user.id}`}
+                        className="hover:underline font-medium"
+                        style={{ color: '#8B3A3A' }}
+                      >
+                        {user.full_name}
+                      </Link>
+                    ) : (
+                      <span style={{ color: '#8B3A3A' }}>-</span>
+                    )}
                   </td>
                   <td className="px-6 py-4 text-sm">
                     <select

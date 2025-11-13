@@ -4,19 +4,50 @@ import type { Database } from '@/types/database'
 
 // Helper function to check admin role
 async function checkAdminRole(supabase: any, session: any) {
-  const { data: psychologist } = await supabase
+  console.log('checkAdminRole - Starting check for session.user.id:', session.user.id)
+  
+  // Try to find psychologist by user_id (which references users.sso_uid)
+  // First, get the user's sso_uid from users table
+  const { data: user, error: userError } = await supabase
+    .from('users')
+    .select('sso_uid')
+    .eq('sso_uid', session.user.id)
+    .maybeSingle()
+
+  console.log('checkAdminRole - User query result:', { user, error: userError })
+
+  if (!user) {
+    console.error('User not found in users table:', session.user.id)
+    return { isAdmin: false, psychologistId: null }
+  }
+
+  const { data: psychologist, error: psychError } = await supabase
     .from('psychologists')
     .select('*')
-    .eq('user_id', session.user.id)
+    .eq('user_id', user.sso_uid)
     .maybeSingle()
+
+  console.log('checkAdminRole - Psychologist query result:', { psychologist, error: psychError })
 
   type Psychologist = Database['public']['Tables']['psychologists']['Row']
   const psychologistData = psychologist as Psychologist | null
 
-  if (!psychologistData || psychologistData.role !== 'admin' || !psychologistData.active) {
+  if (!psychologistData) {
+    console.error('Psychologist not found for user_id:', user.sso_uid)
     return { isAdmin: false, psychologistId: null }
   }
 
+  if (psychologistData.role !== 'admin') {
+    console.error('User is not admin:', psychologistData.role)
+    return { isAdmin: false, psychologistId: null }
+  }
+
+  if (!psychologistData.active) {
+    console.error('Admin account is not active')
+    return { isAdmin: false, psychologistId: null }
+  }
+
+  console.log('checkAdminRole - Success! psychologistId:', psychologistData.id)
   return { isAdmin: true, psychologistId: psychologistData.id }
 }
 
@@ -69,13 +100,20 @@ export async function POST(request: NextRequest) {
 
     // Check authentication and admin role
     const { data: { session } } = await supabase.auth.getSession()
+    console.log('POST /api/admin/posts - Session user:', session?.user?.id)
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const { isAdmin, psychologistId } = await checkAdminRole(supabase, session)
+    console.log('POST /api/admin/posts - Admin check result:', { isAdmin, psychologistId })
     if (!isAdmin) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
+    if (!psychologistId) {
+      console.error('psychologistId is null after admin check')
+      return NextResponse.json({ error: 'Admin user not properly configured' }, { status: 500 })
     }
 
     const body = await request.json()
@@ -123,19 +161,28 @@ export async function POST(request: NextRequest) {
       published_at: published_at || (shouldPublish ? now : null),
     }
 
+    console.log('POST /api/admin/posts - Inserting post with data:', postData)
+
     const { data: post, error: postError } = await (supabase as any)
       .from('posts')
       .insert(postData)
       .select()
       .single()
 
-    if (postError) throw postError
+    if (postError) {
+      console.error('Error inserting post:', postError)
+      console.error('Error details:', JSON.stringify(postError, null, 2))
+      throw postError
+    }
+
+    console.log('POST /api/admin/posts - Post created successfully:', post)
 
     return NextResponse.json({ post })
   } catch (error) {
     console.error('Error creating post:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Failed to create post'
     return NextResponse.json(
-      { error: 'Failed to create post' },
+      { error: errorMessage, details: error },
       { status: 500 }
     )
   }

@@ -26,6 +26,8 @@ export const FACTORS = [
   { value: 'relationship', label: 'Отношения' },
   { value: 'finances', label: 'Финансы' },
   { value: 'health', label: 'Здоровье' },
+  { value: 'entertainment', label: 'Развлечения' },
+  { value: 'rest', label: 'Отдых' },
 ]
 
 export const SUBSCRIPTION_TIERS = {

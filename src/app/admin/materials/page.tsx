@@ -2,13 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import type { Database } from '@/types/database'
-import dynamicImport from 'next/dynamic'
-
-// Import ReactQuill dynamically to avoid SSR issues
-const ReactQuill = dynamicImport(() => import('react-quill'), { ssr: false })
-import 'react-quill/dist/quill.snow.css'
-
-export const dynamic = 'force-dynamic'
+import RichTextEditor from '@/components/admin/RichTextEditor'
 
 type Post = Database['public']['Tables']['posts']['Row']
 
@@ -61,11 +55,19 @@ function MaterialModal({ isOpen, onClose, onSave, post }: MaterialModalProps) {
         }),
       })
 
-      if (!response.ok) throw new Error('Failed to save post')
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+        console.error('Error response:', errorData)
+        console.error('Full error details:', JSON.stringify(errorData, null, 2))
+        const errorMsg = errorData.error || `Failed to save post (${response.status})`
+        const details = errorData.details ? `\n\nDetails: ${JSON.stringify(errorData.details, null, 2)}` : ''
+        throw new Error(errorMsg + details)
+      }
 
       onSave()
       onClose()
     } catch (err) {
+      console.error('Error saving post:', err)
       alert(err instanceof Error ? err.message : 'Failed to save post')
     } finally {
       setSaving(false)
@@ -77,14 +79,24 @@ function MaterialModal({ isOpen, onClose, onSave, post }: MaterialModalProps) {
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+        {/* Backdrop */}
         <div
           className="fixed inset-0 transition-opacity"
-          style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
+          style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 1 }}
           onClick={onClose}
+          aria-hidden="true"
         />
 
-        <div className="inline-block align-bottom rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full"
-          style={{ backgroundColor: '#F5F1EB' }}
+        {/* Center alignment helper */}
+        <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">
+          &#8203;
+        </span>
+
+        {/* Modal panel */}
+        <div 
+          className="inline-block align-bottom rounded-2xl text-left overflow-visible shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full"
+          style={{ backgroundColor: '#F5F1EB', position: 'relative', zIndex: 10 }}
+          onClick={(e) => e.stopPropagation()}
         >
           <div className="px-8 pt-8 pb-4">
             <div className="flex items-center justify-between mb-6">
@@ -128,21 +140,7 @@ function MaterialModal({ isOpen, onClose, onSave, post }: MaterialModalProps) {
                   Текст
                 </label>
                 <div className="rounded-lg overflow-hidden" style={{ backgroundColor: '#FFFFFF' }}>
-                  <ReactQuill
-                    theme="snow"
-                    value={content}
-                    onChange={setContent}
-                    modules={{
-                      toolbar: [
-                        [{ 'header': [1, 2, 3, false] }],
-                        ['bold', 'italic', 'underline', 'strike'],
-                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                        ['link'],
-                        ['clean']
-                      ],
-                    }}
-                    style={{ minHeight: '300px' }}
-                  />
+                  {isOpen && <RichTextEditor value={content} onChange={setContent} />}
                 </div>
               </div>
 
