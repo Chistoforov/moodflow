@@ -3,13 +3,6 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 export async function middleware(req: NextRequest) {
-  // Создаем базовый response
-  let response = NextResponse.next({
-    request: {
-      headers: req.headers,
-    },
-  })
-
   try {
     // Проверка наличия переменных окружения
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -18,8 +11,11 @@ export async function middleware(req: NextRequest) {
     // Если нет переменных окружения - пропускаем без ошибок
     if (!supabaseUrl || !supabaseAnonKey) {
       console.warn('Supabase environment variables are not set')
-      return response
+      return NextResponse.next()
     }
+
+    // Создаем базовый response
+    let response = NextResponse.next()
 
     // Создаем Supabase клиент для Edge Runtime
     const supabase = createServerClient(
@@ -81,7 +77,7 @@ export async function middleware(req: NextRequest) {
   } catch (error) {
     // Логируем ошибку, но не ломаем приложение
     console.error('Middleware error:', error)
-    return response
+    return NextResponse.next()
   }
 }
 
