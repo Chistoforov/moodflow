@@ -4,8 +4,12 @@
   "outputDirectory": ".next",
   "crons": [
     {
+      "path": "/api/cron/monthly-analytics",
+      "schedule": "0 0 * * *"
+    },
+    {
       "path": "/api/cron/weekly-summaries",
-      "schedule": "0 23 * * 0"
+      "schedule": "0 0 * * 0"
     }
   ]
 }

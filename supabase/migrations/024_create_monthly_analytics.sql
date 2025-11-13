@@ -89,3 +89,4 @@ CREATE TRIGGER update_monthly_analytics_updated_at
   EXECUTE FUNCTION update_monthly_analytics_updated_at();
 
 
+

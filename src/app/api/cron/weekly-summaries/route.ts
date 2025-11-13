@@ -1,10 +1,15 @@
-import { createRouteHandlerClient } from '@/lib/supabase/route-handler'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { createRouteHandlerClient } from '@/lib/supabase/route-handler'
 import type { Database } from '@/types/database'
 import { perplexityService } from '@/lib/integrations/perplexity'
 import { telegramService } from '@/lib/integrations/telegram'
 
+/**
+ * GET /api/cron/weekly-summaries
+ * 
+ * Cron job for weekly summaries - runs every Sunday
+ */
 export async function GET(request: NextRequest) {
   // Verify cron secret - support both Vercel cron header and Bearer token
   const vercelCronHeader = request.headers.get('x-vercel-cron')

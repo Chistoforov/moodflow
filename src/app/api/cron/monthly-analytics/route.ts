@@ -1,6 +1,6 @@
-import { createRouteHandlerClient } from '@/lib/supabase/route-handler'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { createRouteHandlerClient } from '@/lib/supabase/route-handler'
 import type { Database } from '@/types/database'
 import { perplexityService } from '@/lib/integrations/perplexity'
 import { startOfMonth, endOfMonth, differenceInDays, lastDayOfMonth } from 'date-fns'
@@ -8,9 +8,7 @@ import { startOfMonth, endOfMonth, differenceInDays, lastDayOfMonth } from 'date
 /**
  * GET /api/cron/monthly-analytics
  * 
- * Automatically generates monthly analytics for all active users
- * Should be run daily via cron job
- * Checks if it's time to generate analytics (every 7 days or last day of month)
+ * Cron job for monthly analytics - runs daily
  */
 export async function GET(request: NextRequest) {
   // Verify cron secret - support both Vercel cron header and Bearer token
@@ -192,5 +190,4 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }
-
 
