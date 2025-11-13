@@ -39,7 +39,20 @@ export class PerplexityService {
   private baseUrl = 'https://api.perplexity.ai'
 
   constructor() {
-    this.apiKey = process.env.PERPLEXITY_API_KEY!
+    this.apiKey = process.env.PERPLEXITY_API_KEY || ''
+    if (!this.apiKey) {
+      console.error('❌ PERPLEXITY_API_KEY is not set in environment variables')
+    } else {
+      console.log('✅ PERPLEXITY_API_KEY is configured (length:', this.apiKey.length, ')')
+    }
+  }
+  
+  private checkApiKey(): void {
+    if (!this.apiKey) {
+      console.error('❌ Perplexity API key check failed - key is missing')
+      throw new Error('Perplexity API key is not configured. Please set PERPLEXITY_API_KEY environment variable.')
+    }
+    console.log('✅ Perplexity API key check passed')
   }
 
   async analyzeWeeklySummary(req: AnalysisRequest): Promise<AnalysisResponse> {
@@ -109,7 +122,14 @@ ${entriesText}
   }
 
   async analyzeMonthlyMood(req: MonthlyAnalysisRequest): Promise<MonthlyAnalysisResponse> {
+    this.checkApiKey()
+    
     const prompt = this.buildMonthlyAnalysisPrompt(req.entries, req.weekNumber, req.totalDays)
+
+    console.log('Starting Perplexity API call for monthly analysis...')
+    console.log('Entries count:', req.entries.length)
+    console.log('Week number:', req.weekNumber)
+    console.log('Total days:', req.totalDays)
 
     try {
       const response = await fetch(`${this.baseUrl}/chat/completions`, {
@@ -136,17 +156,38 @@ ${entriesText}
       })
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
+        const errorText = await response.text()
+        console.error('Perplexity API error response:', errorText)
+        console.error('Response status:', response.status)
+        console.error('Response headers:', Object.fromEntries(response.headers.entries()))
+        
+        let errorData
+        try {
+          errorData = JSON.parse(errorText)
+        } catch {
+          errorData = { raw: errorText }
+        }
+        
         throw new Error(`Perplexity API error: ${response.status} - ${JSON.stringify(errorData)}`)
       }
 
       const data = await response.json()
+      console.log('Perplexity API response received successfully')
+      
+      if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+        console.error('Invalid response structure:', JSON.stringify(data))
+        throw new Error('Invalid response structure from Perplexity API')
+      }
+      
       const content = data.choices[0].message.content
+      console.log('Analysis content length:', content.length)
       
       return this.parseMonthlyAnalysisResponse(content)
-    } catch (error) {
+    } catch (error: any) {
       console.error('Perplexity monthly analysis error:', error)
-      throw new Error('Failed to analyze monthly mood data')
+      console.error('Error message:', error.message)
+      console.error('Error stack:', error.stack)
+      throw error
     }
   }
 

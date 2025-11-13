@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import type { Database } from '@/types/database'
+import AnalysisConfirmModal from '@/components/admin/AnalysisConfirmModal'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,6 +14,13 @@ export default function UsersPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [updatingUserId, setUpdatingUserId] = useState<string | null>(null)
+  const [analyzingUserId, setAnalyzingUserId] = useState<string | null>(null)
+  const [analysisMessage, setAnalysisMessage] = useState<string | null>(null)
+  const [confirmModal, setConfirmModal] = useState<{ isOpen: boolean; userId: string; userName: string }>({
+    isOpen: false,
+    userId: '',
+    userName: ''
+  })
 
   useEffect(() => {
     fetchUsers()
@@ -64,6 +72,56 @@ export default function UsersPage() {
     return user.subscription_tier as Role
   }
 
+  const openConfirmModal = (userId: string, userName: string) => {
+    setConfirmModal({ isOpen: true, userId, userName })
+  }
+
+  const closeConfirmModal = () => {
+    setConfirmModal({ isOpen: false, userId: '', userName: '' })
+  }
+
+  const handleManualAnalysis = async () => {
+    const { userId } = confirmModal
+
+    try {
+      setAnalyzingUserId(userId)
+      setAnalysisMessage(null)
+      
+      const response = await fetch('/api/admin/analytics/manual', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        if (response.status === 400 && data.error === 'Not enough entries for analysis') {
+          setAnalysisMessage(`❌ Недостаточно записей для анализа (минимум 3, найдено: ${data.entriesCount})`)
+        } else if (response.status === 200 && data.message === 'Analysis already exists for this period') {
+          setAnalysisMessage('ℹ️ Анализ для этого периода уже существует')
+        } else {
+          throw new Error(data.error || 'Failed to generate analysis')
+        }
+      } else {
+        setAnalysisMessage(
+          `✅ Анализ успешно создан! Проанализировано ${data.metadata.daysAnalyzed} дней и ${data.metadata.entriesAnalyzed} записей.`
+        )
+      }
+
+      // Clear message after 5 seconds
+      setTimeout(() => setAnalysisMessage(null), 5000)
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Failed to generate analysis'
+      setAnalysisMessage(`❌ Ошибка: ${errorMsg}`)
+      setTimeout(() => setAnalysisMessage(null), 5000)
+    } finally {
+      setAnalyzingUserId(null)
+    }
+  }
+
   if (loading) {
     return (
       <div className="px-4 sm:px-0">
@@ -100,6 +158,12 @@ export default function UsersPage() {
         </p>
       </div>
 
+      {analysisMessage && (
+        <div className="mb-4 p-4 rounded-lg" style={{ backgroundColor: '#E8E2D5' }}>
+          <p style={{ color: '#8B3A3A' }}>{analysisMessage}</p>
+        </div>
+      )}
+
       <div className="rounded-2xl shadow-sm overflow-hidden" style={{ backgroundColor: '#F5F1EB' }}>
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y" style={{ borderColor: '#D4C8B5' }}>
@@ -128,6 +192,12 @@ export default function UsersPage() {
                   style={{ color: '#8B3A3A' }}
                 >
                   Дата регистрации
+                </th>
+                <th
+                  className="px-6 py-4 text-left text-sm font-semibold"
+                  style={{ color: '#8B3A3A' }}
+                >
+                  Действия
                 </th>
               </tr>
             </thead>
@@ -170,6 +240,27 @@ export default function UsersPage() {
                       day: 'numeric',
                     })}
                   </td>
+                  <td className="px-6 py-4 text-sm">
+                    <button
+                      onClick={() => openConfirmModal(user.id, user.full_name || user.email)}
+                      disabled={analyzingUserId === user.id}
+                      className="px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-80"
+                      style={{
+                        backgroundColor: '#8B3A3A',
+                        color: '#FFFFFF',
+                      }}
+                      title="Запустить анализ настроения за текущий месяц"
+                    >
+                      {analyzingUserId === user.id ? (
+                        <span className="flex items-center gap-2">
+                          <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                          Анализ...
+                        </span>
+                      ) : (
+                        '📊 Анализ'
+                      )}
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -184,6 +275,14 @@ export default function UsersPage() {
           </div>
         )}
       </div>
+
+      {/* Модалка подтверждения */}
+      <AnalysisConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={closeConfirmModal}
+        onConfirm={handleManualAnalysis}
+        userName={confirmModal.userName}
+      />
     </div>
   )
 }

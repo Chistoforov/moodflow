@@ -40,15 +40,18 @@ export async function PATCH(
         .from('users')
         .select('email, full_name, sso_uid')
         .eq('id', userId)
-        .single() as any
+        .single()
 
-      if (user) {
+      type UserData = { email: string; full_name: string | null; sso_uid: string } | null
+      const userData = user as UserData
+
+      if (userData) {
         await (supabase as any)
           .from('psychologists')
           .upsert({
-            user_id: user.sso_uid,
-            email: user.email,
-            full_name: user.full_name || 'Admin',
+            user_id: userData.sso_uid,
+            email: userData.email,
+            full_name: userData.full_name || 'Admin',
             role: 'admin',
             active: true
           } as Database['public']['Tables']['psychologists']['Insert'])
@@ -61,13 +64,16 @@ export async function PATCH(
         .from('users')
         .select('sso_uid')
         .eq('id', userId)
-        .single() as any
+        .single()
 
-      if (user) {
+      type UserSsoData = { sso_uid: string } | null
+      const userSsoData = user as UserSsoData
+
+      if (userSsoData) {
         await (supabase as any)
           .from('psychologists')
           .update({ active: false })
-          .eq('user_id', user.sso_uid)
+          .eq('user_id', userSsoData.sso_uid)
       }
     }
 

@@ -14,9 +14,12 @@ async function checkAdminRole(supabase: any, session: any) {
     .eq('sso_uid', session.user.id)
     .maybeSingle()
 
-  console.log('checkAdminRole - User query result:', { user, error: userError })
+  type UserSsoData = { sso_uid: string } | null
+  const userSsoData = user as UserSsoData
 
-  if (!user) {
+  console.log('checkAdminRole - User query result:', { user: userSsoData, error: userError })
+
+  if (!userSsoData) {
     console.error('User not found in users table:', session.user.id)
     return { isAdmin: false, psychologistId: null }
   }
@@ -24,7 +27,7 @@ async function checkAdminRole(supabase: any, session: any) {
   const { data: psychologist, error: psychError } = await supabase
     .from('psychologists')
     .select('*')
-    .eq('user_id', user.sso_uid)
+    .eq('user_id', userSsoData.sso_uid)
     .maybeSingle()
 
   console.log('checkAdminRole - Psychologist query result:', { psychologist, error: psychError })
@@ -33,7 +36,7 @@ async function checkAdminRole(supabase: any, session: any) {
   const psychologistData = psychologist as Psychologist | null
 
   if (!psychologistData) {
-    console.error('Psychologist not found for user_id:', user.sso_uid)
+    console.error('Psychologist not found for user_id:', userSsoData.sso_uid)
     return { isAdmin: false, psychologistId: null }
   }
 
