@@ -179,12 +179,14 @@ export async function POST(request: NextRequest) {
       }, { status: 500 })
     }
     
+    const userDataAny = userData as any
+    
     return NextResponse.json({
       message: 'Analysis completed successfully',
       analysis: newAnalysis,
       metadata: {
         userId,
-        userName: userData.full_name || userData.email,
+        userName: userDataAny.full_name || userDataAny.email || 'Unknown',
         weekNumber,
         daysAnalyzed: daysInMonth,
         entriesAnalyzed: entriesData.length,
