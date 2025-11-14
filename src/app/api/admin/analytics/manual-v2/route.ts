@@ -13,6 +13,10 @@ import { endOfMonth, differenceInDays, lastDayOfMonth } from 'date-fns'
  */
 export async function POST(request: NextRequest) {
   const API_VERSION = 'v3-debug-2024-11-14'
+  
+  // IMMEDIATE TEST RESPONSE - to verify new code is deployed
+  console.log('🚀 NEW API v2 endpoint called!')
+  
   const supabase = await createRouteHandlerClient()
 
   try {
@@ -20,7 +24,11 @@ export async function POST(request: NextRequest) {
     const { data: { user: authUser }, error: authError } = await supabase.auth.getUser()
     
     if (authError || !authUser) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ 
+        error: 'Unauthorized',
+        apiVersion: API_VERSION,
+        message: 'NEW CODE v2 IS RUNNING - Auth failed'
+      }, { status: 401 })
     }
 
     // Get user's sso_uid first (needed for psychologists table)
