@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import type { Database } from '@/types/database'
+import { perplexityService } from '@/lib/integrations/perplexity'
+import { endOfMonth, differenceInDays, lastDayOfMonth } from 'date-fns'
 
 /**
  * NEW CLEAN ENDPOINT - Admin Analytics
@@ -75,13 +77,119 @@ export async function POST(request: NextRequest) {
       }, { status: 404 })
     }
     
-    // Success - user found!
+    // User found! Now proceed with analysis
+    console.log('✅ User found, proceeding with analysis...')
+    
+    const now = new Date()
+    const currentYear = now.getFullYear()
+    const currentMonth = now.getMonth() + 1
+    
+    const monthStart = new Date(currentYear, currentMonth - 1, 1)
+    const monthEnd = endOfMonth(monthStart)
+    const lastDay = lastDayOfMonth(monthStart)
+    
+    const daysInMonth = differenceInDays(
+      now > monthEnd ? monthEnd : now,
+      monthStart
+    ) + 1
+    
+    const weekNumber = Math.ceil(daysInMonth / 7)
+    
+    // Check if analysis already exists
+    const { data: existingAnalysis } = await supabase
+      .from('monthly_analytics')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('year', currentYear)
+      .eq('month', currentMonth)
+      .eq('week_number', weekNumber)
+      .maybeSingle()
+    
+    if (existingAnalysis) {
+      return NextResponse.json({
+        message: 'Analysis already exists for this period',
+        analysis: existingAnalysis
+      }, { status: 200 })
+    }
+    
+    // Get entries
+    const { data: entriesData, error: entriesError } = await supabase
+      .from('daily_entries')
+      .select('*')
+      .eq('user_id', userId)
+      .gte('entry_date', monthStart.toISOString().split('T')[0])
+      .lte('entry_date', (now > monthEnd ? monthEnd : now).toISOString().split('T')[0])
+      .eq('is_deleted', false)
+      .order('entry_date', { ascending: true })
+    
+    if (entriesError || !entriesData || entriesData.length < 3) {
+      return NextResponse.json({
+        error: 'Not enough entries for analysis',
+        details: 'Minimum 3 entries required',
+        entriesCount: entriesData?.length || 0
+      }, { status: 400 })
+    }
+    
+    console.log('📊 Analyzing', entriesData.length, 'entries with Perplexity...')
+    
+    // Analyze with Perplexity
+    const analysis = await perplexityService.analyzeMonthlyMood({
+      entries: entriesData.map(e => ({
+        date: e.entry_date,
+        mood: e.mood_score || 3,
+        text: e.text_entry || '',
+        factors: e.factors || []
+      })),
+      weekNumber,
+      totalDays: daysInMonth
+    })
+    
+    console.log('✅ Analysis completed')
+    
+    // Save analytics
+    const isLastDay = now.getDate() === lastDay.getDate()
+    
+    const { data: newAnalysis, error: insertError } = await supabase
+      .from('monthly_analytics')
+      .insert({
+        user_id: userId,
+        year: currentYear,
+        month: currentMonth,
+        week_number: weekNumber,
+        days_analyzed: daysInMonth,
+        analysis_text: analysis.fullText,
+        general_impression: analysis.generalImpression,
+        positive_trends: analysis.positiveTrends,
+        decline_reasons: analysis.declineReasons,
+        recommendations: analysis.recommendations,
+        reflection_directions: analysis.reflectionDirections,
+        is_final: isLastDay,
+        status: 'completed'
+      })
+      .select()
+      .single()
+    
+    if (insertError) {
+      console.error('Failed to save analytics:', insertError)
+      return NextResponse.json({
+        error: 'Failed to save analysis',
+        details: insertError.message
+      }, { status: 500 })
+    }
+    
     return NextResponse.json({
-      success: true,
-      version: 'start-analysis-v1',
-      deploymentCheck: 'NEW_CLEAN_ENDPOINT_WORKING',
-      message: 'User found successfully! (Analysis not yet implemented)',
-      userData: JSON.parse(JSON.stringify(userData))
+      message: 'Analysis completed successfully',
+      analysis: newAnalysis,
+      metadata: {
+        userId,
+        userName: userData.full_name || userData.email,
+        weekNumber,
+        daysAnalyzed: daysInMonth,
+        entriesAnalyzed: entriesData.length,
+        isFinal: isLastDay,
+        month: currentMonth,
+        year: currentYear
+      }
     })
     
   } catch (error: any) {
