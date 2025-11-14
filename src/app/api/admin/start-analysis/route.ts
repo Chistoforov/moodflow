@@ -95,11 +95,14 @@ export async function POST(request: NextRequest) {
     
     const weekNumber = Math.ceil(daysInMonth / 7)
     
-    // Check if analysis already exists
+    // Check if analysis already exists (using sso_uid)
+    const userDataCheck = userData as any
+    const authUserIdCheck = userDataCheck.sso_uid
+    
     const { data: existingAnalysis } = await supabase
       .from('monthly_analytics')
       .select('*')
-      .eq('user_id', userId)
+      .eq('user_id', authUserIdCheck)
       .eq('year', currentYear)
       .eq('month', currentMonth)
       .eq('week_number', weekNumber)
@@ -149,8 +152,19 @@ export async function POST(request: NextRequest) {
     // Save analytics
     const isLastDay = now.getDate() === lastDay.getDate()
     
+    // Use sso_uid for monthly_analytics because it references auth.users(id)
+    const userDataAny2 = userData as any
+    const authUserId = userDataAny2.sso_uid
+    
+    if (!authUserId) {
+      return NextResponse.json({
+        error: 'User sso_uid not found',
+        details: 'Cannot create analytics without auth user id'
+      }, { status: 500 })
+    }
+    
     const analyticsData = {
-      user_id: userId,
+      user_id: authUserId, // Use sso_uid, not public.users.id!
       year: currentYear,
       month: currentMonth,
       week_number: weekNumber,
