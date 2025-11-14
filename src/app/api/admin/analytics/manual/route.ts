@@ -9,8 +9,10 @@ import { endOfMonth, differenceInDays, lastDayOfMonth } from 'date-fns'
  * POST /api/admin/analytics/manual
  * 
  * Manual trigger for monthly analytics for a specific user
+ * VERSION: v3-debug-2024-11-14
  */
 export async function POST(request: NextRequest) {
+  const API_VERSION = 'v3-debug-2024-11-14'
   const supabase = await createRouteHandlerClient()
 
   try {
@@ -104,8 +106,9 @@ export async function POST(request: NextRequest) {
     if (userError || !user) {
       console.error('❌ User not found:', { userId, userError })
       return NextResponse.json({ 
-        error: 'User not found [v2 with debug]',
-        version: 'v2-debug-enabled',
+        error: 'User not found [NEW VERSION DEPLOYED]',
+        apiVersion: API_VERSION,
+        deploymentCheck: 'NEW_CODE_IS_RUNNING',
         timestamp: new Date().toISOString(),
         debug: {
           userId,
@@ -116,7 +119,9 @@ export async function POST(request: NextRequest) {
           errorMessage: userError?.message,
           errorCode: userError?.code,
           errorDetails: userError?.details,
-          errorHint: userError?.hint
+          errorHint: userError?.hint,
+          // Additional diagnostics
+          userErrorFull: userError ? JSON.stringify(userError) : null
         }
       }, { status: 404 })
     }
