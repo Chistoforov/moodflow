@@ -1,9 +1,11 @@
 'use client'
 
+import { useState } from 'react'
+
 interface AnalysisConfirmModalProps {
   isOpen: boolean
   onClose: () => void
-  onConfirm: () => void
+  onConfirm: (forceRecreate: boolean) => void
   userName: string
 }
 
@@ -13,11 +15,19 @@ export default function AnalysisConfirmModal({
   onConfirm,
   userName
 }: AnalysisConfirmModalProps) {
+  const [forceRecreate, setForceRecreate] = useState(false)
+
   if (!isOpen) return null
 
   const handleConfirm = () => {
-    onConfirm()
+    onConfirm(forceRecreate)
     onClose()
+    setForceRecreate(false) // Reset for next time
+  }
+
+  const handleClose = () => {
+    onClose()
+    setForceRecreate(false) // Reset on close
   }
 
   return (
@@ -68,10 +78,39 @@ export default function AnalysisConfirmModal({
           Система проанализирует записи пользователя за текущий месяц и создаст отчёт с рекомендациями.
         </p>
 
+        {/* Чекбокс для принудительного пересоздания */}
+        <div 
+          className="mb-6 p-4 rounded-xl"
+          style={{
+            backgroundColor: '#E8E2D5',
+          }}
+        >
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={forceRecreate}
+              onChange={(e) => setForceRecreate(e.target.checked)}
+              className="mt-1 w-4 h-4 rounded border-2 cursor-pointer"
+              style={{
+                accentColor: '#8B3A3A',
+                borderColor: '#8B3A3A',
+              }}
+            />
+            <div>
+              <p className="text-sm font-medium">
+                Пересоздать анализ
+              </p>
+              <p className="text-xs mt-1" style={{ color: '#A67C6C' }}>
+                Если анализ уже существует, он будет удалён и создан заново
+              </p>
+            </div>
+          </label>
+        </div>
+
         {/* Кнопки */}
         <div className="flex gap-3">
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="flex-1 px-5 py-3 rounded-xl font-semibold transition-all"
             style={{
               backgroundColor: '#E8E2D5',

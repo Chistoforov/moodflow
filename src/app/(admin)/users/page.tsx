@@ -80,7 +80,7 @@ export default function UsersPage() {
     setConfirmModal({ isOpen: false, userId: '', userName: '' })
   }
 
-  const handleManualAnalysis = async () => {
+  const handleManualAnalysis = async (forceRecreate: boolean) => {
     const { userId } = confirmModal
 
     try {
@@ -92,7 +92,7 @@ export default function UsersPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ userId }),
+        body: JSON.stringify({ userId, forceRecreate }),
       })
 
       const data = await response.json()
@@ -100,15 +100,20 @@ export default function UsersPage() {
       if (!response.ok) {
         if (response.status === 400 && data.error === 'Not enough entries for analysis') {
           setAnalysisMessage(`❌ Недостаточно записей для анализа (минимум 3, найдено: ${data.entriesCount})`)
-        } else if (response.status === 200 && data.message === 'Analysis already exists for this period') {
-          setAnalysisMessage('ℹ️ Анализ для этого периода уже существует')
         } else {
           throw new Error(data.error || 'Failed to generate analysis')
         }
       } else {
-        setAnalysisMessage(
-          `✅ Анализ успешно создан! Проанализировано ${data.metadata.daysAnalyzed} дней и ${data.metadata.entriesAnalyzed} записей.`
-        )
+        // Check if analysis already exists
+        if (data.message === 'Analysis already exists for this period') {
+          setAnalysisMessage('ℹ️ Анализ для этого периода уже существует')
+        } else if (data.metadata) {
+          setAnalysisMessage(
+            `✅ Анализ успешно создан! Проанализировано ${data.metadata.daysAnalyzed} дней и ${data.metadata.entriesAnalyzed} записей.`
+          )
+        } else {
+          setAnalysisMessage('✅ Анализ успешно завершен')
+        }
       }
 
       // Clear message after 5 seconds

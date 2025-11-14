@@ -54,7 +54,9 @@ export async function POST(request: NextRequest) {
 
     // Get userId from request body
     const body = await request.json()
-    const { userId } = body
+    const { userId, forceRecreate = false } = body
+
+    console.log('📝 Requested userId:', userId, 'forceRecreate:', forceRecreate)
 
     if (!userId) {
       return NextResponse.json({ error: 'userId is required' }, { status: 400 })
@@ -152,11 +154,29 @@ export async function POST(request: NextRequest) {
       .eq('week_number', weekNumber)
       .maybeSingle()
 
-    if (existingAnalysis) {
+    if (existingAnalysis && !forceRecreate) {
       return NextResponse.json({ 
         message: 'Analysis already exists for this period',
         analysis: existingAnalysis
       }, { status: 200 })
+    }
+
+    // If forceRecreate is true and analysis exists, delete it first
+    if (existingAnalysis && forceRecreate) {
+      console.log('🗑️ Deleting existing analysis to recreate...')
+      const { error: deleteError } = await supabaseAdmin
+        .from('monthly_analytics')
+        .delete()
+        .eq('id', existingAnalysis.id)
+      
+      if (deleteError) {
+        console.error('Failed to delete existing analysis:', deleteError)
+        return NextResponse.json({
+          error: 'Failed to delete existing analysis',
+          details: deleteError.message
+        }, { status: 500 })
+      }
+      console.log('✅ Existing analysis deleted')
     }
 
     // Get all entries for the month up to today (using admin client)
