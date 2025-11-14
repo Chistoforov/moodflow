@@ -108,20 +108,23 @@ export async function POST(request: NextRequest) {
       .eq('week_number', weekNumber)
       .maybeSingle()
     
-    if (existingAnalysis && !forceRecreate) {
+    type MonthlyAnalysis = Database['public']['Tables']['monthly_analytics']['Row']
+    const existingAnalysisTyped = existingAnalysis as MonthlyAnalysis | null
+    
+    if (existingAnalysisTyped && !forceRecreate) {
       return NextResponse.json({
         message: 'Analysis already exists for this period',
-        analysis: existingAnalysis
+        analysis: existingAnalysisTyped
       }, { status: 200 })
     }
     
     // If forceRecreate is true and analysis exists, delete it first
-    if (existingAnalysis && forceRecreate) {
+    if (existingAnalysisTyped && forceRecreate) {
       console.log('🗑️ Deleting existing analysis to recreate...')
       const { error: deleteError } = await supabase
         .from('monthly_analytics')
         .delete()
-        .eq('id', existingAnalysis.id)
+        .eq('id', existingAnalysisTyped.id)
       
       if (deleteError) {
         console.error('Failed to delete existing analysis:', deleteError)
