@@ -234,3 +234,4 @@ SELECT COUNT(*) FROM pg_policies WHERE tablename = 'monthly_analytics';
 **Время диагностики:** ~5 минут  
 **Время исправления:** ~2 минуты (применение SQL)
 
+

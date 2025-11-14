@@ -93,3 +93,4 @@ CREATE TRIGGER update_monthly_analytics_updated_at
   FOR EACH ROW
   EXECUTE FUNCTION update_monthly_analytics_updated_at();
 
+

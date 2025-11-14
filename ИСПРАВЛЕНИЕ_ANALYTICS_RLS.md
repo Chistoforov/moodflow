@@ -235,3 +235,4 @@ git push origin main
 - ✅ `supabase/migrations/024_create_monthly_analytics_fixed.sql`
 - ✅ `supabase/migrations/025_fix_monthly_analytics_admin_insert_fixed.sql`
 
+

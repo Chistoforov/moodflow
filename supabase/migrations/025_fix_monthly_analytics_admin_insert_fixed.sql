@@ -45,3 +45,4 @@ CREATE POLICY "Admins can delete monthly analytics"
     )
   );
 
+

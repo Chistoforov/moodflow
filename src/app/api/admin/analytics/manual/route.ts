@@ -59,6 +59,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Get user data
+    console.log('🔍 Attempting to fetch user:', userId)
+    console.log('🔍 Current auth user:', authUser.id)
+    
     const { data: userData, error: userError } = await supabase
       .from('users')
       .select('*')
@@ -68,8 +71,19 @@ export async function POST(request: NextRequest) {
     type User = Database['public']['Tables']['users']['Row']
     const user = userData as User | null
 
+    console.log('📊 User query result:', { userData, userError })
+
     if (userError || !user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+      console.error('❌ User not found:', { userId, userError })
+      return NextResponse.json({ 
+        error: 'User not found',
+        details: {
+          userId,
+          errorMessage: userError?.message,
+          errorCode: userError?.code,
+          errorDetails: userError?.details
+        }
+      }, { status: 404 })
     }
 
     const now = new Date()

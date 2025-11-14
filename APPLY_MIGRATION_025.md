@@ -243,3 +243,4 @@ DROP POLICY IF EXISTS "Admins can delete monthly analytics" ON public.monthly_an
 
 **Миграция 025** | Критическое исправление | Ноябрь 2024
 
+
