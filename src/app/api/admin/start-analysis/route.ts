@@ -52,9 +52,9 @@ export async function POST(request: NextRequest) {
     // Fetch user
     const { data: userData, error: userError } = await supabase
       .from('users')
-      .select('*')
+      .select('id, email, full_name, sso_uid, subscription_tier')
       .eq('id', userId)
-      .single()
+      .maybeSingle()
     
     console.log('📊 User fetch result:', { found: !!userData, error: !!userError })
     
@@ -82,8 +82,8 @@ export async function POST(request: NextRequest) {
       message: 'User found successfully! (Analysis not yet implemented)',
       user: {
         id: userData.id,
-        email: userData.email,
-        fullName: userData.full_name
+        email: userData.email || 'N/A',
+        fullName: userData.full_name || 'N/A'
       }
     })
     
