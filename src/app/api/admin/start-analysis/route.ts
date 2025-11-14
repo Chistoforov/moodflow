@@ -79,12 +79,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       version: 'start-analysis-v1',
+      deploymentCheck: 'NEW_CLEAN_ENDPOINT_WORKING',
       message: 'User found successfully! (Analysis not yet implemented)',
-      user: {
-        id: userData.id,
-        email: userData.email || 'N/A',
-        fullName: userData.full_name || 'N/A'
-      }
+      userData: JSON.parse(JSON.stringify(userData))
     })
     
   } catch (error: any) {
