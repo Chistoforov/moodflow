@@ -58,11 +58,25 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'userId is required' }, { status: 400 })
     }
 
-    // Get user data
+    // Get user data using service role to bypass RLS
+    // Admin rights already verified above, so safe to use service role
     console.log('🔍 Attempting to fetch user:', userId)
     console.log('🔍 Current auth user:', authUser.id)
     
-    const { data: userData, error: userError } = await supabase
+    // Create service role client for admin operations
+    const { createClient } = await import('@supabase/supabase-js')
+    const supabaseAdmin = createClient<Database>(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    )
+    
+    const { data: userData, error: userError } = await supabaseAdmin
       .from('users')
       .select('*')
       .eq('id', userId)
@@ -71,7 +85,7 @@ export async function POST(request: NextRequest) {
     type User = Database['public']['Tables']['users']['Row']
     const user = userData as User | null
 
-    console.log('📊 User query result:', { userData, userError })
+    console.log('📊 User query result:', { found: !!userData, hasError: !!userError })
 
     if (userError || !user) {
       console.error('❌ User not found:', { userId, userError })
@@ -102,8 +116,8 @@ export async function POST(request: NextRequest) {
     
     const weekNumber = Math.ceil(daysInMonth / 7)
     
-    // Check if analysis already exists for this week
-    const { data: existingAnalysis } = await supabase
+    // Check if analysis already exists for this week (using admin client)
+    const { data: existingAnalysis } = await supabaseAdmin
       .from('monthly_analytics')
       .select('*')
       .eq('user_id', user.id)
@@ -119,8 +133,8 @@ export async function POST(request: NextRequest) {
       }, { status: 200 })
     }
 
-    // Get all entries for the month up to today
-    const { data: entriesData, error: entriesError } = await supabase
+    // Get all entries for the month up to today (using admin client)
+    const { data: entriesData, error: entriesError } = await supabaseAdmin
       .from('daily_entries')
       .select('*')
       .eq('user_id', user.id)
@@ -179,7 +193,7 @@ export async function POST(request: NextRequest) {
       status: 'completed',
     }
     
-    const { data: newAnalysis, error: insertError } = await supabase
+    const { data: newAnalysis, error: insertError } = await supabaseAdmin
       .from('monthly_analytics')
       .insert(analyticsData as any)
       .select()
