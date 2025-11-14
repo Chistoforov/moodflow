@@ -104,7 +104,9 @@ export async function POST(request: NextRequest) {
     if (userError || !user) {
       console.error('❌ User not found:', { userId, userError })
       return NextResponse.json({ 
-        error: 'User not found',
+        error: 'User not found [v2 with debug]',
+        version: 'v2-debug-enabled',
+        timestamp: new Date().toISOString(),
         debug: {
           userId,
           authUserId: authUser.id,
