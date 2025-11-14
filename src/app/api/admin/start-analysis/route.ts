@@ -149,23 +149,25 @@ export async function POST(request: NextRequest) {
     // Save analytics
     const isLastDay = now.getDate() === lastDay.getDate()
     
+    const analyticsData = {
+      user_id: userId,
+      year: currentYear,
+      month: currentMonth,
+      week_number: weekNumber,
+      days_analyzed: daysInMonth,
+      analysis_text: analysis.fullText,
+      general_impression: analysis.generalImpression,
+      positive_trends: analysis.positiveTrends,
+      decline_reasons: analysis.declineReasons,
+      recommendations: analysis.recommendations,
+      reflection_directions: analysis.reflectionDirections,
+      is_final: isLastDay,
+      status: 'completed' as const
+    }
+    
     const { data: newAnalysis, error: insertError } = await supabase
       .from('monthly_analytics')
-      .insert({
-        user_id: userId,
-        year: currentYear,
-        month: currentMonth,
-        week_number: weekNumber,
-        days_analyzed: daysInMonth,
-        analysis_text: analysis.fullText,
-        general_impression: analysis.generalImpression,
-        positive_trends: analysis.positiveTrends,
-        decline_reasons: analysis.declineReasons,
-        recommendations: analysis.recommendations,
-        reflection_directions: analysis.reflectionDirections,
-        is_final: isLastDay,
-        status: 'completed'
-      })
+      .insert(analyticsData as any)
       .select()
       .single()
     
