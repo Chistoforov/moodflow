@@ -262,6 +262,20 @@ ${entriesText}
     return moodTexts[mood] || 'Неизвестно'
   }
 
+  private formatText(text: string): string {
+    // Удаляем ссылки на источники: [1], [5], [1][4], [1][5] и т.д.
+    let formatted = text.replace(/\[\d+\](\[\d+\])*/g, '')
+    
+    // Оставляем двойные звездочки для последующего форматирования на фронтенде
+    // НЕ удаляем: formatted = formatted.replace(/\*\*(.*?)\*\*/g, '$1')
+    
+    // Очищаем лишние пробелы, которые могли остаться после удаления ссылок
+    formatted = formatted.replace(/\s+\./g, '.').replace(/\s+,/g, ',')
+    formatted = formatted.replace(/\s{2,}/g, ' ')
+    
+    return formatted.trim()
+  }
+
   private parseMonthlyAnalysisResponse(content: string): MonthlyAnalysisResponse {
     // Парсим структурированный ответ по заголовкам
     const sections = {
@@ -279,11 +293,12 @@ ${entriesText}
     const recommendationsMatch = content.match(/##\s*Рекомендации и техники\s*\n([\s\S]*?)(?=##|$)/i)
     const reflectionMatch = content.match(/##\s*Направление для размышлений\s*\n([\s\S]*?)(?=##|$)/i)
 
-    if (generalMatch) sections.generalImpression = generalMatch[1].trim()
-    if (positiveMatch) sections.positiveTrends = positiveMatch[1].trim()
-    if (declineMatch) sections.declineReasons = declineMatch[1].trim()
-    if (recommendationsMatch) sections.recommendations = recommendationsMatch[1].trim()
-    if (reflectionMatch) sections.reflectionDirections = reflectionMatch[1].trim()
+    // Применяем форматирование к каждой секции
+    if (generalMatch) sections.generalImpression = this.formatText(generalMatch[1])
+    if (positiveMatch) sections.positiveTrends = this.formatText(positiveMatch[1])
+    if (declineMatch) sections.declineReasons = this.formatText(declineMatch[1])
+    if (recommendationsMatch) sections.recommendations = this.formatText(recommendationsMatch[1])
+    if (reflectionMatch) sections.reflectionDirections = this.formatText(reflectionMatch[1])
 
     return {
       fullText: content,

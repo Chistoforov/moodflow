@@ -5,6 +5,7 @@ import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isTod
 import { ru } from 'date-fns/locale'
 import { MOOD_LEVELS } from '@/lib/utils/constants'
 import useSWR from 'swr'
+import { FormattedAnalysis } from '@/components/FormattedAnalysis'
 
 interface Entry {
   id: string
@@ -92,7 +93,6 @@ const MoodSymbol = ({ score, size = 24 }: { score: number; size?: number }) => {
 
 export default function CalendarPage() {
   const [currentMonth, setCurrentMonth] = useState(new Date())
-  const [isGenerating, setIsGenerating] = useState(false)
   
   // Используем SWR для кеширования данных
   const { data, isLoading } = useSWR('/api/entries', fetcher, {
@@ -106,7 +106,7 @@ export default function CalendarPage() {
   // Fetch analytics for current month
   const year = currentMonth.getFullYear()
   const month = currentMonth.getMonth() + 1
-  const { data: analyticsData, mutate: mutateAnalytics } = useSWR(
+  const { data: analyticsData } = useSWR(
     `/api/analytics?year=${year}&month=${month}`,
     fetcher,
     {
@@ -135,39 +135,6 @@ export default function CalendarPage() {
     const newDate = new Date(currentMonth)
     newDate.setMonth(newDate.getMonth() + increment)
     setCurrentMonth(newDate)
-  }
-
-  const generateAnalytics = async () => {
-    setIsGenerating(true)
-    try {
-      const response = await fetch('/api/analytics/generate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          year,
-          month,
-        }),
-      })
-
-      const result = await response.json()
-
-      if (response.ok) {
-        // Refresh analytics data
-        await mutateAnalytics()
-        alert(result.isFinal 
-          ? 'Финальная аналитика месяца успешно сгенерирована!' 
-          : `Аналитика за ${result.weekNumber} неделю (${result.daysAnalyzed} дней) успешно сгенерирована!`)
-      } else {
-        alert(result.error || 'Не удалось сгенерировать аналитику')
-      }
-    } catch (error) {
-      console.error('Failed to generate analytics:', error)
-      alert('Произошла ошибка при генерации аналитики')
-    } finally {
-      setIsGenerating(false)
-    }
   }
 
   return (
@@ -309,32 +276,19 @@ export default function CalendarPage() {
 
         {/* Аналитика и рекомендации */}
         <div className="mt-4 sm:mt-6 rounded-2xl p-4 sm:p-6" style={{ backgroundColor: '#F5F1EB' }}>
-          <div className="flex items-center justify-between mb-4">
+          <div className="mb-4">
             <h3 
               className="font-semibold text-base sm:text-lg"
               style={{ color: '#8B3A3A' }}
             >
               Аналитика и рекомендации
             </h3>
-            {!hasAnalytics && (
-              <button
-                onClick={generateAnalytics}
-                disabled={isGenerating || entries.length === 0}
-                className="px-4 py-2 text-sm font-medium transition-all rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{
-                  backgroundColor: '#8B3A3A',
-                  color: '#E8E2D5',
-                }}
-              >
-                {isGenerating ? 'Генерация...' : 'Сгенерировать'}
-              </button>
-            )}
           </div>
 
           {hasAnalytics && analytics ? (
             <div className="space-y-4">
               {/* Header */}
-              <div className="flex items-center justify-between p-3 rounded-lg" style={{ backgroundColor: '#E8E2D5' }}>
+              <div className="p-3 rounded-lg" style={{ backgroundColor: '#E8E2D5' }}>
                 <div>
                   <p className="text-sm font-medium" style={{ color: '#8B3A3A' }}>
                     Неделя {analytics.week_number} • {analytics.days_analyzed} {analytics.days_analyzed === 1 ? 'день' : analytics.days_analyzed < 5 ? 'дня' : 'дней'}
@@ -345,75 +299,62 @@ export default function CalendarPage() {
                     </p>
                   )}
                 </div>
-                {!analytics.is_final && (
-                  <button
-                    onClick={generateAnalytics}
-                    disabled={isGenerating}
-                    className="px-3 py-1.5 text-xs font-medium transition-all rounded-md disabled:opacity-50"
-                    style={{
-                      backgroundColor: '#8B3A3A',
-                      color: '#E8E2D5',
-                    }}
-                  >
-                    {isGenerating ? 'Обновление...' : 'Обновить'}
-                  </button>
-                )}
               </div>
 
               {/* Analysis sections */}
               <div className="space-y-3">
                 {analytics.general_impression && (
                   <div className="p-4 rounded-lg" style={{ backgroundColor: '#E8E2D5' }}>
-                    <h4 className="font-semibold mb-2 text-sm" style={{ color: '#8B3A3A' }}>
+                    <h4 className="font-bold mb-3 text-base text-center" style={{ color: '#8B3A3A' }}>
                       Общее впечатление о периоде
                     </h4>
-                    <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: '#8B3A3A', opacity: 0.9 }}>
-                      {analytics.general_impression}
-                    </p>
+                    <div style={{ color: '#8B3A3A', opacity: 0.9 }}>
+                      <FormattedAnalysis text={analytics.general_impression} />
+                    </div>
                   </div>
                 )}
 
                 {analytics.positive_trends && (
                   <div className="p-4 rounded-lg" style={{ backgroundColor: '#E8E2D5' }}>
-                    <h4 className="font-semibold mb-2 text-sm" style={{ color: '#8B3A3A' }}>
+                    <h4 className="font-bold mb-3 text-base text-center" style={{ color: '#8B3A3A' }}>
                       ✨ Положительные тенденции
                     </h4>
-                    <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: '#8B3A3A', opacity: 0.9 }}>
-                      {analytics.positive_trends}
-                    </p>
+                    <div style={{ color: '#8B3A3A', opacity: 0.9 }}>
+                      <FormattedAnalysis text={analytics.positive_trends} />
+                    </div>
                   </div>
                 )}
 
                 {analytics.decline_reasons && (
                   <div className="p-4 rounded-lg" style={{ backgroundColor: '#E8E2D5' }}>
-                    <h4 className="font-semibold mb-2 text-sm" style={{ color: '#8B3A3A' }}>
+                    <h4 className="font-bold mb-3 text-base text-center" style={{ color: '#8B3A3A' }}>
                       🔍 Возможные причины спада
                     </h4>
-                    <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: '#8B3A3A', opacity: 0.9 }}>
-                      {analytics.decline_reasons}
-                    </p>
+                    <div style={{ color: '#8B3A3A', opacity: 0.9 }}>
+                      <FormattedAnalysis text={analytics.decline_reasons} />
+                    </div>
                   </div>
                 )}
 
                 {analytics.recommendations && (
                   <div className="p-4 rounded-lg" style={{ backgroundColor: '#E8E2D5' }}>
-                    <h4 className="font-semibold mb-2 text-sm" style={{ color: '#8B3A3A' }}>
+                    <h4 className="font-bold mb-3 text-base text-center" style={{ color: '#8B3A3A' }}>
                       💡 Рекомендации и техники
                     </h4>
-                    <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: '#8B3A3A', opacity: 0.9 }}>
-                      {analytics.recommendations}
-                    </p>
+                    <div style={{ color: '#8B3A3A', opacity: 0.9 }}>
+                      <FormattedAnalysis text={analytics.recommendations} />
+                    </div>
                   </div>
                 )}
 
                 {analytics.reflection_directions && (
                   <div className="p-4 rounded-lg" style={{ backgroundColor: '#E8E2D5' }}>
-                    <h4 className="font-semibold mb-2 text-sm" style={{ color: '#8B3A3A' }}>
+                    <h4 className="font-bold mb-3 text-base text-center" style={{ color: '#8B3A3A' }}>
                       🎯 Направление для размышлений
                     </h4>
-                    <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: '#8B3A3A', opacity: 0.9 }}>
-                      {analytics.reflection_directions}
-                    </p>
+                    <div style={{ color: '#8B3A3A', opacity: 0.9 }}>
+                      <FormattedAnalysis text={analytics.reflection_directions} />
+                    </div>
                   </div>
                 )}
               </div>
