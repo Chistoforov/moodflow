@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
     // Get entries
     const { data: entriesData, error: entriesError } = await supabase
       .from('daily_entries')
-      .select('*')
+      .select('entry_date, mood_score, text_entry, factors')
       .eq('user_id', userId)
       .gte('entry_date', monthStart.toISOString().split('T')[0])
       .lte('entry_date', (now > monthEnd ? monthEnd : now).toISOString().split('T')[0])
@@ -134,7 +134,7 @@ export async function POST(request: NextRequest) {
     
     // Analyze with Perplexity
     const analysis = await perplexityService.analyzeMonthlyMood({
-      entries: entriesData.map(e => ({
+      entries: entriesData.map((e: any) => ({
         date: e.entry_date,
         mood: e.mood_score || 3,
         text: e.text_entry || '',
