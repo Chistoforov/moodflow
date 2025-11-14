@@ -94,7 +94,7 @@ export default function UsersPage() {
       setAnalyzingUserId(userId)
       setAnalysisMessage(null)
       
-      const response = await fetch('/api/admin/analytics/manual', {
+      const response = await fetch('/api/admin/analytics/manual-v2', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
