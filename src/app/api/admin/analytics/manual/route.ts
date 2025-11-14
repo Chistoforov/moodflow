@@ -63,11 +63,23 @@ export async function POST(request: NextRequest) {
     console.log('🔍 Attempting to fetch user:', userId)
     console.log('🔍 Current auth user:', authUser.id)
     
+    // Check if service role key is configured
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    if (!serviceRoleKey) {
+      console.error('❌ SUPABASE_SERVICE_ROLE_KEY is not configured!')
+      return NextResponse.json({ 
+        error: 'Server configuration error',
+        details: 'SUPABASE_SERVICE_ROLE_KEY is not set in environment variables'
+      }, { status: 500 })
+    }
+    
+    console.log('✅ SUPABASE_SERVICE_ROLE_KEY is configured (length:', serviceRoleKey.length, ')')
+    
     // Create service role client for admin operations
     const { createClient } = await import('@supabase/supabase-js')
     const supabaseAdmin = createClient<Database>(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      serviceRoleKey,
       {
         auth: {
           autoRefreshToken: false,
@@ -75,6 +87,8 @@ export async function POST(request: NextRequest) {
         }
       }
     )
+    
+    console.log('📡 Using service role client to fetch user')
     
     const { data: userData, error: userError } = await supabaseAdmin
       .from('users')
