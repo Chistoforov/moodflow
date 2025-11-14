@@ -50,15 +50,15 @@ export async function POST(request: NextRequest) {
     console.log('✅ Admin client created')
     
     // Fetch user
-    const { data: user, error: userError } = await supabase
+    const { data: userData, error: userError } = await supabase
       .from('users')
       .select('*')
       .eq('id', userId)
       .single()
     
-    console.log('📊 User fetch result:', { found: !!user, error: !!userError })
+    console.log('📊 User fetch result:', { found: !!userData, error: !!userError })
     
-    if (userError || !user) {
+    if (userError || !userData) {
       return NextResponse.json({
         error: 'User not found',
         version: 'start-analysis-v1',
@@ -81,9 +81,9 @@ export async function POST(request: NextRequest) {
       version: 'start-analysis-v1',
       message: 'User found successfully! (Analysis not yet implemented)',
       user: {
-        id: user.id,
-        email: user.email,
-        fullName: user.full_name
+        id: userData.id,
+        email: userData.email,
+        fullName: userData.full_name
       }
     })
     
