@@ -105,11 +105,16 @@ export async function POST(request: NextRequest) {
       console.error('❌ User not found:', { userId, userError })
       return NextResponse.json({ 
         error: 'User not found',
-        details: {
+        debug: {
           userId,
+          authUserId: authUser.id,
+          serviceRoleKeyConfigured: !!serviceRoleKey,
+          serviceRoleKeyLength: serviceRoleKey?.length || 0,
+          supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
           errorMessage: userError?.message,
           errorCode: userError?.code,
-          errorDetails: userError?.details
+          errorDetails: userError?.details,
+          errorHint: userError?.hint
         }
       }, { status: 404 })
     }
