@@ -92,7 +92,18 @@ else
 fi
 echo ""
 
-echo -e "${YELLOW}Шаг 7: Проверка RLS политик${NC}"
+echo -e "${YELLOW}Шаг 7: Применение миграции 029 (гарантия доступа админа)${NC}"
+psql postgresql://postgres:postgres@127.0.0.1:54322/postgres < supabase/migrations/029_ensure_admin_select_policy.sql
+
+if [ $? -eq 0 ]; then
+    echo -e "${GREEN}✅ Миграция 029 применена успешно${NC}"
+else
+    echo -e "${RED}❌ Ошибка применения миграции 029${NC}"
+    exit 1
+fi
+echo ""
+
+echo -e "${YELLOW}Шаг 8: Проверка RLS политик${NC}"
 psql postgresql://postgres:postgres@127.0.0.1:54322/postgres -c "
 SELECT 
   policyname,
@@ -129,6 +140,7 @@ echo -e "${YELLOW}Для production (Vercel):${NC}"
 echo "1. Откройте Supabase Dashboard > SQL Editor"
 echo "2. Выполните содержимое файла 024_create_monthly_analytics_fixed.sql"
 echo "3. Выполните содержимое файла 025_fix_monthly_analytics_admin_insert_fixed.sql"
-echo "4. Задеплойте изменения: git push origin main"
+echo "4. Выполните содержимое файла 029_ensure_admin_select_policy.sql"
+echo "5. Задеплойте изменения: git push origin main"
 
 

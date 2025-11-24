@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { ChevronLeft, ChevronRight, ArrowLeft } from 'lucide-react'
+import { ChevronLeft, ChevronRight, ArrowLeft, Edit2 } from 'lucide-react'
+import EditAnalyticsModal from '@/components/admin/EditAnalyticsModal'
+import { FormattedAnalysis } from '@/components/FormattedAnalysis'
 
 interface UserInfo {
   id: string
@@ -24,6 +26,19 @@ interface UserEntriesData {
   year: number
   month: number
   entries: DayEntry[]
+}
+
+interface Analytics {
+  id: string
+  general_impression: string | null
+  positive_trends: string | null
+  decline_reasons: string | null
+  recommendations: string | null
+  reflection_directions: string | null
+  week_number: number
+  days_analyzed: number
+  is_final: boolean
+  created_at: string
 }
 
 const MOOD_LABELS: Record<number, string> = {
@@ -60,38 +75,64 @@ export default function UserDetailsPage() {
   const userId = params?.userId as string
 
   const [data, setData] = useState<UserEntriesData | null>(null)
+  const [analytics, setAnalytics] = useState<Analytics | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
 
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear())
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1)
 
   useEffect(() => {
     if (userId) {
-      fetchUserEntries()
+      fetchData()
     }
   }, [userId, currentYear, currentMonth])
 
-  const fetchUserEntries = async () => {
+  const fetchData = async () => {
     try {
       setLoading(true)
       setError(null)
-      
-      const response = await fetch(
+
+      // Fetch entries
+      const entriesResponse = await fetch(
         `/api/admin/users/${userId}/entries?year=${currentYear}&month=${currentMonth}`
       )
-      
-      if (!response.ok) {
+
+      if (!entriesResponse.ok) {
         throw new Error('Failed to fetch user entries')
       }
-      
-      const result = await response.json()
-      setData(result)
+
+      const entriesResult = await entriesResponse.json()
+      setData(entriesResult)
+
+      // Fetch analytics
+      const analyticsResponse = await fetch(
+        `/api/admin/users/${userId}/analytics?year=${currentYear}&month=${currentMonth}`
+      )
+
+      if (analyticsResponse.ok) {
+        const analyticsResult = await analyticsResponse.json()
+        setAnalytics(analyticsResult.analytics)
+      } else {
+        setAnalytics(null)
+      }
+
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch user entries')
+      setError(err instanceof Error ? err.message : 'Failed to fetch data')
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleAnalyticsUpdate = () => {
+    // Refresh just the analytics part
+    fetch(
+      `/api/admin/users/${userId}/analytics?year=${currentYear}&month=${currentMonth}`
+    )
+      .then(res => res.json())
+      .then(data => setAnalytics(data.analytics))
+      .catch(console.error)
   }
 
   const goToPreviousMonth = () => {
@@ -152,7 +193,7 @@ export default function UserDetailsPage() {
   }
 
   return (
-    <div className="px-4 sm:px-0">
+    <div className="px-4 sm:px-0 pb-20">
       {/* Back button */}
       <button
         onClick={() => router.push('/admin/users')}
@@ -207,102 +248,214 @@ export default function UserDetailsPage() {
         </div>
       </div>
 
-      {/* Entries table */}
-      <div className="rounded-2xl shadow-sm overflow-hidden" style={{ backgroundColor: '#F5F1EB' }}>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y" style={{ borderColor: '#D4C8B5' }}>
-            <thead style={{ backgroundColor: '#E8E2D5' }}>
-              <tr>
-                <th
-                  className="px-4 py-4 text-left text-sm font-semibold w-24"
-                  style={{ color: '#8B3A3A' }}
-                >
-                  Дата
-                </th>
-                <th
-                  className="px-4 py-4 text-left text-sm font-semibold w-32"
-                  style={{ color: '#8B3A3A' }}
-                >
-                  Настроение
-                </th>
-                <th
-                  className="px-4 py-4 text-left text-sm font-semibold w-48"
-                  style={{ color: '#8B3A3A' }}
-                >
-                  Факторы
-                </th>
-                <th
-                  className="px-4 py-4 text-left text-sm font-semibold"
-                  style={{ color: '#8B3A3A' }}
-                >
-                  Описание
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y" style={{ borderColor: '#D4C8B5' }}>
-              {data.entries.map((entry) => (
-                <tr
-                  key={entry.date}
-                  className="hover:bg-opacity-50 transition-colors"
-                  style={{ 
-                    backgroundColor: entry.has_entries ? 'transparent' : 'rgba(217, 207, 191, 0.2)',
-                    opacity: entry.has_entries ? 1 : 0.6
-                  }}
-                >
-                  <td className="px-4 py-3 text-sm whitespace-nowrap" style={{ color: '#8B3A3A' }}>
-                    {entry.day} {MONTH_NAMES[currentMonth - 1].substring(0, 3).toLowerCase()}
-                  </td>
-                  <td className="px-4 py-3 text-sm" style={{ color: '#8B3A3A' }}>
-                    {entry.mood_score !== null ? (
-                      <div className="flex items-center gap-2">
-                        <span>{MOOD_LABELS[entry.mood_score]}</span>
-                        <span className="text-xs opacity-70">({entry.mood_score})</span>
-                      </div>
-                    ) : (
-                      <span className="text-xs opacity-50">—</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-sm" style={{ color: '#8B3A3A' }}>
-                    {entry.factors.length > 0 ? (
-                      <div className="flex flex-wrap gap-1">
-                        {entry.factors.map((factor, idx) => (
-                          <span
-                            key={idx}
-                            className="inline-flex items-center px-2 py-1 rounded-full text-xs"
-                            style={{ backgroundColor: '#E8E2D5', color: '#8B3A3A' }}
-                          >
-                            {FACTOR_LABELS[factor] || factor}
-                          </span>
-                        ))}
-                      </div>
-                    ) : (
-                      <span className="text-xs opacity-50">—</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-sm" style={{ color: '#8B3A3A' }}>
-                    {entry.text ? (
-                      <div className="whitespace-pre-wrap max-w-2xl">
-                        {entry.text}
-                      </div>
-                    ) : (
-                      <span className="text-xs opacity-50">—</span>
-                    )}
-                  </td>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Entries table - Takes up 2 columns on large screens */}
+        <div className="lg:col-span-2 rounded-2xl shadow-sm overflow-hidden h-fit" style={{ backgroundColor: '#F5F1EB' }}>
+          <div className="p-6 border-b" style={{ borderColor: '#D4C8B5' }}>
+            <h2 className="text-xl font-bold" style={{ color: '#8B3A3A' }}>Дневник настроения</h2>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y" style={{ borderColor: '#D4C8B5' }}>
+              <thead style={{ backgroundColor: '#E8E2D5' }}>
+                <tr>
+                  <th
+                    className="px-4 py-4 text-left text-sm font-semibold w-24"
+                    style={{ color: '#8B3A3A' }}
+                  >
+                    Дата
+                  </th>
+                  <th
+                    className="px-4 py-4 text-left text-sm font-semibold w-32"
+                    style={{ color: '#8B3A3A' }}
+                  >
+                    Настроение
+                  </th>
+                  <th
+                    className="px-4 py-4 text-left text-sm font-semibold w-48"
+                    style={{ color: '#8B3A3A' }}
+                  >
+                    Факторы
+                  </th>
+                  <th
+                    className="px-4 py-4 text-left text-sm font-semibold"
+                    style={{ color: '#8B3A3A' }}
+                  >
+                    Описание
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y" style={{ borderColor: '#D4C8B5' }}>
+                {data.entries.map((entry) => (
+                  <tr
+                    key={entry.date}
+                    className="hover:bg-opacity-50 transition-colors"
+                    style={{
+                      backgroundColor: entry.has_entries ? 'transparent' : 'rgba(217, 207, 191, 0.2)',
+                      opacity: entry.has_entries ? 1 : 0.6
+                    }}
+                  >
+                    <td className="px-4 py-3 text-sm whitespace-nowrap" style={{ color: '#8B3A3A' }}>
+                      {entry.day} {MONTH_NAMES[currentMonth - 1].substring(0, 3).toLowerCase()}
+                    </td>
+                    <td className="px-4 py-3 text-sm" style={{ color: '#8B3A3A' }}>
+                      {entry.mood_score !== null ? (
+                        <div className="flex items-center gap-2">
+                          <span>{MOOD_LABELS[entry.mood_score]}</span>
+                          <span className="text-xs opacity-70">({entry.mood_score})</span>
+                        </div>
+                      ) : (
+                        <span className="text-xs opacity-50">—</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-sm" style={{ color: '#8B3A3A' }}>
+                      {entry.factors.length > 0 ? (
+                        <div className="flex flex-wrap gap-1">
+                          {entry.factors.map((factor, idx) => (
+                            <span
+                              key={idx}
+                              className="inline-flex items-center px-2 py-1 rounded-full text-xs"
+                              style={{ backgroundColor: '#E8E2D5', color: '#8B3A3A' }}
+                            >
+                              {FACTOR_LABELS[factor] || factor}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-xs opacity-50">—</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-sm" style={{ color: '#8B3A3A' }}>
+                      {entry.text ? (
+                        <div className="whitespace-pre-wrap max-w-2xl">
+                          {entry.text}
+                        </div>
+                      ) : (
+                        <span className="text-xs opacity-50">—</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {data.entries.every(e => !e.has_entries) && (
+            <div className="px-6 py-12 text-center">
+              <p style={{ color: '#8B3A3A', opacity: 0.7 }}>
+                Нет записей за этот месяц
+              </p>
+            </div>
+          )}
         </div>
 
-        {data.entries.every(e => !e.has_entries) && (
-          <div className="px-6 py-12 text-center">
-            <p style={{ color: '#8B3A3A', opacity: 0.7 }}>
-              Нет записей за этот месяц
-            </p>
+        {/* Analytics Section - Takes up 1 column on large screens */}
+        <div className="lg:col-span-1 space-y-6">
+          <div className="rounded-2xl shadow-sm p-6" style={{ backgroundColor: '#F5F1EB' }}>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold" style={{ color: '#8B3A3A' }}>Аналитика</h2>
+              {analytics && (
+                <button
+                  onClick={() => setIsEditModalOpen(true)}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors hover:bg-[#E8E2D5]"
+                  style={{ color: '#8B3A3A', border: '1px solid #D4C8B5' }}
+                >
+                  <Edit2 size={16} />
+                  Редактировать
+                </button>
+              )}
+            </div>
+
+            {analytics ? (
+              <div className="space-y-4">
+                <div className="p-3 rounded-lg" style={{ backgroundColor: '#E8E2D5' }}>
+                  <div>
+                    <p className="text-sm font-medium" style={{ color: '#8B3A3A' }}>
+                      Неделя {analytics.week_number} • {analytics.days_analyzed} {analytics.days_analyzed === 1 ? 'день' : analytics.days_analyzed < 5 ? 'дня' : 'дней'}
+                    </p>
+                    {analytics.is_final && (
+                      <p className="text-xs mt-1" style={{ color: '#8B3A3A', opacity: 0.7 }}>
+                        🎯 Финальная аналитика месяца
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-4 max-h-[calc(100vh-300px)] overflow-y-auto pr-2 custom-scrollbar">
+                  {analytics.general_impression && (
+                    <div>
+                      <h4 className="font-bold mb-2 text-sm" style={{ color: '#8B3A3A' }}>
+                        Общее впечатление
+                      </h4>
+                      <div className="text-sm" style={{ color: '#8B3A3A', opacity: 0.9 }}>
+                        <FormattedAnalysis text={analytics.general_impression} />
+                      </div>
+                    </div>
+                  )}
+
+                  {analytics.positive_trends && (
+                    <div>
+                      <h4 className="font-bold mb-2 text-sm" style={{ color: '#8B3A3A' }}>
+                        ✨ Положительные тенденции
+                      </h4>
+                      <div className="text-sm" style={{ color: '#8B3A3A', opacity: 0.9 }}>
+                        <FormattedAnalysis text={analytics.positive_trends} />
+                      </div>
+                    </div>
+                  )}
+
+                  {analytics.decline_reasons && (
+                    <div>
+                      <h4 className="font-bold mb-2 text-sm" style={{ color: '#8B3A3A' }}>
+                        🔍 Возможные причины спада
+                      </h4>
+                      <div className="text-sm" style={{ color: '#8B3A3A', opacity: 0.9 }}>
+                        <FormattedAnalysis text={analytics.decline_reasons} />
+                      </div>
+                    </div>
+                  )}
+
+                  {analytics.recommendations && (
+                    <div>
+                      <h4 className="font-bold mb-2 text-sm" style={{ color: '#8B3A3A' }}>
+                        💡 Рекомендации
+                      </h4>
+                      <div className="text-sm" style={{ color: '#8B3A3A', opacity: 0.9 }}>
+                        <FormattedAnalysis text={analytics.recommendations} />
+                      </div>
+                    </div>
+                  )}
+
+                  {analytics.reflection_directions && (
+                    <div>
+                      <h4 className="font-bold mb-2 text-sm" style={{ color: '#8B3A3A' }}>
+                        🎯 Направление для размышлений
+                      </h4>
+                      <div className="text-sm" style={{ color: '#8B3A3A', opacity: 0.9 }}>
+                        <FormattedAnalysis text={analytics.reflection_directions} />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <p style={{ color: '#8B3A3A', opacity: 0.7 }}>
+                  Нет аналитики за этот месяц
+                </p>
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
+
+      {analytics && (
+        <EditAnalyticsModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          onSave={handleAnalyticsUpdate}
+          analytics={analytics}
+        />
+      )}
     </div>
   )
 }
-
