@@ -1,59 +1,96 @@
 @import "tailwindcss";
 
 :root {
-  --background: #E8E2D5;
-  --foreground: #8B3A3A;
-  --card-bg: #F5F1EB;
-  --border: #C8BEB0;
-  --accent: #D4C8B5;
+  /* Dark theme colors */
+  --background: #0F0F1E;
+  --background-secondary: #1A1A2E;
+  --foreground: #EAEAEA;
+  --foreground-secondary: #B8B8C8;
+
+  /* Accent colors */
+  --accent-primary: #6366F1;
+  --accent-secondary: #EC4899;
+  --accent-success: #10B981;
+  --accent-warning: #F59E0B;
+  --accent-danger: #EF4444;
+
+  /* Glassmorphism */
+  --glass-bg: rgba(26, 26, 46, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.1);
+
+  /* Mood gradients */
+  --mood-1: linear-gradient(135deg, #667EEA 0%, #764BA2 100%);
+  --mood-2: linear-gradient(135deg, #F093FB 0%, #F5576C 100%);
+  --mood-3: linear-gradient(135deg, #4FACFE 0%, #00F2FE 100%);
+  --mood-4: linear-gradient(135deg, #43E97B 0%, #38F9D7 100%);
+  --mood-5: linear-gradient(135deg, #FA709A 0%, #FEE140 100%);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-inter), var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  --font-serif: var(--font-playfair), Georgia, serif;
   --font-mono: var(--font-geist-mono);
 }
 
 html {
-  /* Allow pull-to-refresh on mobile */
   overscroll-behavior: auto;
-  /* Fix viewport height on mobile browsers */
   height: 100%;
-  /* Ensure smooth scrolling */
   scroll-behavior: smooth;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  /* Allow pull-to-refresh on mobile */
   overscroll-behavior-y: auto;
-  /* Important: Keep body scrollable even when keyboard is open */
   position: relative !important;
   overflow: auto !important;
-  /* Enable momentum scrolling on iOS */
   -webkit-overflow-scrolling: touch;
 }
 
+/* Animated gradient background */
+.gradient-bg {
+  background: linear-gradient(135deg, #0F0F1E 0%, #1A1A2E 50%, #16213E 100%);
+  background-size: 200% 200%;
+  animation: gradient-shift 15s ease infinite;
+}
+
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
 /* Mobile touch targets */
-button, a {
-  -webkit-tap-highlight-color: rgba(139, 58, 58, 0.2);
+button,
+a {
+  -webkit-tap-highlight-color: rgba(99, 102, 241, 0.2);
+  min-height: 44px;
+  min-width: 44px;
 }
 
 /* Smooth scrolling on iOS */
 .overflow-y-auto {
   -webkit-overflow-scrolling: touch;
-  /* Ensure scrollable areas don't affect fixed positioning */
   will-change: scroll-position;
 }
 
 /* Prevent zoom on input focus on iOS */
 @media screen and (max-width: 768px) {
+
   input[type="text"],
   input[type="email"],
   input[type="password"],
@@ -64,16 +101,19 @@ button, a {
 }
 
 .handwritten {
-  font-family: var(--font-handwritten), 'Dancing Script', cursive;
+  font-family: var(--font-playfair), var(--font-handwritten), 'Dancing Script', serif;
+  font-weight: 700;
 }
 
+/* Custom scrollbar */
 * {
   scrollbar-width: thin;
-  scrollbar-color: var(--border) var(--background);
+  scrollbar-color: var(--accent-primary) var(--background);
 }
 
 *::-webkit-scrollbar {
   width: 8px;
+  height: 8px;
 }
 
 *::-webkit-scrollbar-track {
@@ -81,106 +121,257 @@ button, a {
 }
 
 *::-webkit-scrollbar-thumb {
-  background-color: var(--border);
+  background: var(--accent-primary);
   border-radius: 4px;
 }
 
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-secondary);
+}
+
+/* Glassmorphism utility */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--glass-border);
+}
+
+.glass-strong {
+  background: rgba(26, 26, 46, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* Animations */
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
-.chat-input-textarea::placeholder {
-  color: rgba(139, 58, 58, 0.6);
-  font-size: 0.9rem;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
-@keyframes recording-pulse {
-  0%, 100% {
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+
+  to {
     opacity: 1;
     transform: scale(1);
   }
-  50% {
-    opacity: 0.7;
-    transform: scale(1.1);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-@keyframes heartbeat {
-  0% {
-    transform: scale(1);
-  }
-  14% {
-    transform: scale(1.15);
-  }
-  28% {
-    transform: scale(1);
-  }
-  42% {
-    transform: scale(1.15);
-  }
-  70% {
-    transform: scale(1);
-  }
+@keyframes glow {
+
+  0%,
   100% {
-    transform: scale(1);
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+  }
+
+  50% {
+    box-shadow: 0 0 30px rgba(99, 102, 241, 0.5);
   }
 }
 
-@keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
+@keyframes pulse {
 
-@keyframes scale-in {
-  from {
-    opacity: 0;
-    transform: scale(0.5);
-  }
-  to {
+  0%,
+  100% {
     opacity: 1;
     transform: scale(1);
   }
+
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
 }
 
-@keyframes slide-up {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+
+  100% {
+    background-position: 1000px 0;
   }
 }
 
 .animate-fade-in {
-  animation: fade-in 0.3s ease-out;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s ease-out;
 }
 
 .animate-scale-in {
-  animation: scale-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: scaleIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .animate-slide-up {
-  animation: slide-up 0.4s ease-out 0.1s both;
+  animation: slideUp 0.4s ease-out;
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite;
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #6366F1 0%, #EC4899 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Gradient button */
+.btn-gradient {
+  background: linear-gradient(135deg, #6366F1 0%, #EC4899 100%);
+  color: white;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.btn-gradient:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
+}
+
+.btn-gradient:active {
+  transform: translateY(0);
+}
+
+/* Card styles */
+.card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(99, 102, 241, 0.3);
+  box-shadow: 0 10px 30px rgba(99, 102, 241, 0.2);
+}
+
+/* Mood icon styles */
+.mood-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.mood-icon:hover {
+  transform: scale(1.1);
+}
+
+/* Calendar day cell */
+.calendar-day {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  padding: 4px 2px;
+  position: relative;
+  min-height: 0;
+}
+
+.calendar-day:hover {
+  background: rgba(99, 102, 241, 0.1);
+  transform: scale(1.05);
+}
+
+.calendar-day.today {
+  border: 2px solid var(--accent-primary);
+}
+
+.calendar-day.today:not(.calendar-day-with-mood) {
+  background: rgba(99, 102, 241, 0.2);
+}
+
+/* Ячейки с настроением - без цветного фона, только квадрат настроения */
+.calendar-day-with-mood {
+  /* Убираем цветной фон - квадрат настроения сам по себе цветной */
+}
+
+.calendar-day-with-mood.today {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: -2px;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
+}
+
+.calendar-day-number {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--foreground);
+  line-height: 1;
+  z-index: 2;
+  flex-shrink: 0;
+}
+
+.calendar-day-mood {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  flex-shrink: 0;
+  height: 36px;
 }
 
 /* Quill Editor Styles */
 .quill-wrapper .ql-toolbar {
   border: none !important;
-  border-bottom: 1px solid #D4C8B5 !important;
-  background-color: #FFFFFF !important;
+  border-bottom: 1px solid var(--glass-border) !important;
+  background: var(--glass-bg) !important;
+  backdrop-filter: blur(10px);
   position: relative;
   z-index: 2;
 }
@@ -188,8 +379,9 @@ button, a {
 .quill-wrapper .ql-container {
   border: none !important;
   font-size: 16px;
-  font-family: Arial, Helvetica, sans-serif;
-  background-color: #FFFFFF !important;
+  font-family: var(--font-inter), Arial, Helvetica, sans-serif;
+  background: var(--glass-bg) !important;
+  backdrop-filter: blur(10px);
   min-height: 300px;
   position: relative;
   z-index: 1;
@@ -198,42 +390,53 @@ button, a {
 .quill-wrapper .ql-editor {
   min-height: 300px;
   padding: 16px;
-  color: #8B3A3A;
+  color: var(--foreground);
 }
 
 .quill-wrapper .ql-editor.ql-blank::before {
-  color: rgba(139, 58, 58, 0.5);
+  color: var(--foreground-secondary);
   font-style: normal;
 }
 
 .quill-wrapper .ql-snow .ql-stroke {
-  stroke: #8B3A3A !important;
+  stroke: var(--foreground) !important;
 }
 
 .quill-wrapper .ql-snow .ql-fill {
-  fill: #8B3A3A !important;
+  fill: var(--foreground) !important;
 }
 
 .quill-wrapper .ql-snow .ql-picker-label {
-  color: #8B3A3A !important;
+  color: var(--foreground) !important;
 }
 
 .quill-wrapper .ql-snow .ql-picker-options {
-  background-color: #FFFFFF !important;
-  border: 1px solid #D4C8B5 !important;
+  background: var(--background-secondary) !important;
+  border: 1px solid var(--glass-border) !important;
 }
 
 .quill-wrapper .ql-toolbar button:hover,
 .quill-wrapper .ql-toolbar button:focus,
 .quill-wrapper .ql-toolbar button.ql-active {
-  background-color: #F5F1EB !important;
-  color: #8B3A3A !important;
+  background: rgba(99, 102, 241, 0.2) !important;
+  color: var(--accent-primary) !important;
 }
 
 .quill-wrapper .ql-toolbar button.ql-active .ql-stroke {
-  stroke: #8B3A3A !important;
+  stroke: var(--accent-primary) !important;
 }
 
 .quill-wrapper .ql-toolbar button.ql-active .ql-fill {
-  fill: #8B3A3A !important;
+  fill: var(--accent-primary) !important;
+}
+
+/* Loading skeleton */
+.skeleton {
+  background: linear-gradient(90deg,
+      rgba(255, 255, 255, 0.05) 0%,
+      rgba(255, 255, 255, 0.1) 50%,
+      rgba(255, 255, 255, 0.05) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8px;
 }
