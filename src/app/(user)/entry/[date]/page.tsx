@@ -320,6 +320,39 @@ export default function EntryPage() {
     await saveMessages(messages)
   }
 
+  // Universal function to save mood and factors with explicit values
+  const saveMoodAndFactors = async (newMoodScore?: number | null, newFactors?: string[]) => {
+    setSaving(true)
+    try {
+      const textEntryJson = messages.length > 0 ? JSON.stringify(messages) : null
+
+      const response = await fetch('/api/entries', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          entry_date: date,
+          mood_score: newMoodScore !== undefined ? newMoodScore : moodScore,
+          text_entry: textEntryJson,
+          factors: newFactors !== undefined ? newFactors : selectedFactors,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || 'Failed to save entry')
+      }
+    } catch (error) {
+      console.error('Failed to save entry:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Ошибка при сохранении записи'
+      alert(`Ошибка при сохранении записи: ${errorMessage}`)
+      throw error
+    } finally {
+      setSaving(false)
+    }
+  }
+
   const handleDeleteClick = (messageId: string) => {
     const message = messages.find(m => m.id === messageId)
     if (message) {
@@ -354,8 +387,8 @@ export default function EntryPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen px-4 sm:px-0" style={{ backgroundColor: '#E8E2D5' }}>
-        <div className="text-center py-12" style={{ color: '#8B3A3A' }}>Загрузка...</div>
+      <div className="min-h-screen px-4 sm:px-0" style={{ backgroundColor: '#1a1d2e' }}>
+        <div className="text-center py-12" style={{ color: 'rgba(255, 255, 255, 0.7)' }}>Загрузка...</div>
       </div>
     )
   }
@@ -366,18 +399,25 @@ export default function EntryPage() {
       <div 
         ref={chatContainerRef}
         style={{ 
-          backgroundColor: '#E8E2D5',
+          backgroundColor: '#1a1d2e',
           minHeight: '100vh',
           paddingTop: '64px', // Space for fixed header
           paddingBottom: '180px', // Space for ChatInput (~100px) + BottomNav (80px)
         }}
       >
         {/* Mood and Factors Section */}
-        <div className="px-3 sm:px-4 py-4" style={{ backgroundColor: '#E8E2D5' }}>
+        <div className="px-3 sm:px-4 py-4" style={{ backgroundColor: '#1a1d2e' }}>
           <div className="max-w-3xl mx-auto space-y-3 sm:space-y-4">
             {/* Mood Selection */}
-            <div className="rounded-2xl shadow-sm p-4 sm:p-6" style={{ backgroundColor: '#F5F1EB' }}>
-              <h2 className="text-base sm:text-lg font-semibold mb-4 text-center" style={{ color: '#8B3A3A' }}>
+            <div 
+              className="rounded-3xl shadow-sm p-4 sm:p-6" 
+              style={{ 
+                backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                backdropFilter: 'blur(10px)'
+              }}
+            >
+              <h2 className="text-base sm:text-lg font-semibold mb-4 text-center" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>
                 Настроение на {formatDate(date)}
               </h2>
               <div className="flex justify-center flex-wrap gap-2 sm:gap-3 max-w-2xl mx-auto">
@@ -386,18 +426,18 @@ export default function EntryPage() {
                     key={level.value}
                     onClick={() => {
                       setMoodScore(level.value)
-                      handleSaveFactors()
+                      saveMoodAndFactors(level.value)
                     }}
                     className="flex flex-col items-center p-2 sm:p-3 md:p-4 rounded-xl transition-all min-w-[56px] sm:min-w-[70px] md:min-w-[80px]"
                     style={{
-                      backgroundColor: moodScore === level.value ? '#E8E2D5' : 'transparent',
-                      border: moodScore === level.value ? '2px solid #8B3A3A' : '2px solid transparent',
+                      backgroundColor: moodScore === level.value ? 'rgba(124, 92, 255, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                      border: moodScore === level.value ? '2px solid #7c5cff' : '2px solid rgba(255, 255, 255, 0.1)',
                     }}
                   >
                     <div className="mb-1 sm:mb-2 flex justify-center">
                       <MoodSymbol score={level.value} selected={moodScore === level.value} size={36} />
                     </div>
-                    <div className="text-xs font-medium text-center leading-tight" style={{ color: '#8B3A3A' }}>
+                    <div className="text-xs font-medium text-center leading-tight" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>
                       {level.label}
                     </div>
                   </button>
@@ -406,8 +446,15 @@ export default function EntryPage() {
             </div>
 
             {/* Factors */}
-            <div className="rounded-2xl shadow-sm p-4 sm:p-6" style={{ backgroundColor: '#F5F1EB' }}>
-              <h2 className="text-base sm:text-lg font-semibold mb-4" style={{ color: '#8B3A3A' }}>
+            <div 
+              className="rounded-3xl shadow-sm p-4 sm:p-6" 
+              style={{ 
+                backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                backdropFilter: 'blur(10px)'
+              }}
+            >
+              <h2 className="text-base sm:text-lg font-semibold mb-4" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>
                 Факторы
               </h2>
               <div className="flex flex-wrap gap-2">
@@ -415,14 +462,17 @@ export default function EntryPage() {
                   <button
                     key={factor.value}
                     onClick={() => {
+                      const newFactors = selectedFactors.includes(factor.value)
+                        ? selectedFactors.filter(f => f !== factor.value)
+                        : [...selectedFactors, factor.value]
                       toggleFactor(factor.value)
-                      setTimeout(() => handleSaveFactors(), 100)
+                      saveMoodAndFactors(undefined, newFactors)
                     }}
                     className="px-3 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-all min-h-[36px]"
                     style={{
-                      backgroundColor: selectedFactors.includes(factor.value) ? '#8B3A3A' : '#E8E2D5',
-                      color: selectedFactors.includes(factor.value) ? '#E8E2D5' : '#8B3A3A',
-                      border: `2px solid ${selectedFactors.includes(factor.value) ? '#8B3A3A' : '#C8BEB0'}`,
+                      backgroundColor: selectedFactors.includes(factor.value) ? '#7c5cff' : 'rgba(255, 255, 255, 0.05)',
+                      color: selectedFactors.includes(factor.value) ? '#ffffff' : 'rgba(255, 255, 255, 0.7)',
+                      border: `2px solid ${selectedFactors.includes(factor.value) ? '#7c5cff' : 'rgba(255, 255, 255, 0.1)'}`,
                     }}
                   >
                     {factor.label}
@@ -434,7 +484,7 @@ export default function EntryPage() {
         </div>
 
         {/* Chat Messages Area */}
-        <div className="px-3 sm:px-4 py-4" style={{ backgroundColor: '#E8E2D5' }}>
+        <div className="px-3 sm:px-4 py-4" style={{ backgroundColor: '#1a1d2e' }}>
           <div className="max-w-3xl mx-auto">
             {messages.map((message) => (
               <ChatMessage 

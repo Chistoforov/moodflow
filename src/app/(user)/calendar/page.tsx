@@ -92,7 +92,6 @@ const MoodSymbol = ({ score, size = 24 }: { score: number; size?: number }) => {
 
 export default function CalendarPage() {
   const [currentMonth, setCurrentMonth] = useState(new Date())
-  const [isGenerating, setIsGenerating] = useState(false)
   
   // Используем SWR для кеширования данных
   const { data, isLoading } = useSWR('/api/entries', fetcher, {
@@ -135,39 +134,6 @@ export default function CalendarPage() {
     const newDate = new Date(currentMonth)
     newDate.setMonth(newDate.getMonth() + increment)
     setCurrentMonth(newDate)
-  }
-
-  const generateAnalytics = async () => {
-    setIsGenerating(true)
-    try {
-      const response = await fetch('/api/analytics/generate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          year,
-          month,
-        }),
-      })
-
-      const result = await response.json()
-
-      if (response.ok) {
-        // Refresh analytics data
-        await mutateAnalytics()
-        alert(result.isFinal 
-          ? 'Финальная аналитика месяца успешно сгенерирована!' 
-          : `Аналитика за ${result.weekNumber} неделю (${result.daysAnalyzed} дней) успешно сгенерирована!`)
-      } else {
-        alert(result.error || 'Не удалось сгенерировать аналитику')
-      }
-    } catch (error) {
-      console.error('Failed to generate analytics:', error)
-      alert('Произошла ошибка при генерации аналитики')
-    } finally {
-      setIsGenerating(false)
-    }
   }
 
   // Функция для получения цвета настроения
@@ -296,7 +262,7 @@ export default function CalendarPage() {
                   const entry = getEntryForDate(day)
                   const today = isToday(day)
                   const dateStr = format(day, 'yyyy-MM-dd')
-                  const hasMood = entry && entry.mood_score
+                  const hasMood = entry && entry.mood_score !== null
 
                   return (
                     <div
@@ -305,7 +271,7 @@ export default function CalendarPage() {
                     >
                       <a
                         href={`/entry/${dateStr}`}
-                        className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl transition-all"
+                        className="absolute inset-0 flex flex-col items-center justify-center rounded-lg transition-all"
                         style={{
                           backgroundColor: hasMood ? getMoodColor(entry.mood_score!) : 'transparent',
                           border: today ? '2px solid #7c5cff' : hasMood ? '1px solid rgba(255, 255, 255, 0.15)' : 'none',
@@ -331,10 +297,10 @@ export default function CalendarPage() {
                               {format(day, 'd')}
                             </div>
                             <div 
-                              className="text-[9px] sm:text-[10px] font-medium text-center mt-0.5 leading-tight"
+                              className="text-[8px] sm:text-[9px] font-semibold text-center mt-0.5 leading-tight uppercase"
                               style={{ color: 'rgba(255, 255, 255, 0.9)' }}
                             >
-                              {getMoodLabel(entry.mood_score!)}
+                              {getMoodLabel(entry.mood_score!).replace('Очень плохое', 'Плохо').replace('Очень ', '')}
                             </div>
                           </div>
                         ) : (
@@ -371,19 +337,6 @@ export default function CalendarPage() {
             >
               Аналитика и рекомендации
             </h3>
-            {!hasAnalytics && (
-              <button
-                onClick={generateAnalytics}
-                disabled={isGenerating || entries.length === 0}
-                className="px-4 py-2 text-sm font-medium transition-all rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{
-                  backgroundColor: '#7c5cff',
-                  color: '#ffffff',
-                }}
-              >
-                {isGenerating ? 'Генерация...' : 'Сгенерировать'}
-              </button>
-            )}
           </div>
 
           {hasAnalytics && analytics ? (
@@ -406,19 +359,6 @@ export default function CalendarPage() {
                     </p>
                   )}
                 </div>
-                {!analytics.is_final && (
-                  <button
-                    onClick={generateAnalytics}
-                    disabled={isGenerating}
-                    className="px-3 py-1.5 text-xs font-medium transition-all rounded-md disabled:opacity-50"
-                    style={{
-                      backgroundColor: '#7c5cff',
-                      color: '#ffffff',
-                    }}
-                  >
-                    {isGenerating ? 'Обновление...' : 'Обновить'}
-                  </button>
-                )}
               </div>
 
               {/* Analysis sections */}
