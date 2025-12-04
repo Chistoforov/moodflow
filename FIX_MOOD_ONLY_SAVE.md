@@ -59,3 +59,4 @@ const hasMood = entry && entry.mood_score !== null
 - База данных позволяет `factors` быть `null`
 - Исправление было необходимо только на клиентской стороне
 
+

@@ -33,6 +33,8 @@ export async function POST(
       return NextResponse.json({ error: 'Year and month are required' }, { status: 400 })
     }
 
+    console.log(`[Admin Analytics Generate] Starting for user: ${userId}, year: ${year}, month: ${month}`)
+
     // Get all entries for this user for the specified month
     const startDate = new Date(year, month - 1, 1).toISOString().split('T')[0]
     const endDate = new Date(year, month, 0).toISOString().split('T')[0]
@@ -51,8 +53,11 @@ export async function POST(
     }
 
     if (!entries || entries.length === 0) {
+      console.log(`[Admin Analytics Generate] No entries found for user: ${userId}`)
       return NextResponse.json({ error: 'No entries found for this period' }, { status: 400 })
     }
+
+    console.log(`[Admin Analytics Generate] Found ${entries.length} entries for user: ${userId}`)
 
     // Prepare entries for Perplexity
     const formattedEntries = (entries as any[])
@@ -85,8 +90,11 @@ export async function POST(
       })
 
     if (formattedEntries.length === 0) {
+      console.log(`[Admin Analytics Generate] No valid entries with mood scores for user: ${userId}`)
       return NextResponse.json({ error: 'No valid entries with mood scores found' }, { status: 400 })
     }
+
+    console.log(`[Admin Analytics Generate] Formatted ${formattedEntries.length} entries, calling Perplexity...`)
 
     // Calculate days analyzed and week number
     const daysAnalyzed = formattedEntries.length
@@ -151,16 +159,20 @@ ${formattedEntries.join('\n\n')}
     })
 
     if (!perplexityResponse.ok) {
-      console.error('Perplexity API error:', await perplexityResponse.text())
-      return NextResponse.json({ error: 'Failed to generate analytics' }, { status: 500 })
+      const errorText = await perplexityResponse.text()
+      console.error('[Admin Analytics Generate] Perplexity API error:', errorText)
+      return NextResponse.json({ error: 'Failed to generate analytics', details: errorText }, { status: 500 })
     }
 
     const perplexityData = await perplexityResponse.json()
     const analysisText = perplexityData.choices[0]?.message?.content
 
     if (!analysisText) {
+      console.error('[Admin Analytics Generate] No analysis text in Perplexity response')
       return NextResponse.json({ error: 'No analysis generated' }, { status: 500 })
     }
+
+    console.log(`[Admin Analytics Generate] Perplexity analysis received, length: ${analysisText.length}`)
 
     // Parse the analysis into sections
     const sections = analysisText.split('\n\n').filter((s: string) => s.trim())
@@ -239,6 +251,8 @@ ${formattedEntries.join('\n\n')}
       }
       result = data
     }
+
+    console.log(`[Admin Analytics Generate] Successfully saved analytics for user: ${userId}, week: ${weekNumber}, days: ${daysAnalyzed}, final: ${isFinal}`)
 
     return NextResponse.json({
       analytics: result,

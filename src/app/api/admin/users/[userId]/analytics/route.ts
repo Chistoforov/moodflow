@@ -35,21 +35,27 @@ export async function GET(
       return NextResponse.json({ error: 'Year and month are required' }, { status: 400 })
     }
 
+    console.log(`[Admin Analytics GET] Fetching analytics for user: ${userId}, year: ${year}, month: ${month}`)
+
     // Get analytics for the user
+    // Prefer final analytics, otherwise get the latest week (same logic as user API)
     const { data: analytics, error } = await supabase
       .from('monthly_analytics')
       .select('*')
       .eq('user_id', userId)
       .eq('year', parseInt(year))
       .eq('month', parseInt(month))
-      .order('created_at', { ascending: false })
+      .order('is_final', { ascending: false })
+      .order('week_number', { ascending: false })
       .limit(1)
-      .single()
+      .maybeSingle()
 
-    if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
-      console.error('Error fetching analytics:', error)
-      return NextResponse.json({ error: 'Failed to fetch analytics' }, { status: 500 })
+    if (error) {
+      console.error('[Admin Analytics GET] Error fetching analytics:', error)
+      return NextResponse.json({ error: 'Failed to fetch analytics', details: error.message }, { status: 500 })
     }
+
+    console.log(`[Admin Analytics GET] Found analytics: ${!!analytics}, is_final: ${analytics?.is_final}, week_number: ${analytics?.week_number}`)
 
     return NextResponse.json({ 
       analytics: analytics || null,
