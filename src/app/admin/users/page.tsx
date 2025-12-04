@@ -75,11 +75,18 @@ export default function UsersPage() {
     return (
       <div className="px-4 sm:px-0">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold" style={{ color: '#8B3A3A' }}>Пользователи</h1>
+          <h1 className="text-4xl font-bold" style={{ color: 'rgba(255, 255, 255, 0.95)' }}>Пользователи</h1>
         </div>
-        <div className="rounded-2xl shadow-sm p-8 text-center" style={{ backgroundColor: '#F5F1EB' }}>
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: '#8B3A3A' }}></div>
-          <p className="mt-4" style={{ color: '#8B3A3A' }}>Загрузка...</p>
+        <div 
+          className="rounded-3xl shadow-sm p-8 text-center" 
+          style={{ 
+            backgroundColor: 'rgba(255, 255, 255, 0.03)',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            backdropFilter: 'blur(10px)'
+          }}
+        >
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: '#7c5cff' }}></div>
+          <p className="mt-4" style={{ color: 'rgba(255, 255, 255, 0.7)' }}>Загрузка...</p>
         </div>
       </div>
     )
@@ -89,10 +96,17 @@ export default function UsersPage() {
     return (
       <div className="px-4 sm:px-0">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold" style={{ color: '#8B3A3A' }}>Пользователи</h1>
+          <h1 className="text-4xl font-bold" style={{ color: 'rgba(255, 255, 255, 0.95)' }}>Пользователи</h1>
         </div>
-        <div className="rounded-2xl shadow-sm p-8" style={{ backgroundColor: '#F5F1EB' }}>
-          <p style={{ color: '#8B3A3A' }}>{error}</p>
+        <div 
+          className="rounded-3xl shadow-sm p-8" 
+          style={{ 
+            backgroundColor: 'rgba(255, 255, 255, 0.03)',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            backdropFilter: 'blur(10px)'
+          }}
+        >
+          <p style={{ color: 'rgba(255, 255, 255, 0.7)' }}>{error}</p>
         </div>
       </div>
     )
@@ -101,47 +115,54 @@ export default function UsersPage() {
   return (
     <div className="px-4 sm:px-0">
       <div className="mb-8">
-        <h1 className="text-4xl font-bold" style={{ color: '#8B3A3A' }}>Пользователи</h1>
-        <p className="mt-2" style={{ color: '#8B3A3A', opacity: 0.7 }}>
+        <h1 className="text-4xl font-bold" style={{ color: 'rgba(255, 255, 255, 0.95)' }}>Пользователи</h1>
+        <p className="mt-2" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>
           Всего пользователей: {users.length}
         </p>
       </div>
 
-      <div className="rounded-2xl shadow-sm overflow-hidden" style={{ backgroundColor: '#F5F1EB' }}>
+      <div 
+        className="rounded-3xl shadow-sm overflow-hidden" 
+        style={{ 
+          backgroundColor: 'rgba(255, 255, 255, 0.03)',
+          border: '1px solid rgba(255, 255, 255, 0.08)',
+          backdropFilter: 'blur(10px)'
+        }}
+      >
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y" style={{ borderColor: '#D4C8B5' }}>
-            <thead style={{ backgroundColor: '#E8E2D5' }}>
+          <table className="min-w-full divide-y" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
+            <thead style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)' }}>
               <tr>
                 <th
                   className="px-6 py-4 text-left text-sm font-semibold"
-                  style={{ color: '#8B3A3A' }}
+                  style={{ color: 'rgba(255, 255, 255, 0.9)' }}
                 >
                   Email
                 </th>
                 <th
                   className="px-6 py-4 text-left text-sm font-semibold"
-                  style={{ color: '#8B3A3A' }}
+                  style={{ color: 'rgba(255, 255, 255, 0.9)' }}
                 >
                   Имя
                 </th>
                 <th
                   className="px-6 py-4 text-left text-sm font-semibold"
-                  style={{ color: '#8B3A3A' }}
+                  style={{ color: 'rgba(255, 255, 255, 0.9)' }}
                 >
                   Роль
                 </th>
                 <th
                   className="px-6 py-4 text-left text-sm font-semibold"
-                  style={{ color: '#8B3A3A' }}
+                  style={{ color: 'rgba(255, 255, 255, 0.9)' }}
                 >
                   Дата регистрации
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y" style={{ borderColor: '#D4C8B5' }}>
+            <tbody className="divide-y" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
               {users.map((user) => (
                 <tr key={user.id} className="hover:bg-opacity-50" style={{ backgroundColor: 'transparent' }}>
-                  <td className="px-6 py-4 text-sm" style={{ color: '#8B3A3A' }}>
+                  <td className="px-6 py-4 text-sm" style={{ color: 'rgba(255, 255, 255, 0.8)' }}>
                     {user.email}
                   </td>
                   <td className="px-6 py-4 text-sm">
@@ -149,12 +170,12 @@ export default function UsersPage() {
                       <Link
                         href={`/admin/users/${user.id}`}
                         className="hover:underline font-medium"
-                        style={{ color: '#8B3A3A' }}
+                        style={{ color: '#7c5cff' }}
                       >
                         {user.full_name}
                       </Link>
                     ) : (
-                      <span style={{ color: '#8B3A3A' }}>-</span>
+                      <span style={{ color: 'rgba(255, 255, 255, 0.5)' }}>-</span>
                     )}
                   </td>
                   <td className="px-6 py-4 text-sm">
@@ -164,9 +185,9 @@ export default function UsersPage() {
                       disabled={updatingUserId === user.id}
                       className="block w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed"
                       style={{
-                        backgroundColor: '#FFFFFF',
-                        borderColor: '#D4C8B5',
-                        color: '#8B3A3A',
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        borderColor: 'rgba(255, 255, 255, 0.1)',
+                        color: 'rgba(255, 255, 255, 0.9)',
                       }}
                     >
                       <option value="free">Бесплатный</option>
@@ -175,12 +196,12 @@ export default function UsersPage() {
                       <option value="admin">Админ</option>
                     </select>
                     {updatingUserId === user.id && (
-                      <div className="mt-1 text-xs" style={{ color: '#8B3A3A', opacity: 0.7 }}>
+                      <div className="mt-1 text-xs" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>
                         Обновление...
                       </div>
                     )}
                   </td>
-                  <td className="px-6 py-4 text-sm" style={{ color: '#8B3A3A', opacity: 0.7 }}>
+                  <td className="px-6 py-4 text-sm" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>
                     {new Date(user.created_at).toLocaleDateString('ru-RU', {
                       year: 'numeric',
                       month: 'long',
@@ -195,7 +216,7 @@ export default function UsersPage() {
 
         {users.length === 0 && (
           <div className="px-6 py-12 text-center">
-            <p style={{ color: '#8B3A3A', opacity: 0.7 }}>
+            <p style={{ color: 'rgba(255, 255, 255, 0.6)' }}>
               Нет зарегистрированных пользователей
             </p>
           </div>

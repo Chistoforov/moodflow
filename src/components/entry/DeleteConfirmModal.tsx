@@ -23,26 +23,28 @@ export default function DeleteConfirmModal({
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
+      style={{ backgroundColor: 'rgba(0, 0, 0, 0.7)' }}
       onClick={onClose}
     >
       <div
-        className="rounded-2xl p-6 max-w-sm w-full shadow-xl"
+        className="rounded-3xl p-6 max-w-sm w-full shadow-xl"
         style={{
-          backgroundColor: '#F5F1EB',
-          color: '#8B3A3A',
+          backgroundColor: 'rgba(26, 29, 46, 0.95)',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          backdropFilter: 'blur(20px)'
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <h3 className="text-lg font-semibold mb-2">
+        <h3 className="text-lg font-semibold mb-2" style={{ color: 'rgba(255, 255, 255, 0.95)' }}>
           Удалить сообщение?
         </h3>
         {messageText && (
           <p 
             className="text-sm mb-4 p-3 rounded-lg"
             style={{
-              backgroundColor: '#E8E2D5',
-              color: '#8B3A3A',
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+              color: 'rgba(255, 255, 255, 0.8)',
+              border: '1px solid rgba(255, 255, 255, 0.1)'
             }}
           >
             {messageText.length > 100 
@@ -50,7 +52,7 @@ export default function DeleteConfirmModal({
               : messageText}
           </p>
         )}
-        <p className="text-sm mb-6" style={{ color: '#A67C6C' }}>
+        <p className="text-sm mb-6" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>
           Это действие нельзя отменить.
         </p>
         <div className="flex gap-3">
@@ -58,14 +60,15 @@ export default function DeleteConfirmModal({
             onClick={onClose}
             className="flex-1 px-4 py-2.5 rounded-xl font-medium transition-all"
             style={{
-              backgroundColor: '#E8E2D5',
-              color: '#8B3A3A',
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+              color: 'rgba(255, 255, 255, 0.7)',
+              border: '1px solid rgba(255, 255, 255, 0.1)'
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#D4C8B5'
+              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = '#E8E2D5'
+              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)'
             }}
           >
             Отмена
@@ -74,14 +77,14 @@ export default function DeleteConfirmModal({
             onClick={handleConfirm}
             className="flex-1 px-4 py-2.5 rounded-xl font-medium transition-all"
             style={{
-              backgroundColor: '#D0021B',
+              backgroundColor: '#ef4444',
               color: '#FFFFFF',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#B0021A'
+              e.currentTarget.style.backgroundColor = '#dc2626'
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = '#D0021B'
+              e.currentTarget.style.backgroundColor = '#ef4444'
             }}
           >
             Удалить

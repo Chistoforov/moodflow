@@ -75,7 +75,7 @@ export default function AudioRecordModal({
       className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-opacity duration-300 ${
         isClosing ? 'opacity-0' : 'opacity-100'
       }`}
-      style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
+      style={{ backgroundColor: 'rgba(0, 0, 0, 0.7)' }}
       onClick={(e) => {
         if (e.target === e.currentTarget && !showSuccessMessage) {
           handleCancel()
@@ -83,10 +83,14 @@ export default function AudioRecordModal({
       }}
     >
       <div
-        className={`rounded-2xl shadow-2xl max-w-md w-full p-6 mx-4 transition-all duration-300 ${
+        className={`rounded-3xl shadow-2xl max-w-md w-full p-6 mx-4 transition-all duration-300 ${
           isClosing ? 'scale-95 opacity-0' : 'scale-100 opacity-100'
         }`}
-        style={{ backgroundColor: '#F5F1EB' }}
+        style={{ 
+          backgroundColor: 'rgba(26, 29, 46, 0.95)',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          backdropFilter: 'blur(20px)'
+        }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Success message */}
@@ -94,7 +98,7 @@ export default function AudioRecordModal({
           <div className="flex flex-col items-center justify-center py-8 animate-fade-in">
             <div 
               className="mb-4 rounded-full p-4 animate-scale-in"
-              style={{ backgroundColor: '#8B3A3A' }}
+              style={{ backgroundColor: '#7c5cff' }}
             >
               <svg
                 width="48"
@@ -114,7 +118,7 @@ export default function AudioRecordModal({
             </div>
             <p 
               className="text-2xl font-semibold animate-slide-up"
-              style={{ color: '#8B3A3A' }}
+              style={{ color: 'rgba(255, 255, 255, 0.95)' }}
             >
               Запись сохранена
             </p>
@@ -142,17 +146,17 @@ export default function AudioRecordModal({
                   disabled={disabled}
                   className="p-3 rounded-full transition-all min-w-[56px] min-h-[56px] flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
                   style={{
-                    backgroundColor: '#E8E2D5',
-                    color: '#8B3A3A',
-                    border: '2px solid #C8BEB0',
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    color: 'rgba(255, 255, 255, 0.7)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
                   }}
                   onMouseEnter={(e) => {
                     if (!disabled) {
-                      e.currentTarget.style.backgroundColor = '#D4C8B5'
+                      e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'
                     }
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = '#E8E2D5'
+                    e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)'
                   }}
                   title="Отменить"
                 >
@@ -167,17 +171,17 @@ export default function AudioRecordModal({
                   disabled={disabled}
                   className="p-3 rounded-full transition-all min-w-[56px] min-h-[56px] flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
                   style={{
-                    backgroundColor: '#E8E2D5',
-                    color: '#8B3A3A',
-                    border: '2px solid #8B3A3A',
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    color: '#7c5cff',
+                    border: '1px solid #7c5cff',
                   }}
                   onMouseEnter={(e) => {
                     if (!disabled) {
-                      e.currentTarget.style.backgroundColor = '#D4C8B5'
+                      e.currentTarget.style.backgroundColor = 'rgba(124, 92, 255, 0.1)'
                     }
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = '#E8E2D5'
+                    e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)'
                   }}
                   title={isPaused ? 'Продолжить' : 'Пауза'}
                 >
@@ -201,16 +205,16 @@ export default function AudioRecordModal({
                   disabled={disabled}
                   className="p-3 rounded-full transition-all min-w-[56px] min-h-[56px] flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
                   style={{
-                    backgroundColor: '#8B3A3A',
+                    backgroundColor: '#7c5cff',
                     color: '#FFFFFF',
                   }}
                   onMouseEnter={(e) => {
                     if (!disabled) {
-                      e.currentTarget.style.backgroundColor = '#6B1F1F'
+                      e.currentTarget.style.backgroundColor = '#6b4de6'
                     }
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = '#8B3A3A'
+                    e.currentTarget.style.backgroundColor = '#7c5cff'
                   }}
                   title="Отправить"
                 >

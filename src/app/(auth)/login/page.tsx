@@ -66,23 +66,38 @@ export default function LoginPage() {
   // Показываем загрузку пока проверяем сессию
   if (checkingSession) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#E8E2D5' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#1a1d2e' }}>
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: '#8B3A3A' }}></div>
-          <p className="mt-4" style={{ color: '#8B3A3A' }}>Проверка сессии...</p>
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: '#7c5cff' }}></div>
+          <p className="mt-4" style={{ color: 'rgba(255, 255, 255, 0.7)' }}>Проверка сессии...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-8" style={{ backgroundColor: '#E8E2D5' }}>
-      <div className="max-w-md w-full space-y-6 sm:space-y-8 p-6 sm:p-8 rounded-2xl" style={{ backgroundColor: '#F5F1EB' }}>
+    <div className="min-h-screen flex items-center justify-center px-4 py-8" style={{ backgroundColor: '#1a1d2e' }}>
+      <div 
+        className="max-w-md w-full space-y-6 sm:space-y-8 p-6 sm:p-8 rounded-3xl" 
+        style={{ 
+          backgroundColor: 'rgba(255, 255, 255, 0.03)',
+          border: '1px solid rgba(255, 255, 255, 0.08)',
+          backdropFilter: 'blur(10px)'
+        }}
+      >
         <div>
-          <h2 className="handwritten text-4xl sm:text-5xl font-bold text-center mb-4" style={{ color: '#8B3A3A' }}>
+          <h2 
+            className="handwritten text-4xl sm:text-5xl font-bold text-center mb-4" 
+            style={{ 
+              background: 'linear-gradient(135deg, #9b7dff 0%, #c084fc 50%, #d893ff 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text'
+            }}
+          >
             MoodFlow
           </h2>
-          <p className="text-center text-base sm:text-lg" style={{ color: '#8B3A3A' }}>
+          <p className="text-center text-base sm:text-lg" style={{ color: 'rgba(255, 255, 255, 0.7)' }}>
             Войдите в свой аккаунт
           </p>
         </div>
@@ -91,11 +106,11 @@ export default function LoginPage() {
           <button
             onClick={handleGoogleLogin}
             disabled={loading}
-            className="group relative w-full flex items-center justify-center gap-3 py-3 px-4 border-2 font-medium rounded-full disabled:opacity-50 transition-all hover:shadow-lg text-sm sm:text-base"
+            className="group relative w-full flex items-center justify-center gap-3 py-3 px-4 font-medium rounded-full disabled:opacity-50 transition-all hover:shadow-lg text-sm sm:text-base"
             style={{
-              backgroundColor: 'white',
-              borderColor: '#C8BEB0',
-              color: '#8B3A3A',
+              backgroundColor: 'rgba(255, 255, 255, 0.9)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              color: '#1a1d2e',
             }}
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -108,7 +123,14 @@ export default function LoginPage() {
           </button>
 
           {error && (
-            <div className="text-center p-3 rounded-lg" style={{ backgroundColor: '#F8D7DA', color: '#721C24' }}>
+            <div 
+              className="text-center p-3 rounded-lg" 
+              style={{ 
+                backgroundColor: 'rgba(239, 68, 68, 0.1)', 
+                color: '#ef4444',
+                border: '1px solid rgba(239, 68, 68, 0.3)'
+              }}
+            >
               {error}
             </div>
           )}

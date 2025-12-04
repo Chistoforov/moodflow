@@ -170,26 +170,48 @@ export default function CalendarPage() {
     }
   }
 
+  // Функция для получения цвета настроения
+  const getMoodColor = (score: number): string => {
+    const colors = {
+      1: 'rgba(239, 68, 68, 0.2)', // Красный/розовый
+      2: 'rgba(194, 120, 77, 0.25)', // Коричневый/оранжевый
+      3: 'rgba(148, 163, 184, 0.2)', // Серый
+      4: 'rgba(134, 239, 172, 0.25)', // Светло-зеленый
+      5: 'rgba(34, 197, 94, 0.3)', // Темно-зеленый
+    }
+    return colors[score as keyof typeof colors] || colors[3]
+  }
+
+  const getMoodLabel = (score: number): string => {
+    const labels = {
+      1: 'Очень плохое',
+      2: 'Плохое',
+      3: 'Нейтральное',
+      4: 'Хорошее',
+      5: 'Отличное',
+    }
+    return labels[score as keyof typeof labels] || ''
+  }
+
   return (
-    <div className="min-h-screen px-2 sm:px-4 pt-4 pb-20" style={{ backgroundColor: '#E8E2D5' }}>
+    <div className="min-h-screen px-2 sm:px-4 pt-4 pb-20" style={{ backgroundColor: '#1a1d2e' }}>
       <div className="max-w-2xl mx-auto">
         {/* Компактный заголовок с месяцем, годом и навигацией */}
         <div className="flex items-center justify-between mb-6 sm:mb-8 px-2 sm:px-4">
           <button
             onClick={() => changeMonth(-1)}
-            className="px-4 sm:px-6 py-2 text-base sm:text-lg font-medium transition-all rounded-full border-2 min-w-[44px] min-h-[44px] flex items-center justify-center"
+            className="px-4 sm:px-6 py-2 text-base sm:text-lg font-medium transition-all rounded-full min-w-[44px] min-h-[44px] flex items-center justify-center"
             style={{ 
-              color: '#8B3A3A',
-              borderColor: '#8B3A3A',
-              backgroundColor: 'transparent'
+              color: 'rgba(255, 255, 255, 0.7)',
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              backdropFilter: 'blur(10px)'
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#8B3A3A'
-              e.currentTarget.style.color = '#E8E2D5'
+              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent'
-              e.currentTarget.style.color = '#8B3A3A'
+              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)'
             }}
           >
             ←
@@ -198,13 +220,18 @@ export default function CalendarPage() {
           <div className="text-center px-2">
             <h1 
               className="handwritten text-3xl sm:text-4xl"
-              style={{ color: '#8B3A3A' }}
+              style={{ 
+                background: 'linear-gradient(135deg, #9b7dff 0%, #c084fc 50%, #d893ff 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text'
+              }}
             >
               {format(currentMonth, 'LLLL', { locale: ru })}
             </h1>
             <p 
               className="text-lg sm:text-xl font-semibold mt-1"
-              style={{ color: '#8B3A3A', opacity: 0.8 }}
+              style={{ color: 'rgba(255, 255, 255, 0.6)' }}
             >
               {format(currentMonth, 'yyyy')}
             </p>
@@ -212,19 +239,18 @@ export default function CalendarPage() {
 
           <button
             onClick={() => changeMonth(1)}
-            className="px-4 sm:px-6 py-2 text-base sm:text-lg font-medium transition-all rounded-full border-2 min-w-[44px] min-h-[44px] flex items-center justify-center"
+            className="px-4 sm:px-6 py-2 text-base sm:text-lg font-medium transition-all rounded-full min-w-[44px] min-h-[44px] flex items-center justify-center"
             style={{ 
-              color: '#8B3A3A',
-              borderColor: '#8B3A3A',
-              backgroundColor: 'transparent'
+              color: 'rgba(255, 255, 255, 0.7)',
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              backdropFilter: 'blur(10px)'
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#8B3A3A'
-              e.currentTarget.style.color = '#E8E2D5'
+              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent'
-              e.currentTarget.style.color = '#8B3A3A'
+              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)'
             }}
           >
             →
@@ -232,9 +258,16 @@ export default function CalendarPage() {
         </div>
 
         {/* Календарь */}
-        <div className="rounded-2xl p-4 sm:p-6 md:p-8" style={{ backgroundColor: '#E8E2D5' }}>
+        <div 
+          className="rounded-3xl p-4 sm:p-6 md:p-8" 
+          style={{ 
+            backgroundColor: 'rgba(255, 255, 255, 0.03)',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            backdropFilter: 'blur(10px)'
+          }}
+        >
           {isLoading ? (
-            <div className="text-center py-12" style={{ color: '#8B3A3A' }}>
+            <div className="text-center py-12" style={{ color: 'rgba(255, 255, 255, 0.7)' }}>
               Загрузка...
             </div>
           ) : (
@@ -245,7 +278,7 @@ export default function CalendarPage() {
                   <div 
                     key={day} 
                     className="text-center font-semibold text-xs sm:text-sm uppercase tracking-wider"
-                    style={{ color: '#8B3A3A' }}
+                    style={{ color: 'rgba(255, 255, 255, 0.5)' }}
                   >
                     {day}
                   </div>
@@ -263,6 +296,7 @@ export default function CalendarPage() {
                   const entry = getEntryForDate(day)
                   const today = isToday(day)
                   const dateStr = format(day, 'yyyy-MM-dd')
+                  const hasMood = entry && entry.mood_score
 
                   return (
                     <div
@@ -271,31 +305,44 @@ export default function CalendarPage() {
                     >
                       <a
                         href={`/entry/${dateStr}`}
-                        className="absolute inset-0 flex flex-col items-center justify-center rounded-xl transition-all"
+                        className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl transition-all"
                         style={{
-                          backgroundColor: today ? '#D4C8B5' : 'transparent',
-                          border: today ? '2px solid #8B3A3A' : 'none',
+                          backgroundColor: hasMood ? getMoodColor(entry.mood_score!) : 'transparent',
+                          border: today ? '2px solid #7c5cff' : hasMood ? '1px solid rgba(255, 255, 255, 0.15)' : 'none',
+                          backdropFilter: hasMood ? 'blur(10px)' : 'none',
                         }}
                         onMouseEnter={(e) => {
-                          if (!today) {
-                            e.currentTarget.style.backgroundColor = '#D4C8B5'
+                          if (!hasMood) {
+                            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)'
                           }
                         }}
                         onMouseLeave={(e) => {
-                          if (!today) {
+                          if (!hasMood) {
                             e.currentTarget.style.backgroundColor = 'transparent'
                           }
                         }}
                       >
-                        <div 
-                          className="text-lg font-medium mb-1"
-                          style={{ color: '#8B3A3A' }}
-                        >
-                          {format(day, 'd')}
-                        </div>
-                        {entry && entry.mood_score && (
-                          <div className="flex justify-center">
-                            <MoodSymbol score={entry.mood_score} />
+                        {hasMood ? (
+                          <div className="flex flex-col items-center justify-center h-full w-full px-1">
+                            <div 
+                              className="text-base sm:text-lg font-bold"
+                              style={{ color: '#ffffff' }}
+                            >
+                              {format(day, 'd')}
+                            </div>
+                            <div 
+                              className="text-[9px] sm:text-[10px] font-medium text-center mt-0.5 leading-tight"
+                              style={{ color: 'rgba(255, 255, 255, 0.9)' }}
+                            >
+                              {getMoodLabel(entry.mood_score!)}
+                            </div>
+                          </div>
+                        ) : (
+                          <div 
+                            className="text-lg font-medium"
+                            style={{ color: 'rgba(255, 255, 255, 0.4)' }}
+                          >
+                            {format(day, 'd')}
                           </div>
                         )}
                       </a>
@@ -308,11 +355,19 @@ export default function CalendarPage() {
         </div>
 
         {/* Аналитика и рекомендации */}
-        <div className="mt-4 sm:mt-6 rounded-2xl p-4 sm:p-6" style={{ backgroundColor: '#F5F1EB' }}>
-          <div className="flex items-center justify-between mb-4">
+        <div 
+          className="mt-4 sm:mt-6 rounded-3xl p-4 sm:p-6" 
+          style={{ 
+            backgroundColor: 'rgba(255, 255, 255, 0.03)',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            backdropFilter: 'blur(10px)'
+          }}
+        >
+          <div className="flex items-center gap-3 mb-4">
+            <div className="text-2xl">📊</div>
             <h3 
-              className="font-semibold text-base sm:text-lg"
-              style={{ color: '#8B3A3A' }}
+              className="font-semibold text-base sm:text-lg flex-1"
+              style={{ color: 'rgba(255, 255, 255, 0.9)' }}
             >
               Аналитика и рекомендации
             </h3>
@@ -322,8 +377,8 @@ export default function CalendarPage() {
                 disabled={isGenerating || entries.length === 0}
                 className="px-4 py-2 text-sm font-medium transition-all rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{
-                  backgroundColor: '#8B3A3A',
-                  color: '#E8E2D5',
+                  backgroundColor: '#7c5cff',
+                  color: '#ffffff',
                 }}
               >
                 {isGenerating ? 'Генерация...' : 'Сгенерировать'}
@@ -334,13 +389,19 @@ export default function CalendarPage() {
           {hasAnalytics && analytics ? (
             <div className="space-y-4">
               {/* Header */}
-              <div className="flex items-center justify-between p-3 rounded-lg" style={{ backgroundColor: '#E8E2D5' }}>
+              <div 
+                className="flex items-center justify-between p-3 rounded-lg" 
+                style={{ 
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)'
+                }}
+              >
                 <div>
-                  <p className="text-sm font-medium" style={{ color: '#8B3A3A' }}>
+                  <p className="text-sm font-medium" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>
                     Неделя {analytics.week_number} • {analytics.days_analyzed} {analytics.days_analyzed === 1 ? 'день' : analytics.days_analyzed < 5 ? 'дня' : 'дней'}
                   </p>
                   {analytics.is_final && (
-                    <p className="text-xs mt-1" style={{ color: '#8B3A3A', opacity: 0.7 }}>
+                    <p className="text-xs mt-1" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>
                       🎯 Финальная аналитика месяца
                     </p>
                   )}
@@ -351,8 +412,8 @@ export default function CalendarPage() {
                     disabled={isGenerating}
                     className="px-3 py-1.5 text-xs font-medium transition-all rounded-md disabled:opacity-50"
                     style={{
-                      backgroundColor: '#8B3A3A',
-                      color: '#E8E2D5',
+                      backgroundColor: '#7c5cff',
+                      color: '#ffffff',
                     }}
                   >
                     {isGenerating ? 'Обновление...' : 'Обновить'}
@@ -363,62 +424,92 @@ export default function CalendarPage() {
               {/* Analysis sections */}
               <div className="space-y-3">
                 {analytics.general_impression && (
-                  <div className="p-4 rounded-lg" style={{ backgroundColor: '#E8E2D5' }}>
-                    <h4 className="font-semibold mb-2 text-sm" style={{ color: '#8B3A3A' }}>
+                  <div 
+                    className="p-4 rounded-lg" 
+                    style={{ 
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)'
+                    }}
+                  >
+                    <h4 className="font-semibold mb-2 text-sm" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>
                       Общее впечатление о периоде
                     </h4>
-                    <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: '#8B3A3A', opacity: 0.9 }}>
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: 'rgba(255, 255, 255, 0.7)' }}>
                       {analytics.general_impression}
                     </p>
                   </div>
                 )}
 
                 {analytics.positive_trends && (
-                  <div className="p-4 rounded-lg" style={{ backgroundColor: '#E8E2D5' }}>
-                    <h4 className="font-semibold mb-2 text-sm" style={{ color: '#8B3A3A' }}>
+                  <div 
+                    className="p-4 rounded-lg" 
+                    style={{ 
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)'
+                    }}
+                  >
+                    <h4 className="font-semibold mb-2 text-sm" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>
                       ✨ Положительные тенденции
                     </h4>
-                    <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: '#8B3A3A', opacity: 0.9 }}>
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: 'rgba(255, 255, 255, 0.7)' }}>
                       {analytics.positive_trends}
                     </p>
                   </div>
                 )}
 
                 {analytics.decline_reasons && (
-                  <div className="p-4 rounded-lg" style={{ backgroundColor: '#E8E2D5' }}>
-                    <h4 className="font-semibold mb-2 text-sm" style={{ color: '#8B3A3A' }}>
+                  <div 
+                    className="p-4 rounded-lg" 
+                    style={{ 
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)'
+                    }}
+                  >
+                    <h4 className="font-semibold mb-2 text-sm" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>
                       🔍 Возможные причины спада
                     </h4>
-                    <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: '#8B3A3A', opacity: 0.9 }}>
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: 'rgba(255, 255, 255, 0.7)' }}>
                       {analytics.decline_reasons}
                     </p>
                   </div>
                 )}
 
                 {analytics.recommendations && (
-                  <div className="p-4 rounded-lg" style={{ backgroundColor: '#E8E2D5' }}>
-                    <h4 className="font-semibold mb-2 text-sm" style={{ color: '#8B3A3A' }}>
+                  <div 
+                    className="p-4 rounded-lg" 
+                    style={{ 
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)'
+                    }}
+                  >
+                    <h4 className="font-semibold mb-2 text-sm" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>
                       💡 Рекомендации и техники
                     </h4>
-                    <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: '#8B3A3A', opacity: 0.9 }}>
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: 'rgba(255, 255, 255, 0.7)' }}>
                       {analytics.recommendations}
                     </p>
                   </div>
                 )}
 
                 {analytics.reflection_directions && (
-                  <div className="p-4 rounded-lg" style={{ backgroundColor: '#E8E2D5' }}>
-                    <h4 className="font-semibold mb-2 text-sm" style={{ color: '#8B3A3A' }}>
+                  <div 
+                    className="p-4 rounded-lg" 
+                    style={{ 
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)'
+                    }}
+                  >
+                    <h4 className="font-semibold mb-2 text-sm" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>
                       🎯 Направление для размышлений
                     </h4>
-                    <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: '#8B3A3A', opacity: 0.9 }}>
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: 'rgba(255, 255, 255, 0.7)' }}>
                       {analytics.reflection_directions}
                     </p>
                   </div>
                 )}
               </div>
 
-              <p className="text-xs text-center mt-4" style={{ color: '#8B3A3A', opacity: 0.6 }}>
+              <p className="text-xs text-center mt-4" style={{ color: 'rgba(255, 255, 255, 0.4)' }}>
                 Создано: {format(new Date(analytics.created_at), 'dd MMMM yyyy, HH:mm', { locale: ru })}
               </p>
             </div>
@@ -426,16 +517,15 @@ export default function CalendarPage() {
             <div 
               className="text-center p-3 sm:p-4 rounded-lg"
               style={{ 
-                color: '#8B3A3A',
-                backgroundColor: '#E8E2D5',
-                opacity: 0.8
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.1)'
               }}
             >
-              <p className="text-sm sm:text-base leading-relaxed mb-3">
+              <p className="text-sm sm:text-base leading-relaxed mb-3" style={{ color: 'rgba(255, 255, 255, 0.7)' }}>
                 Продолжайте заполнять дневник и скоро вы сможете увидеть выводы и рекомендации
               </p>
               {entries.length > 0 && (
-                <p className="text-xs" style={{ opacity: 0.7 }}>
+                <p className="text-xs" style={{ color: 'rgba(255, 255, 255, 0.5)' }}>
                   У вас уже есть {entries.filter(e => {
                     const entryDate = new Date(e.entry_date)
                     return entryDate.getMonth() === month - 1 && entryDate.getFullYear() === year

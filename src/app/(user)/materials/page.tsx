@@ -91,8 +91,8 @@ export default function MaterialsPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen px-4 pt-8" style={{ backgroundColor: '#E8E2D5' }}>
-        <div className="max-w-2xl mx-auto text-center py-12" style={{ color: '#8B3A3A' }}>
+      <div className="min-h-screen px-4 pt-8" style={{ backgroundColor: '#1a1d2e' }}>
+        <div className="max-w-2xl mx-auto text-center py-12" style={{ color: 'rgba(255, 255, 255, 0.7)' }}>
           Загрузка...
         </div>
       </div>
@@ -101,37 +101,43 @@ export default function MaterialsPage() {
 
   if (selectedPost) {
     return (
-      <div className="min-h-screen px-4 pt-4 sm:pt-8 pb-20" style={{ backgroundColor: '#E8E2D5' }}>
+      <div className="min-h-screen px-4 pt-4 sm:pt-8 pb-20" style={{ backgroundColor: '#1a1d2e' }}>
         <div className="max-w-2xl mx-auto">
           {/* Кнопка назад */}
           <button
             onClick={closePost}
-            className="mb-4 sm:mb-6 px-4 sm:px-6 py-2 text-sm sm:text-base font-medium transition-all rounded-full border-2 min-h-[44px]"
+            className="mb-4 sm:mb-6 px-4 sm:px-6 py-2 text-sm sm:text-base font-medium transition-all rounded-full min-h-[44px]"
             style={{ 
-              color: '#8B3A3A',
-              borderColor: '#8B3A3A',
-              backgroundColor: 'transparent'
+              color: 'rgba(255, 255, 255, 0.7)',
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              backdropFilter: 'blur(10px)'
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#8B3A3A'
-              e.currentTarget.style.color = '#E8E2D5'
+              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent'
-              e.currentTarget.style.color = '#8B3A3A'
+              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)'
             }}
           >
             ← Назад
           </button>
 
           {/* Статья */}
-          <article className="rounded-2xl p-4 sm:p-6 md:p-8 mb-8" style={{ backgroundColor: '#F5F1EB' }}>
+          <article 
+            className="rounded-3xl p-4 sm:p-6 md:p-8 mb-8" 
+            style={{ 
+              backgroundColor: 'rgba(255, 255, 255, 0.03)',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+              backdropFilter: 'blur(10px)'
+            }}
+          >
             <div className="mb-4">
               <span 
                 className="inline-block px-3 py-1 rounded-full text-xs sm:text-sm font-medium"
                 style={{ 
-                  backgroundColor: '#D4C8B5',
-                  color: '#8B3A3A'
+                  backgroundColor: '#7c5cff',
+                  color: '#ffffff'
                 }}
               >
                 {selectedPost.category}
@@ -140,33 +146,33 @@ export default function MaterialsPage() {
 
             <h1 
               className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4"
-              style={{ color: '#8B3A3A' }}
+              style={{ color: 'rgba(255, 255, 255, 0.95)' }}
             >
               {selectedPost.title}
             </h1>
 
-            <div className="mb-6 text-xs sm:text-sm" style={{ color: '#A67C6C' }}>
+            <div className="mb-6 text-xs sm:text-sm" style={{ color: 'rgba(255, 255, 255, 0.5)' }}>
               {format(new Date(selectedPost.published_at), 'd MMMM yyyy', { locale: ru })}
             </div>
 
             <div 
               className="prose prose-sm sm:prose-base md:prose-lg max-w-none"
-              style={{ color: '#5C4A42' }}
+              style={{ color: 'rgba(255, 255, 255, 0.8)' }}
               dangerouslySetInnerHTML={{ 
-                __html: selectedPost.content.replace(/\n/g, '<br />').replace(/#{1,6}\s(.*?)(<br \/>|$)/g, (_: string, text: string) => `<h2 style="color: #8B3A3A; font-weight: 600; font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 1rem;">${text}</h2>`) 
+                __html: selectedPost.content.replace(/\n/g, '<br />').replace(/#{1,6}\s(.*?)(<br \/>|$)/g, (_: string, text: string) => `<h2 style="color: rgba(255, 255, 255, 0.95); font-weight: 600; font-size: 1.25rem; margin-top: 1.5rem; margin-bottom: 1rem;">${text}</h2>`) 
               }}
             />
 
             {selectedPost.tags && selectedPost.tags.length > 0 && (
-              <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t" style={{ borderColor: '#D4C8B5' }}>
+              <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
                 <div className="flex flex-wrap gap-2">
                   {selectedPost.tags.map((tag: string) => (
                     <span
                       key={tag}
                       className="px-3 py-1 rounded-full text-xs sm:text-sm"
                       style={{ 
-                        backgroundColor: '#E8E2D5',
-                        color: '#8B3A3A'
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        color: 'rgba(255, 255, 255, 0.7)'
                       }}
                     >
                       #{tag}
@@ -182,17 +188,22 @@ export default function MaterialsPage() {
   }
 
   return (
-    <div className="min-h-screen px-4 pt-4 sm:pt-8 pb-20" style={{ backgroundColor: '#E8E2D5' }}>
+    <div className="min-h-screen px-4 pt-4 sm:pt-8 pb-20" style={{ backgroundColor: '#1a1d2e' }}>
       <div className="max-w-2xl mx-auto">
         {/* Заголовок */}
         <div className="text-center mb-8 sm:mb-12">
           <h1 
             className="handwritten text-4xl sm:text-5xl md:text-6xl mb-4"
-            style={{ color: '#8B3A3A' }}
+            style={{ 
+              background: 'linear-gradient(135deg, #9b7dff 0%, #c084fc 50%, #d893ff 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text'
+            }}
           >
             Материалы
           </h1>
-          <p className="text-base sm:text-lg" style={{ color: '#A67C6C' }}>
+          <p className="text-base sm:text-lg" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>
             Полезные статьи от наших психологов
           </p>
         </div>
@@ -200,8 +211,14 @@ export default function MaterialsPage() {
         {/* Список постов */}
         <div className="space-y-4">
           {posts.length === 0 ? (
-            <div className="text-center py-12 rounded-2xl" style={{ backgroundColor: '#F5F1EB' }}>
-              <p className="text-lg" style={{ color: '#A67C6C' }}>
+            <div 
+              className="text-center py-12 rounded-3xl" 
+              style={{ 
+                backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                border: '1px solid rgba(255, 255, 255, 0.08)'
+              }}
+            >
+              <p className="text-lg" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>
                 Пока нет материалов
               </p>
             </div>
@@ -210,26 +227,29 @@ export default function MaterialsPage() {
               <button
                 key={post.id}
                 onClick={() => openPost(post.id)}
-                className="w-full text-left rounded-2xl p-4 sm:p-6 transition-all"
+                className="w-full text-left rounded-3xl p-4 sm:p-6 transition-all"
                 style={{ 
-                  backgroundColor: '#F5F1EB',
-                  border: '2px solid transparent'
+                  backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                  border: '1px solid rgba(255, 255, 255, 0.08)',
+                  backdropFilter: 'blur(10px)'
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = '#8B3A3A'
+                  e.currentTarget.style.borderColor = '#7c5cff'
                   e.currentTarget.style.transform = 'translateY(-2px)'
+                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)'
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = 'transparent'
+                  e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.08)'
                   e.currentTarget.style.transform = 'translateY(0)'
+                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.03)'
                 }}
               >
                 <div className="flex justify-between items-start mb-2">
                   <span 
                     className="inline-block px-3 py-1 rounded-full text-xs font-medium"
                     style={{ 
-                      backgroundColor: '#D4C8B5',
-                      color: '#8B3A3A'
+                      backgroundColor: '#7c5cff',
+                      color: '#ffffff'
                     }}
                   >
                     {post.category}
@@ -237,7 +257,7 @@ export default function MaterialsPage() {
                   {!post.is_read && (
                     <div
                       className="w-2 h-2 rounded-full flex-shrink-0"
-                      style={{ backgroundColor: '#8B3A3A' }}
+                      style={{ backgroundColor: '#ef4444' }}
                       title="Непрочитанный материал"
                     />
                   )}
@@ -245,12 +265,12 @@ export default function MaterialsPage() {
 
                 <h2 
                   className="text-xl sm:text-2xl font-bold mb-3"
-                  style={{ color: '#8B3A3A' }}
+                  style={{ color: 'rgba(255, 255, 255, 0.95)' }}
                 >
                   {post.title}
                 </h2>
 
-                <p className="mb-3 line-clamp-2 text-sm sm:text-base" style={{ color: '#5C4A42' }}>
+                <p className="mb-3 line-clamp-2 text-sm sm:text-base" style={{ color: 'rgba(255, 255, 255, 0.7)' }}>
                   {post.excerpt}
                 </p>
 
@@ -260,8 +280,8 @@ export default function MaterialsPage() {
                       key={tag}
                       className="text-xs px-2 py-1 rounded-full"
                       style={{ 
-                        backgroundColor: '#E8E2D5',
-                        color: '#A67C6C'
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        color: 'rgba(255, 255, 255, 0.6)'
                       }}
                     >
                       #{tag}
@@ -269,7 +289,7 @@ export default function MaterialsPage() {
                   ))}
                 </div>
 
-                <div className="text-xs sm:text-sm" style={{ color: '#A67C6C' }}>
+                <div className="text-xs sm:text-sm" style={{ color: 'rgba(255, 255, 255, 0.5)' }}>
                   {format(new Date(post.published_at), 'd MMMM yyyy', { locale: ru })}
                 </div>
               </button>

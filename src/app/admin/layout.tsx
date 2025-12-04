@@ -30,7 +30,7 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#E8E2D5' }}>
+    <div className="min-h-screen" style={{ backgroundColor: '#1a1d2e' }}>
       <AdminNav />
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         {children}

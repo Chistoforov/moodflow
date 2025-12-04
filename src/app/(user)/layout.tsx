@@ -16,16 +16,24 @@ export default async function UserLayout({
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#E8E2D5' }}>
+    <div className="min-h-screen" style={{ backgroundColor: '#1a1d2e' }}>
       {/* Логотип сверху */}
       <header 
         className="shadow-sm fixed top-0 left-0 right-0 z-40" 
-        style={{ backgroundColor: '#F5F1EB' }}
+        style={{ backgroundColor: 'transparent' }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-center h-14 sm:h-16 items-center">
             <Link href="/calendar" className="cursor-pointer">
-              <h1 className="handwritten text-2xl sm:text-3xl font-bold" style={{ color: '#8B3A3A' }}>
+              <h1 
+                className="handwritten text-3xl sm:text-4xl font-bold" 
+                style={{ 
+                  background: 'linear-gradient(135deg, #9b7dff 0%, #c084fc 50%, #d893ff 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text'
+                }}
+              >
                 MoodFlow
               </h1>
             </Link>

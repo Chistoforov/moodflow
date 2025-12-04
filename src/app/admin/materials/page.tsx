@@ -82,7 +82,7 @@ function MaterialModal({ isOpen, onClose, onSave, post }: MaterialModalProps) {
         {/* Backdrop */}
         <div
           className="fixed inset-0 transition-opacity"
-          style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 1 }}
+          style={{ backgroundColor: 'rgba(0, 0, 0, 0.7)', zIndex: 1 }}
           onClick={onClose}
           aria-hidden="true"
         />
@@ -94,21 +94,27 @@ function MaterialModal({ isOpen, onClose, onSave, post }: MaterialModalProps) {
 
         {/* Modal panel */}
         <div 
-          className="inline-block align-bottom rounded-2xl text-left overflow-visible shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full"
-          style={{ backgroundColor: '#F5F1EB', position: 'relative', zIndex: 10 }}
+          className="inline-block align-bottom rounded-3xl text-left overflow-visible shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full"
+          style={{ 
+            backgroundColor: 'rgba(26, 29, 46, 0.95)', 
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            backdropFilter: 'blur(20px)',
+            position: 'relative', 
+            zIndex: 10 
+          }}
           onClick={(e) => e.stopPropagation()}
         >
           <div className="px-8 pt-8 pb-4">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-2xl font-bold" style={{ color: '#8B3A3A' }}>
+              <h3 className="text-2xl font-bold" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>
                 {post ? 'Редактировать материал' : 'Новый материал'}
               </h3>
               <button
                 onClick={onClose}
                 className="rounded-full p-2 hover:bg-opacity-20"
-                style={{ backgroundColor: '#D4C8B5' }}
+                style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
               >
-                <svg className="w-6 h-6" style={{ color: '#8B3A3A' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-6 h-6" style={{ color: 'rgba(255, 255, 255, 0.9)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
@@ -117,7 +123,7 @@ function MaterialModal({ isOpen, onClose, onSave, post }: MaterialModalProps) {
             <div className="space-y-6">
               {/* Title */}
               <div>
-                <label className="block text-sm font-medium mb-2" style={{ color: '#8B3A3A' }}>
+                <label className="block text-sm font-medium mb-2" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>
                   Заголовок
                 </label>
                 <input
@@ -127,8 +133,8 @@ function MaterialModal({ isOpen, onClose, onSave, post }: MaterialModalProps) {
                   className="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2"
                   style={{
                     backgroundColor: '#FFFFFF',
-                    borderColor: '#D4C8B5',
-                    color: '#8B3A3A',
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                    color: 'rgba(255, 255, 255, 0.9)',
                   }}
                   placeholder="Введите заголовок"
                 />
@@ -136,7 +142,7 @@ function MaterialModal({ isOpen, onClose, onSave, post }: MaterialModalProps) {
 
               {/* Content */}
               <div>
-                <label className="block text-sm font-medium mb-2" style={{ color: '#8B3A3A' }}>
+                <label className="block text-sm font-medium mb-2" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>
                   Текст
                 </label>
                 <div className="rounded-lg overflow-hidden" style={{ backgroundColor: '#FFFFFF' }}>
@@ -146,7 +152,7 @@ function MaterialModal({ isOpen, onClose, onSave, post }: MaterialModalProps) {
 
               {/* Publish Date */}
               <div>
-                <label className="block text-sm font-medium mb-2" style={{ color: '#8B3A3A' }}>
+                <label className="block text-sm font-medium mb-2" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>
                   Дата публикации (опционально)
                 </label>
                 <input
@@ -156,25 +162,25 @@ function MaterialModal({ isOpen, onClose, onSave, post }: MaterialModalProps) {
                   className="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2"
                   style={{
                     backgroundColor: '#FFFFFF',
-                    borderColor: '#D4C8B5',
-                    color: '#8B3A3A',
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                    color: 'rgba(255, 255, 255, 0.9)',
                   }}
                 />
-                <p className="mt-1 text-sm" style={{ color: '#8B3A3A', opacity: 0.7 }}>
+                <p className="mt-1 text-sm" style={{ color: 'rgba(255, 255, 255, 0.9)', opacity: 0.7 }}>
                   Если не заполнено, материал будет опубликован сразу
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="px-8 py-4 flex justify-end space-x-3" style={{ backgroundColor: '#E8E2D5' }}>
+          <div className="px-8 py-4 flex justify-end space-x-3" style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)' }}>
             <button
               onClick={onClose}
               disabled={saving}
               className="px-6 py-2 rounded-full font-medium transition-colors disabled:opacity-50"
               style={{
-                backgroundColor: '#D4C8B5',
-                color: '#8B3A3A',
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                color: 'rgba(255, 255, 255, 0.9)',
               }}
             >
               Отмена
@@ -184,7 +190,7 @@ function MaterialModal({ isOpen, onClose, onSave, post }: MaterialModalProps) {
               disabled={saving}
               className="px-6 py-2 rounded-full font-medium transition-colors disabled:opacity-50"
               style={{
-                backgroundColor: '#8B3A3A',
+                backgroundColor: 'rgba(255, 255, 255, 0.9)',
                 color: '#FFFFFF',
               }}
             >
@@ -267,11 +273,11 @@ export default function MaterialsPage() {
     return (
       <div className="px-4 sm:px-0">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold" style={{ color: '#8B3A3A' }}>Материалы</h1>
+          <h1 className="text-4xl font-bold" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>Материалы</h1>
         </div>
-        <div className="rounded-2xl shadow-sm p-8 text-center" style={{ backgroundColor: '#F5F1EB' }}>
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: '#8B3A3A' }}></div>
-          <p className="mt-4" style={{ color: '#8B3A3A' }}>Загрузка...</p>
+        <div className="rounded-2xl shadow-sm p-8 text-center" style={{ backgroundColor: 'rgba(255, 255, 255, 0.03)' }}>
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: 'rgba(255, 255, 255, 0.9)' }}></div>
+          <p className="mt-4" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>Загрузка...</p>
         </div>
       </div>
     )
@@ -281,10 +287,10 @@ export default function MaterialsPage() {
     return (
       <div className="px-4 sm:px-0">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold" style={{ color: '#8B3A3A' }}>Материалы</h1>
+          <h1 className="text-4xl font-bold" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>Материалы</h1>
         </div>
-        <div className="rounded-2xl shadow-sm p-8" style={{ backgroundColor: '#F5F1EB' }}>
-          <p style={{ color: '#8B3A3A' }}>{error}</p>
+        <div className="rounded-2xl shadow-sm p-8" style={{ backgroundColor: 'rgba(255, 255, 255, 0.03)' }}>
+          <p style={{ color: 'rgba(255, 255, 255, 0.9)' }}>{error}</p>
         </div>
       </div>
     )
@@ -295,15 +301,15 @@ export default function MaterialsPage() {
       <div className="px-4 sm:px-0">
         <div className="mb-8 flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold" style={{ color: '#8B3A3A' }}>Материалы</h1>
-            <p className="mt-2" style={{ color: '#8B3A3A', opacity: 0.7 }}>
+            <h1 className="text-4xl font-bold" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>Материалы</h1>
+            <p className="mt-2" style={{ color: 'rgba(255, 255, 255, 0.9)', opacity: 0.7 }}>
               Всего материалов: {posts.length}
             </p>
           </div>
           <button
             onClick={handleCreateNew}
             className="flex items-center justify-center w-14 h-14 rounded-full shadow-lg hover:shadow-xl transition-all"
-            style={{ backgroundColor: '#4CAF50' }}
+            style={{ backgroundColor: '#7c5cff' }}
             title="Добавить новый материал"
           >
             <svg className="w-8 h-8" style={{ color: '#FFFFFF' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -316,15 +322,19 @@ export default function MaterialsPage() {
           {posts.map((post) => (
             <div
               key={post.id}
-              className="rounded-2xl shadow-sm p-6 hover:shadow-md transition-shadow"
-              style={{ backgroundColor: '#F5F1EB' }}
+              className="rounded-3xl shadow-sm p-6 hover:shadow-md transition-shadow"
+              style={{ 
+                backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                backdropFilter: 'blur(10px)'
+              }}
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <h3 className="text-xl font-semibold mb-2" style={{ color: '#8B3A3A' }}>
+                  <h3 className="text-xl font-semibold mb-2" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>
                     {post.title}
                   </h3>
-                  <div className="flex items-center space-x-4 text-sm" style={{ color: '#8B3A3A', opacity: 0.7 }}>
+                  <div className="flex items-center space-x-4 text-sm" style={{ color: 'rgba(255, 255, 255, 0.9)', opacity: 0.7 }}>
                     <span>
                       {post.published ? (
                         <span className="inline-flex items-center">
@@ -353,10 +363,10 @@ export default function MaterialsPage() {
                   <button
                     onClick={() => handleEdit(post)}
                     className="p-2 rounded-full hover:bg-opacity-20 transition-colors"
-                    style={{ backgroundColor: '#D4C8B5' }}
+                    style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
                     title="Редактировать"
                   >
-                    <svg className="w-5 h-5" style={{ color: '#8B3A3A' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="w-5 h-5" style={{ color: 'rgba(255, 255, 255, 0.9)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
                   </button>
@@ -364,10 +374,10 @@ export default function MaterialsPage() {
                     onClick={() => handleDelete(post.id)}
                     disabled={deletingPostId === post.id}
                     className="p-2 rounded-full hover:bg-opacity-20 transition-colors disabled:opacity-50"
-                    style={{ backgroundColor: '#D4C8B5' }}
+                    style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
                     title="Удалить"
                   >
-                    <svg className="w-5 h-5" style={{ color: '#8B3A3A' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="w-5 h-5" style={{ color: 'rgba(255, 255, 255, 0.9)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                     </svg>
                   </button>
@@ -378,15 +388,22 @@ export default function MaterialsPage() {
         </div>
 
         {posts.length === 0 && (
-          <div className="rounded-2xl shadow-sm p-12 text-center" style={{ backgroundColor: '#F5F1EB' }}>
-            <p className="text-lg mb-4" style={{ color: '#8B3A3A', opacity: 0.7 }}>
+          <div 
+            className="rounded-3xl shadow-sm p-12 text-center" 
+            style={{ 
+              backgroundColor: 'rgba(255, 255, 255, 0.03)',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+              backdropFilter: 'blur(10px)'
+            }}
+          >
+            <p className="text-lg mb-4" style={{ color: 'rgba(255, 255, 255, 0.9)', opacity: 0.7 }}>
               Нет материалов
             </p>
             <button
               onClick={handleCreateNew}
               className="px-6 py-3 rounded-full font-medium transition-colors"
               style={{
-                backgroundColor: '#8B3A3A',
+                backgroundColor: '#7c5cff',
                 color: '#FFFFFF',
               }}
             >

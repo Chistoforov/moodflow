@@ -59,7 +59,7 @@ export default function AudioModal({ date, isOpen, onClose }: AudioModalProps) {
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
+      style={{ backgroundColor: 'rgba(0, 0, 0, 0.7)' }}
       onClick={(e) => {
         if (e.target === e.currentTarget) {
           onClose()
@@ -67,33 +67,38 @@ export default function AudioModal({ date, isOpen, onClose }: AudioModalProps) {
       }}
     >
       <div
-        className="rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
-        style={{ backgroundColor: '#E8E2D5' }}
+        className="rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+        style={{ 
+          backgroundColor: 'rgba(26, 29, 46, 0.95)',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          backdropFilter: 'blur(20px)'
+        }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div
-          className="sticky top-0 z-10 flex items-center justify-between p-6 border-b-2"
+          className="sticky top-0 z-10 flex items-center justify-between p-6 border-b"
           style={{
-            backgroundColor: '#E8E2D5',
-            borderColor: '#D4C8B5',
+            backgroundColor: 'rgba(26, 29, 46, 0.95)',
+            borderColor: 'rgba(255, 255, 255, 0.1)',
+            backdropFilter: 'blur(20px)'
           }}
         >
-          <h2 className="text-2xl font-bold" style={{ color: '#8B3A3A' }}>
+          <h2 className="text-2xl font-bold" style={{ color: 'rgba(255, 255, 255, 0.95)' }}>
             Аудиозаписи — {formatDate(date)}
           </h2>
           <button
             onClick={onClose}
             className="p-2 rounded-full transition-all"
             style={{
-              backgroundColor: '#F5F1EB',
-              color: '#8B3A3A',
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+              color: 'rgba(255, 255, 255, 0.7)',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#D4C8B5'
+              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = '#F5F1EB'
+              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)'
             }}
           >
             <svg
@@ -117,8 +122,11 @@ export default function AudioModal({ date, isOpen, onClose }: AudioModalProps) {
         <div className="p-6">
           {/* Recorder */}
           <div
-            className="rounded-lg p-6 mb-6"
-            style={{ backgroundColor: '#F5F1EB' }}
+            className="rounded-2xl p-6 mb-6"
+            style={{ 
+              backgroundColor: 'rgba(255, 255, 255, 0.03)',
+              border: '1px solid rgba(255, 255, 255, 0.08)'
+            }}
           >
             <AudioRecorder
               onRecordingComplete={handleRecordingComplete}
@@ -126,7 +134,7 @@ export default function AudioModal({ date, isOpen, onClose }: AudioModalProps) {
             />
             
             {isUploading && (
-              <div className="mt-4 text-center" style={{ color: '#8B3A3A' }}>
+              <div className="mt-4 text-center" style={{ color: 'rgba(255, 255, 255, 0.7)' }}>
                 <div className="flex items-center justify-center gap-2">
                   <svg
                     className="animate-spin"
@@ -160,8 +168,9 @@ export default function AudioModal({ date, isOpen, onClose }: AudioModalProps) {
               <div
                 className="mt-4 p-3 rounded text-sm"
                 style={{
-                  backgroundColor: '#FFE8E8',
-                  color: '#D0021B',
+                  backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                  color: '#ef4444',
+                  border: '1px solid rgba(239, 68, 68, 0.3)'
                 }}
               >
                 {uploadError}

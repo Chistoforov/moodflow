@@ -38,8 +38,9 @@ export default function BottomNav() {
     <nav 
       className="fixed bottom-0 left-0 right-0 shadow-lg border-t z-50"
       style={{ 
-        backgroundColor: '#F5F1EB',
-        borderColor: '#D4C8B5'
+        backgroundColor: 'rgba(26, 29, 46, 0.9)',
+        borderColor: 'rgba(255, 255, 255, 0.1)',
+        backdropFilter: 'blur(10px)'
       }}
     >
       <div className="max-w-7xl mx-auto px-4">
@@ -49,16 +50,21 @@ export default function BottomNav() {
             href="/calendar"
             className="flex flex-col items-center justify-center min-w-[80px] py-2"
           >
-            <div className="relative">
+            <div 
+              className="relative p-2 rounded-2xl transition-all"
+              style={{
+                backgroundColor: isActive('/calendar') ? '#7c5cff' : 'transparent'
+              }}
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
                 strokeWidth={1.5}
                 stroke="currentColor"
-                className="w-7 h-7 mb-1"
+                className="w-7 h-7"
                 style={{ 
-                  color: isActive('/calendar') ? '#8B3A3A' : '#A67C6C',
+                  color: isActive('/calendar') ? '#ffffff' : 'rgba(255, 255, 255, 0.5)',
                   strokeWidth: isActive('/calendar') ? 2 : 1.5
                 }}
               >
@@ -70,9 +76,9 @@ export default function BottomNav() {
               </svg>
             </div>
             <span
-              className="text-xs font-medium"
+              className="text-xs font-medium mt-1"
               style={{ 
-                color: isActive('/calendar') ? '#8B3A3A' : '#A67C6C',
+                color: isActive('/calendar') ? '#ffffff' : 'rgba(255, 255, 255, 0.5)',
                 fontWeight: isActive('/calendar') ? 600 : 500
               }}
             >
@@ -85,16 +91,21 @@ export default function BottomNav() {
             href="/materials"
             className="flex flex-col items-center justify-center min-w-[80px] py-2"
           >
-            <div className="relative">
+            <div 
+              className="relative p-2 rounded-2xl transition-all"
+              style={{
+                backgroundColor: isActive('/materials') ? '#7c5cff' : 'transparent'
+              }}
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
                 strokeWidth={1.5}
                 stroke="currentColor"
-                className="w-7 h-7 mb-1"
+                className="w-7 h-7"
                 style={{ 
-                  color: isActive('/materials') ? '#8B3A3A' : '#A67C6C',
+                  color: isActive('/materials') ? '#ffffff' : 'rgba(255, 255, 255, 0.5)',
                   strokeWidth: isActive('/materials') ? 2 : 1.5
                 }}
               >
@@ -108,8 +119,8 @@ export default function BottomNav() {
                 <div
                   className="absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full flex items-center justify-center text-[10px] font-bold"
                   style={{
-                    backgroundColor: '#8B3A3A',
-                    color: '#F5F1EB'
+                    backgroundColor: '#ef4444',
+                    color: '#ffffff'
                   }}
                 >
                   {unreadCount > 99 ? '99+' : unreadCount}
@@ -117,9 +128,9 @@ export default function BottomNav() {
               )}
             </div>
             <span
-              className="text-xs font-medium"
+              className="text-xs font-medium mt-1"
               style={{ 
-                color: isActive('/materials') ? '#8B3A3A' : '#A67C6C',
+                color: isActive('/materials') ? '#ffffff' : 'rgba(255, 255, 255, 0.5)',
                 fontWeight: isActive('/materials') ? 600 : 500
               }}
             >

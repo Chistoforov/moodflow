@@ -118,15 +118,15 @@ export default function UserDetailsPage() {
         <button
           onClick={() => router.push('/admin/users')}
           className="mb-6 flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-opacity-50 transition-colors"
-          style={{ backgroundColor: '#E8E2D5', color: '#8B3A3A' }}
+          style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', color: 'rgba(255, 255, 255, 0.9)' }}
         >
           <ArrowLeft size={20} />
           <span>Назад к списку пользователей</span>
         </button>
 
-        <div className="rounded-2xl shadow-sm p-8 text-center" style={{ backgroundColor: '#F5F1EB' }}>
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: '#8B3A3A' }}></div>
-          <p className="mt-4" style={{ color: '#8B3A3A' }}>Загрузка данных...</p>
+        <div className="rounded-2xl shadow-sm p-8 text-center" style={{ backgroundColor: 'rgba(255, 255, 255, 0.03)' }}>
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: 'rgba(255, 255, 255, 0.9)' }}></div>
+          <p className="mt-4" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>Загрузка данных...</p>
         </div>
       </div>
     )
@@ -138,14 +138,14 @@ export default function UserDetailsPage() {
         <button
           onClick={() => router.push('/admin/users')}
           className="mb-6 flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-opacity-50 transition-colors"
-          style={{ backgroundColor: '#E8E2D5', color: '#8B3A3A' }}
+          style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', color: 'rgba(255, 255, 255, 0.9)' }}
         >
           <ArrowLeft size={20} />
           <span>Назад к списку пользователей</span>
         </button>
 
-        <div className="rounded-2xl shadow-sm p-8" style={{ backgroundColor: '#F5F1EB' }}>
-          <p style={{ color: '#8B3A3A' }}>{error || 'Не удалось загрузить данные'}</p>
+        <div className="rounded-2xl shadow-sm p-8" style={{ backgroundColor: 'rgba(255, 255, 255, 0.03)' }}>
+          <p style={{ color: 'rgba(255, 255, 255, 0.9)' }}>{error || 'Не удалось загрузить данные'}</p>
         </div>
       </div>
     )
@@ -157,7 +157,7 @@ export default function UserDetailsPage() {
       <button
         onClick={() => router.push('/admin/users')}
         className="mb-6 flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-opacity-50 transition-colors"
-        style={{ backgroundColor: '#E8E2D5', color: '#8B3A3A' }}
+        style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', color: 'rgba(255, 255, 255, 0.9)' }}
       >
         <ArrowLeft size={20} />
         <span>Назад к списку пользователей</span>
@@ -166,11 +166,11 @@ export default function UserDetailsPage() {
       {/* Header with user name and month navigation */}
       <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-4xl font-bold" style={{ color: '#8B3A3A' }}>
+          <h1 className="text-4xl font-bold" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>
             {data.user.full_name || data.user.email}
           </h1>
           {data.user.full_name && (
-            <p className="mt-2 text-sm" style={{ color: '#8B3A3A', opacity: 0.7 }}>
+            <p className="mt-2 text-sm" style={{ color: 'rgba(255, 255, 255, 0.9)', opacity: 0.7 }}>
               {data.user.email}
             </p>
           )}
@@ -181,17 +181,17 @@ export default function UserDetailsPage() {
           <button
             onClick={goToPreviousMonth}
             className="p-2 rounded-lg hover:bg-opacity-50 transition-colors"
-            style={{ backgroundColor: '#E8E2D5', color: '#8B3A3A' }}
+            style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', color: 'rgba(255, 255, 255, 0.9)' }}
             aria-label="Предыдущий месяц"
           >
             <ChevronLeft size={24} />
           </button>
 
           <div className="text-center min-w-[160px]">
-            <div className="text-xl font-semibold" style={{ color: '#8B3A3A' }}>
+            <div className="text-xl font-semibold" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>
               {MONTH_NAMES[currentMonth - 1]}
             </div>
-            <div className="text-sm" style={{ color: '#8B3A3A', opacity: 0.7 }}>
+            <div className="text-sm" style={{ color: 'rgba(255, 255, 255, 0.9)', opacity: 0.7 }}>
               {currentYear}
             </div>
           </div>
@@ -199,7 +199,7 @@ export default function UserDetailsPage() {
           <button
             onClick={goToNextMonth}
             className="p-2 rounded-lg hover:bg-opacity-50 transition-colors"
-            style={{ backgroundColor: '#E8E2D5', color: '#8B3A3A' }}
+            style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', color: 'rgba(255, 255, 255, 0.9)' }}
             aria-label="Следующий месяц"
           >
             <ChevronRight size={24} />
@@ -208,38 +208,38 @@ export default function UserDetailsPage() {
       </div>
 
       {/* Entries table */}
-      <div className="rounded-2xl shadow-sm overflow-hidden" style={{ backgroundColor: '#F5F1EB' }}>
+      <div className="rounded-2xl shadow-sm overflow-hidden" style={{ backgroundColor: 'rgba(255, 255, 255, 0.03)' }}>
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y" style={{ borderColor: '#D4C8B5' }}>
-            <thead style={{ backgroundColor: '#E8E2D5' }}>
+          <table className="min-w-full divide-y" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
+            <thead style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)' }}>
               <tr>
                 <th
                   className="px-4 py-4 text-left text-sm font-semibold w-24"
-                  style={{ color: '#8B3A3A' }}
+                  style={{ color: 'rgba(255, 255, 255, 0.9)' }}
                 >
                   Дата
                 </th>
                 <th
                   className="px-4 py-4 text-left text-sm font-semibold w-32"
-                  style={{ color: '#8B3A3A' }}
+                  style={{ color: 'rgba(255, 255, 255, 0.9)' }}
                 >
                   Настроение
                 </th>
                 <th
                   className="px-4 py-4 text-left text-sm font-semibold w-48"
-                  style={{ color: '#8B3A3A' }}
+                  style={{ color: 'rgba(255, 255, 255, 0.9)' }}
                 >
                   Факторы
                 </th>
                 <th
                   className="px-4 py-4 text-left text-sm font-semibold"
-                  style={{ color: '#8B3A3A' }}
+                  style={{ color: 'rgba(255, 255, 255, 0.9)' }}
                 >
                   Описание
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y" style={{ borderColor: '#D4C8B5' }}>
+            <tbody className="divide-y" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
               {data.entries.map((entry) => (
                 <tr
                   key={entry.date}
@@ -249,10 +249,10 @@ export default function UserDetailsPage() {
                     opacity: entry.has_entries ? 1 : 0.6
                   }}
                 >
-                  <td className="px-4 py-3 text-sm whitespace-nowrap" style={{ color: '#8B3A3A' }}>
+                  <td className="px-4 py-3 text-sm whitespace-nowrap" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>
                     {entry.day} {MONTH_NAMES[currentMonth - 1].substring(0, 3).toLowerCase()}
                   </td>
-                  <td className="px-4 py-3 text-sm" style={{ color: '#8B3A3A' }}>
+                  <td className="px-4 py-3 text-sm" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>
                     {entry.mood_score !== null ? (
                       <div className="flex items-center gap-2">
                         <span>{MOOD_LABELS[entry.mood_score]}</span>
@@ -262,14 +262,14 @@ export default function UserDetailsPage() {
                       <span className="text-xs opacity-50">—</span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-sm" style={{ color: '#8B3A3A' }}>
+                  <td className="px-4 py-3 text-sm" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>
                     {entry.factors.length > 0 ? (
                       <div className="flex flex-wrap gap-1">
                         {entry.factors.map((factor, idx) => (
                           <span
                             key={idx}
                             className="inline-flex items-center px-2 py-1 rounded-full text-xs"
-                            style={{ backgroundColor: '#E8E2D5', color: '#8B3A3A' }}
+                            style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', color: 'rgba(255, 255, 255, 0.9)' }}
                           >
                             {FACTOR_LABELS[factor] || factor}
                           </span>
@@ -279,7 +279,7 @@ export default function UserDetailsPage() {
                       <span className="text-xs opacity-50">—</span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-sm" style={{ color: '#8B3A3A' }}>
+                  <td className="px-4 py-3 text-sm" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>
                     {entry.text ? (
                       <div className="whitespace-pre-wrap max-w-2xl">
                         {entry.text}
@@ -296,7 +296,7 @@ export default function UserDetailsPage() {
 
         {data.entries.every(e => !e.has_entries) && (
           <div className="px-6 py-12 text-center">
-            <p style={{ color: '#8B3A3A', opacity: 0.7 }}>
+            <p style={{ color: 'rgba(255, 255, 255, 0.9)', opacity: 0.7 }}>
               Нет записей за этот месяц
             </p>
           </div>
