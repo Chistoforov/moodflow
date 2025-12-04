@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createServerClient } from '@/lib/supabase/server'
 
 // GET - получить аналитику пользователя за месяц
 export async function GET(
@@ -7,7 +7,7 @@ export async function GET(
   { params }: { params: Promise<{ userId: string }> }
 ) {
   try {
-    const supabase = await createClient()
+    const supabase = await createServerClient()
     const { userId } = await params
     
     // Check if user is admin
@@ -22,7 +22,7 @@ export async function GET(
       .eq('user_id', user.id)
       .maybeSingle()
 
-    if (!psychologist || psychologist.role !== 'admin' || !psychologist.active) {
+    if (!psychologist || (psychologist as any).role !== 'admin' || !(psychologist as any).active) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
@@ -67,7 +67,7 @@ export async function PATCH(
   { params }: { params: Promise<{ userId: string }> }
 ) {
   try {
-    const supabase = await createClient()
+    const supabase = await createServerClient()
     const { userId } = await params
     
     // Check if user is admin
@@ -82,7 +82,7 @@ export async function PATCH(
       .eq('user_id', user.id)
       .maybeSingle()
 
-    if (!psychologist || psychologist.role !== 'admin' || !psychologist.active) {
+    if (!psychologist || (psychologist as any).role !== 'admin' || !(psychologist as any).active) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
@@ -101,7 +101,7 @@ export async function PATCH(
     }
 
     // Update analytics
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('monthly_analytics')
       .update({
         general_impression,

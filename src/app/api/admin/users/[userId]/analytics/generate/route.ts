@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createServerClient } from '@/lib/supabase/server'
 
 // POST - сгенерировать или обновить аналитику для пользователя
 export async function POST(
@@ -7,7 +7,7 @@ export async function POST(
   { params }: { params: Promise<{ userId: string }> }
 ) {
   try {
-    const supabase = await createClient()
+    const supabase = await createServerClient()
     const { userId } = await params
     
     // Check if user is admin
@@ -22,7 +22,7 @@ export async function POST(
       .eq('user_id', user.id)
       .maybeSingle()
 
-    if (!psychologist || psychologist.role !== 'admin' || !psychologist.active) {
+    if (!psychologist || (psychologist as any).role !== 'admin' || !(psychologist as any).active) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
@@ -38,7 +38,7 @@ export async function POST(
     const endDate = new Date(year, month, 0).toISOString().split('T')[0]
 
     const { data: entries, error: entriesError } = await supabase
-      .from('entries')
+      .from('daily_entries')
       .select('entry_date, mood_score, factors, text_entry, transcript')
       .eq('user_id', userId)
       .gte('entry_date', startDate)
@@ -55,7 +55,7 @@ export async function POST(
     }
 
     // Prepare entries for Perplexity
-    const formattedEntries = entries
+    const formattedEntries = (entries as any[])
       .filter(e => e.mood_score !== null)
       .map(entry => {
         const factors = Array.isArray(entry.factors) ? entry.factors.join(', ') : ''
@@ -174,7 +174,7 @@ ${formattedEntries.join('\n\n')}
     ] = sections
 
     // Check if analytics already exists
-    const { data: existingAnalytics } = await supabase
+    const { data: existingAnalytics } = await (supabase as any)
       .from('monthly_analytics')
       .select('id')
       .eq('user_id', userId)
@@ -187,7 +187,7 @@ ${formattedEntries.join('\n\n')}
     let result
     if (existingAnalytics) {
       // Update existing
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('monthly_analytics')
         .update({
           week_number: weekNumber,
@@ -213,7 +213,7 @@ ${formattedEntries.join('\n\n')}
       result = data
     } else {
       // Create new
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('monthly_analytics')
         .insert({
           user_id: userId,
