@@ -4,7 +4,7 @@
 
 При переходе по ссылке из email получаете ошибку:
 ```
-Application error: a server-side exception has occurred while loading moodflow-six.vercel.app
+Application error: a server-side exception has occurred while loading moodflow-ashen.vercel.app
 ```
 
 ## ✅ Решение
@@ -40,7 +40,7 @@ Middleware теперь не блокирует API routes для авториз
 ### Шаг 2: Настройте Site URL
 
 ```
-Site URL: https://moodflow-six.vercel.app
+Site URL: https://moodflow-ashen.vercel.app
 ```
 
 ### Шаг 3: Настройте Redirect URLs
@@ -48,8 +48,8 @@ Site URL: https://moodflow-six.vercel.app
 Добавьте следующие URLs в поле **Redirect URLs** (каждый на новой строке):
 
 ```
-https://moodflow-six.vercel.app/api/auth/callback
-https://moodflow-six.vercel.app/**
+https://moodflow-ashen.vercel.app/api/auth/callback
+https://moodflow-ashen.vercel.app/**
 http://localhost:3000/api/auth/callback
 http://localhost:3000/**
 ```
@@ -75,7 +75,7 @@ http://localhost:3000/**
 
 После настройки Supabase:
 
-1. Перейдите на https://moodflow-six.vercel.app/login
+1. Перейдите на https://moodflow-ashen.vercel.app/login
 2. Введите email
 3. Проверьте почту и кликните на ссылку
 4. Вы должны быть перенаправлены на `/calendar`
@@ -92,7 +92,7 @@ http://localhost:3000/**
 2. **В Vercel:**
    - [ ] `NEXT_PUBLIC_SUPABASE_URL` правильный
    - [ ] `NEXT_PUBLIC_SUPABASE_ANON_KEY` правильный
-   - [ ] `NEXT_PUBLIC_APP_URL` = `https://moodflow-six.vercel.app`
+   - [ ] `NEXT_PUBLIC_APP_URL` = `https://moodflow-ashen.vercel.app`
 
 3. **В браузере:**
    - [ ] Откройте Developer Tools (F12)
@@ -145,7 +145,7 @@ Callback route теперь логирует ошибки. Чтобы их ув�
 После правильной настройки:
 
 1. ✅ Magic link email приходит на почту
-2. ✅ При клике на ссылку происходит редирект на `moodflow-six.vercel.app`
+2. ✅ При клике на ссылку происходит редирект на `moodflow-ashen.vercel.app`
 3. ✅ Нет ошибок, показывается "Завершение входа..."
 4. ✅ Перенаправление на `/calendar`
 5. ✅ Пользователь авторизован

@@ -155,7 +155,7 @@ ORDER BY cmd, policyname;
 - Admins can delete posts (DELETE)
 
 ### Шаг 5: Тестирование
-1. Обновите страницу https://moodflow-six.vercel.app/admin/materials (Ctrl+Shift+R / Cmd+Shift+R)
+1. Обновите страницу https://moodflow-ashen.vercel.app/admin/materials (Ctrl+Shift+R / Cmd+Shift+R)
 2. Попробуйте создать новый материал
 3. Должно работать! ✨
 

@@ -18,7 +18,7 @@
 6. Настройте:
    - **Name**: MoodFlow Production (или любое имя)
    - **Authorized JavaScript origins**:
-     - `https://moodflow-six.vercel.app`
+     - `https://moodflow-ashen.vercel.app`
      - `http://localhost:3000` (для локальной разработки)
    - **Authorized redirect URIs**:
      - `https://[YOUR-PROJECT-REF].supabase.co/auth/v1/callback`
@@ -45,9 +45,9 @@
 
 1. В Supabase перейдите в **Authentication** → **URL Configuration**
 2. Установите:
-   - **Site URL**: `https://moodflow-six.vercel.app`
+   - **Site URL**: `https://moodflow-ashen.vercel.app`
    - **Redirect URLs**: Добавьте:
-     - `https://moodflow-six.vercel.app/api/auth/callback`
+     - `https://moodflow-ashen.vercel.app/api/auth/callback`
      - `http://localhost:3000/api/auth/callback` (для разработки)
 
 ### 4. (Опционально) Отключите Email провайдер
@@ -79,7 +79,7 @@
 
 ## Проверка работы
 
-1. Откройте `https://moodflow-six.vercel.app`
+1. Откройте `https://moodflow-ashen.vercel.app`
 2. Должна открыться страница с кнопкой "Войти через Google"
 3. Нажмите на кнопку
 4. Пройдите авторизацию Google
@@ -112,8 +112,8 @@
 **Причина**: Неправильная настройка Redirect URLs
 
 **Решение**:
-1. В Supabase проверьте **Site URL** - должен быть `https://moodflow-six.vercel.app`
-2. В **Redirect URLs** должен быть `https://moodflow-six.vercel.app/api/auth/callback`
+1. В Supabase проверьте **Site URL** - должен быть `https://moodflow-ashen.vercel.app`
+2. В **Redirect URLs** должен быть `https://moodflow-ashen.vercel.app/api/auth/callback`
 
 ## Изменения в коде
 

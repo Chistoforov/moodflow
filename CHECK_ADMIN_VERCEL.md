@@ -83,5 +83,5 @@ FROM psychologists
 WHERE email = 'site4people@gmail.com';
 ```
 
-После этого обновите страницу на moodflow-six.vercel.app и попробуйте снова.
+После этого обновите страницу на moodflow-ashen.vercel.app и попробуйте снова.
 

@@ -36,7 +36,7 @@ npm run build
 NEXT_PUBLIC_SUPABASE_URL=https://ваш-проект.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=ваш_anon_key
 SUPABASE_SERVICE_ROLE_KEY=ваш_service_role_key
-NEXT_PUBLIC_APP_URL=https://moodflow-six.vercel.app
+NEXT_PUBLIC_APP_URL=https://moodflow-ashen.vercel.app
 ```
 
 #### Опциональные (если используются):
@@ -59,7 +59,7 @@ CRON_SECRET=ваш_секретный_ключ
 ### Шаг 4: Настройка домена
 
 1. В настройках проекта перейдите в **Settings → Domains**
-2. Добавьте домен: `moodflow-six.vercel.app`
+2. Добавьте домен: `moodflow-ashen.vercel.app`
 3. Vercel автоматически настроит DNS записи
 4. Если домен уже создан, он автоматически подключится
 
@@ -67,14 +67,14 @@ CRON_SECRET=ваш_секретный_ключ
 
 Cron jobs уже настроены в `vercel.json`. Убедитесь, что:
 
-1. В Supabase добавлен URL для webhook: `https://moodflow-six.vercel.app/api/cron/weekly-summaries`
+1. В Supabase добавлен URL для webhook: `https://moodflow-ashen.vercel.app/api/cron/weekly-summaries`
 2. Для защиты cron endpoints используйте `CRON_SECRET` в коде
 
 ### Шаг 6: Деплой
 
 1. Нажмите **"Deploy"**
 2. Дождитесь завершения билда
-3. После успешного деплоя проект будет доступен на `https://moodflow-six.vercel.app`
+3. После успешного деплоя проект будет доступен на `https://moodflow-ashen.vercel.app`
 
 ## 🔧 Способ 2: Деплой через Vercel CLI
 
@@ -120,15 +120,15 @@ vercel --prod
 
 ## ✅ Проверка после деплоя
 
-1. **Проверьте главную страницу**: `https://moodflow-six.vercel.app`
+1. **Проверьте главную страницу**: `https://moodflow-ashen.vercel.app`
 2. **Проверьте авторизацию**: попробуйте зарегистрироваться/войти
 3. **Проверьте API endpoints**: убедитесь, что они работают
 4. **Проверьте Supabase настройки**:
    - В Supabase Dashboard → Authentication → URL Configuration
-   - Добавьте `https://moodflow-six.vercel.app` в **Site URL**
+   - Добавьте `https://moodflow-ashen.vercel.app` в **Site URL**
    - Добавьте в **Redirect URLs**:
      ```
-     https://moodflow-six.vercel.app/api/auth/callback
+     https://moodflow-ashen.vercel.app/api/auth/callback
      ```
 
 ## 🔒 Настройка Supabase для Production
@@ -136,14 +136,14 @@ vercel --prod
 ### Важно! Обновите настройки в Supabase:
 
 1. **Settings → API → URL Configuration**:
-   - Site URL: `https://moodflow-six.vercel.app`
+   - Site URL: `https://moodflow-ashen.vercel.app`
    
 2. **Authentication → URL Configuration**:
-   - Site URL: `https://moodflow-six.vercel.app`
+   - Site URL: `https://moodflow-ashen.vercel.app`
    - Redirect URLs: добавьте:
      ```
-     https://moodflow-six.vercel.app/api/auth/callback
-     https://moodflow-six.vercel.app/**
+     https://moodflow-ashen.vercel.app/api/auth/callback
+     https://moodflow-ashen.vercel.app/**
      ```
 
 3. **Database → Connection Pooling** (опционально):
@@ -183,5 +183,5 @@ vercel --prod
 
 ---
 
-**Готово! Ваше приложение должно быть доступно на https://moodflow-six.vercel.app** 🎉
+**Готово! Ваше приложение должно быть доступно на https://moodflow-ashen.vercel.app** 🎉
 

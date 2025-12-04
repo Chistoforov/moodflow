@@ -40,13 +40,13 @@ vercel --prod
 
 2. Установите **Site URL**:
    ```
-   https://moodflow-six.vercel.app
+   https://moodflow-ashen.vercel.app
    ```
 
 3. В поле **Redirect URLs** добавьте (каждый на новой строке):
    ```
-   https://moodflow-six.vercel.app/api/auth/callback
-   https://moodflow-six.vercel.app/**
+   https://moodflow-ashen.vercel.app/api/auth/callback
+   https://moodflow-ashen.vercel.app/**
    http://localhost:3000/api/auth/callback
    http://localhost:3000/**
    ```
@@ -67,7 +67,7 @@ vercel --prod
 После выполнения шагов выше:
 
 1. Очистите cookies в браузере (или используйте режим инкогнито)
-2. Перейдите на https://moodflow-six.vercel.app/login
+2. Перейдите на https://moodflow-ashen.vercel.app/login
 3. Введите email
 4. Проверьте почту
 5. Кликните на ссылку

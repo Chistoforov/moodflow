@@ -1,6 +1,6 @@
 # 🚀 Быстрый деплой на Vercel
 
-## 📦 Ваш домен: `moodflow-six.vercel.app`
+## 📦 Ваш домен: `moodflow-ashen.vercel.app`
 
 ## Шаг 1: Подготовка проекта
 
@@ -41,7 +41,7 @@ vercel
 NEXT_PUBLIC_SUPABASE_URL=https://ваш-проект.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=ваш_anon_key
 SUPABASE_SERVICE_ROLE_KEY=ваш_service_role_key
-NEXT_PUBLIC_APP_URL=https://moodflow-six.vercel.app
+NEXT_PUBLIC_APP_URL=https://moodflow-ashen.vercel.app
 ```
 
 ### ⚙️ Опциональные (если используете):
@@ -63,7 +63,7 @@ CRON_SECRET=ваш_секретный_ключ
 
 ## Шаг 4: Настройка домена
 
-1. Vercel автоматически создаст домен `moodflow-six.vercel.app` при первом деплое
+1. Vercel автоматически создаст домен `moodflow-ashen.vercel.app` при первом деплое
 2. Или в **Settings → Domains** добавьте домен вручную
 3. Домены `.vercel.app` настраиваются автоматически
 
@@ -75,13 +75,13 @@ CRON_SECRET=ваш_секретный_ключ
    
    - **Site URL**: 
      ```
-     https://moodflow-six.vercel.app
+     https://moodflow-ashen.vercel.app
      ```
    
    - **Redirect URLs** (добавьте каждый на новой строке):
      ```
-     https://moodflow-six.vercel.app/api/auth/callback
-     https://moodflow-six.vercel.app/**
+     https://moodflow-ashen.vercel.app/api/auth/callback
+     https://moodflow-ashen.vercel.app/**
      http://localhost:3000/api/auth/callback
      http://localhost:3000/**
      ```
@@ -117,7 +117,7 @@ vercel --prod
 
 После деплоя проверьте:
 
-1. ✅ Главная страница: `https://moodflow-six.vercel.app`
+1. ✅ Главная страница: `https://moodflow-ashen.vercel.app`
 2. ✅ Авторизация работает
 3. ✅ API endpoints отвечают
 4. ✅ Supabase подключен
@@ -141,7 +141,7 @@ Application error: a server-side exception has occurred
 
 **Быстрая проверка:**
 1. ✅ Supabase Redirect URLs включают `/api/auth/callback`
-2. ✅ Site URL = `https://moodflow-six.vercel.app`
+2. ✅ Site URL = `https://moodflow-ashen.vercel.app`
 3. ✅ Переменные окружения правильные
 4. ✅ Последние изменения задеплоены
 
@@ -150,10 +150,10 @@ Application error: a server-side exception has occurred
 1. Проверьте логи билда в Vercel Dashboard
 2. Убедитесь, что все переменные окружения заданы
 3. Проверьте настройки Supabase (URL Configuration)
-4. Убедитесь, что `NEXT_PUBLIC_APP_URL` = `https://moodflow-six.vercel.app`
+4. Убедитесь, что `NEXT_PUBLIC_APP_URL` = `https://moodflow-ashen.vercel.app`
 5. Попробуйте очистить cookies и использовать режим инкогнито
 
 ---
 
-**Готово! 🎉 Ваше приложение доступно на https://moodflow-six.vercel.app**
+**Готово! 🎉 Ваше приложение доступно на https://moodflow-ashen.vercel.app**
 
