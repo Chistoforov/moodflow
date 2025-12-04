@@ -2,6 +2,22 @@ import { createRouteHandlerClient } from '@/lib/supabase/route-handler'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
+interface MonthlyAnalytics {
+  id: string
+  user_id: string
+  year: number
+  month: number
+  week_number: number
+  is_final: boolean
+  general_impression: string | null
+  positive_trends: string | null
+  decline_reasons: string | null
+  recommendations: string | null
+  reflection_directions: string | null
+  created_at: string
+  updated_at: string
+}
+
 /**
  * GET /api/analytics?year=2024&month=11
  * 
@@ -43,7 +59,7 @@ export async function GET(request: NextRequest) {
       .order('is_final', { ascending: false })
       .order('week_number', { ascending: false })
       .limit(1)
-      .maybeSingle() as { data: any; error: any }
+      .maybeSingle() as { data: MonthlyAnalytics | null; error: any }
 
     if (analyticsError) {
       console.error('Failed to fetch analytics:', analyticsError)

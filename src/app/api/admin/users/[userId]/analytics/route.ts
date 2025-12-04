@@ -1,6 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase/server'
 
+interface MonthlyAnalytics {
+  id: string
+  user_id: string
+  year: number
+  month: number
+  week_number: number
+  is_final: boolean
+  general_impression: string | null
+  positive_trends: string | null
+  decline_reasons: string | null
+  recommendations: string | null
+  reflection_directions: string | null
+  created_at: string
+  updated_at: string
+}
+
 // GET - получить аналитику пользователя за месяц
 export async function GET(
   request: NextRequest,
@@ -48,7 +64,7 @@ export async function GET(
       .order('is_final', { ascending: false })
       .order('week_number', { ascending: false })
       .limit(1)
-      .maybeSingle()
+      .maybeSingle() as { data: MonthlyAnalytics | null; error: any }
 
     if (error) {
       console.error('[Admin Analytics GET] Error fetching analytics:', error)
