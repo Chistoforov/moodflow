@@ -32,7 +32,7 @@ const getMoodLabel = (score: number): string => {
   const labels = {
     1: 'очень\nплохо',
     2: 'плохо',
-    3: 'нейтрально',
+    3: 'ровно',
     4: 'хорошо',
     5: 'очень\nхорошо',
   }

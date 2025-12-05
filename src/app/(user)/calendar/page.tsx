@@ -56,7 +56,7 @@ const MoodSymbol = ({ score, size = 24 }: { score: number; size?: number }) => {
       <rect x="34" y="42" width="2" height="6" rx="1" fill="#6B7A88"/>
       <rect x="40" y="42" width="2" height="6" rx="1" fill="#6B7A88"/>
     </svg>,
-    // 3 - нейтрально (облачно)
+    // 3 - ровно (облачно)
     <svg key="3" width={size} height={size} viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M46 28C46 26.5 45.5 25 44.5 24C43 21.5 40 20 37 20C36.5 20 36 20 35.5 20.2C34.5 16 30.5 13 26 13C21 13 17 17 17 22C17 22.2 17 22.5 17 22.8C14 23.5 12 26.5 12 30C12 34.5 15.5 38 20 38H44C48.5 38 52 34.5 52 30C52 29 51.5 28.5 51 28C49.5 28 47.5 28 46 28Z" fill="#B8C5D6"/>
     </svg>,
@@ -152,7 +152,7 @@ export default function CalendarPage() {
     const labels = {
       1: 'очень\nплохо',
       2: 'плохо',
-      3: 'нейтрально',
+      3: 'ровно',
       4: 'хорошо',
       5: 'очень\nхорошо',
     }

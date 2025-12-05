@@ -10,7 +10,7 @@ export interface MoodLevelConfig {
 export const MOOD_LEVELS: MoodLevelConfig[] = [
   { value: 1, label: 'очень плохо', Icon: Frown, color: 'bg-red-500' },
   { value: 2, label: 'плохо', Icon: TrendingDown, color: 'bg-orange-500' },
-  { value: 3, label: 'нейтрально', Icon: Meh, color: 'bg-yellow-500' },
+  { value: 3, label: 'ровно', Icon: Meh, color: 'bg-yellow-500' },
   { value: 4, label: 'хорошо', Icon: Smile, color: 'bg-green-500' },
   { value: 5, label: 'очень хорошо', Icon: Laugh, color: 'bg-emerald-500' },
 ]
