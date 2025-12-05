@@ -91,3 +91,4 @@ BEGIN
   
   RAISE NOTICE 'Total policies created for monthly_analytics: %', policy_count;
 END $$;
+
