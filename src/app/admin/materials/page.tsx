@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react'
 import type { Database } from '@/types/database'
 import RichTextEditor from '@/components/admin/RichTextEditor'
+import ErrorModal from '@/components/entry/ErrorModal'
+import ConfirmModal from '@/components/shared/ConfirmModal'
 
 type Post = Database['public']['Tables']['posts']['Row']
 
@@ -18,6 +20,7 @@ function MaterialModal({ isOpen, onClose, onSave, post }: MaterialModalProps) {
   const [content, setContent] = useState('')
   const [publishDate, setPublishDate] = useState('')
   const [saving, setSaving] = useState(false)
+  const [errorModal, setErrorModal] = useState({ isOpen: false, message: '' })
 
   useEffect(() => {
     if (post) {
@@ -33,7 +36,10 @@ function MaterialModal({ isOpen, onClose, onSave, post }: MaterialModalProps) {
 
   const handleSave = async () => {
     if (!title.trim() || !content.trim()) {
-      alert('Заполните заголовок и текст')
+      setErrorModal({
+        isOpen: true,
+        message: 'Заполните заголовок и текст'
+      })
       return
     }
 
@@ -68,7 +74,10 @@ function MaterialModal({ isOpen, onClose, onSave, post }: MaterialModalProps) {
       onClose()
     } catch (err) {
       console.error('Error saving post:', err)
-      alert(err instanceof Error ? err.message : 'Failed to save post')
+      setErrorModal({
+        isOpen: true,
+        message: err instanceof Error ? err.message : 'Failed to save post'
+      })
     } finally {
       setSaving(false)
     }
@@ -199,6 +208,12 @@ function MaterialModal({ isOpen, onClose, onSave, post }: MaterialModalProps) {
           </div>
         </div>
       </div>
+
+      <ErrorModal
+        isOpen={errorModal.isOpen}
+        onClose={() => setErrorModal({ isOpen: false, message: '' })}
+        message={errorModal.message}
+      />
     </div>
   )
 }
@@ -210,6 +225,8 @@ export default function MaterialsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingPost, setEditingPost] = useState<Post | null>(null)
   const [deletingPostId, setDeletingPostId] = useState<string | null>(null)
+  const [confirmModal, setConfirmModal] = useState({ isOpen: false, postId: '' })
+  const [errorModal, setErrorModal] = useState({ isOpen: false, message: '' })
 
   useEffect(() => {
     fetchPosts()
@@ -239,10 +256,13 @@ export default function MaterialsPage() {
     setIsModalOpen(true)
   }
 
-  const handleDelete = async (postId: string) => {
-    if (!confirm('Вы уверены, что хотите удалить этот материал?')) {
-      return
-    }
+  const handleDelete = (postId: string) => {
+    setConfirmModal({ isOpen: true, postId })
+  }
+
+  const confirmDelete = async () => {
+    const postId = confirmModal.postId
+    if (!postId) return
 
     try {
       setDeletingPostId(postId)
@@ -254,7 +274,10 @@ export default function MaterialsPage() {
 
       await fetchPosts()
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to delete post')
+      setErrorModal({
+        isOpen: true,
+        message: err instanceof Error ? err.message : 'Failed to delete post'
+      })
     } finally {
       setDeletingPostId(null)
     }
@@ -418,6 +441,23 @@ export default function MaterialsPage() {
         onClose={handleModalClose}
         onSave={handleModalSave}
         post={editingPost}
+      />
+
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal({ isOpen: false, postId: '' })}
+        onConfirm={confirmDelete}
+        title="Удалить материал?"
+        message="Вы уверены, что хотите удалить этот материал? Это действие нельзя отменить."
+        confirmText="Удалить"
+        cancelText="Отмена"
+        variant="danger"
+      />
+
+      <ErrorModal
+        isOpen={errorModal.isOpen}
+        onClose={() => setErrorModal({ isOpen: false, message: '' })}
+        message={errorModal.message}
       />
     </>
   )

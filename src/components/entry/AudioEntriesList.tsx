@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import useSWR from 'swr'
+import ConfirmModal from '@/components/shared/ConfirmModal'
+import ErrorModal from '@/components/entry/ErrorModal'
 
 interface AudioEntry {
   id: string
@@ -23,6 +25,8 @@ const fetcher = (url: string) => fetch(url).then(res => res.json())
 export default function AudioEntriesList({ date, onUpdate }: AudioEntriesListProps) {
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [confirmModal, setConfirmModal] = useState({ isOpen: false, entryId: '' })
+  const [errorModal, setErrorModal] = useState({ isOpen: false, message: '' })
 
   const { data, error, mutate } = useSWR(
     `/api/audio-entries?date=${date}`,
@@ -36,10 +40,13 @@ export default function AudioEntriesList({ date, onUpdate }: AudioEntriesListPro
   const audioEntries: AudioEntry[] = data?.audioEntries || []
   const isLoading = !data && !error
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Вы уверены, что хотите удалить эту аудиозапись?')) {
-      return
-    }
+  const handleDelete = (id: string) => {
+    setConfirmModal({ isOpen: true, entryId: id })
+  }
+
+  const confirmDelete = async () => {
+    const id = confirmModal.entryId
+    if (!id) return
 
     setDeletingId(id)
     try {
@@ -56,7 +63,10 @@ export default function AudioEntriesList({ date, onUpdate }: AudioEntriesListPro
       onUpdate?.()
     } catch (error) {
       console.error('Delete error:', error)
-      alert('Не удалось удалить запись. Попробуйте еще раз.')
+      setErrorModal({
+        isOpen: true,
+        message: 'Не удалось удалить запись. Попробуйте еще раз.'
+      })
     } finally {
       setDeletingId(null)
     }
@@ -273,6 +283,23 @@ export default function AudioEntriesList({ date, onUpdate }: AudioEntriesListPro
           </div>
         ))}
       </div>
+
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal({ isOpen: false, entryId: '' })}
+        onConfirm={confirmDelete}
+        title="Удалить аудиозапись?"
+        message="Вы уверены, что хотите удалить эту аудиозапись? Это действие нельзя отменить."
+        confirmText="Удалить"
+        cancelText="Отмена"
+        variant="danger"
+      />
+
+      <ErrorModal
+        isOpen={errorModal.isOpen}
+        onClose={() => setErrorModal({ isOpen: false, message: '' })}
+        message={errorModal.message}
+      />
     </div>
   )
 }

@@ -99,6 +99,10 @@ export default function UserDetailsPage() {
     reflection_directions: ''
   })
 
+  // Modal states
+  const [successModal, setSuccessModal] = useState({ isOpen: false, message: '' })
+  const [errorModal, setErrorModal] = useState({ isOpen: false, message: '' })
+
   useEffect(() => {
     if (userId) {
       fetchUserEntries()
@@ -179,13 +183,19 @@ export default function UserDetailsPage() {
       }
       
       const result = await response.json()
-      alert(result.isFinal 
-        ? 'Финальная аналитика месяца успешно сгенерирована!' 
-        : `Аналитика за ${result.weekNumber} неделю (${result.daysAnalyzed} дней) успешно сгенерирована!`)
+      setSuccessModal({
+        isOpen: true,
+        message: result.isFinal 
+          ? 'Финальная аналитика месяца успешно сгенерирована!' 
+          : `Аналитика за ${result.weekNumber} неделю (${result.daysAnalyzed} дней) успешно сгенерирована!`
+      })
       
       await fetchAnalytics()
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Произошла ошибка при генерации аналитики')
+      setErrorModal({
+        isOpen: true,
+        message: err instanceof Error ? err.message : 'Произошла ошибка при генерации аналитики'
+      })
     } finally {
       setIsGenerating(false)
     }
@@ -213,9 +223,15 @@ export default function UserDetailsPage() {
       
       await fetchAnalytics()
       setIsEditing(false)
-      alert('Аналитика успешно обновлена!')
+      setSuccessModal({
+        isOpen: true,
+        message: 'Аналитика успешно обновлена!'
+      })
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Произошла ошибка при сохранении')
+      setErrorModal({
+        isOpen: true,
+        message: err instanceof Error ? err.message : 'Произошла ошибка при сохранении'
+      })
     }
   }
 
@@ -672,6 +688,18 @@ export default function UserDetailsPage() {
           )}
         </div>
       </div>
+
+      {/* Modals */}
+      <SuccessModal
+        isOpen={successModal.isOpen}
+        onClose={() => setSuccessModal({ isOpen: false, message: '' })}
+        message={successModal.message}
+      />
+      <ErrorModal
+        isOpen={errorModal.isOpen}
+        onClose={() => setErrorModal({ isOpen: false, message: '' })}
+        message={errorModal.message}
+      />
     </div>
   )
 }

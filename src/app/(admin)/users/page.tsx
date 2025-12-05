@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import type { Database } from '@/types/database'
+import ErrorModal from '@/components/entry/ErrorModal'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,6 +14,7 @@ export default function UsersPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [updatingUserId, setUpdatingUserId] = useState<string | null>(null)
+  const [errorModal, setErrorModal] = useState({ isOpen: false, message: '' })
 
   useEffect(() => {
     fetchUsers()
@@ -52,7 +54,10 @@ export default function UsersPage() {
       // Refresh users list
       await fetchUsers()
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to update user')
+      setErrorModal({
+        isOpen: true,
+        message: err instanceof Error ? err.message : 'Failed to update user'
+      })
     } finally {
       setUpdatingUserId(null)
     }
@@ -184,6 +189,12 @@ export default function UsersPage() {
           </div>
         )}
       </div>
+
+      <ErrorModal
+        isOpen={errorModal.isOpen}
+        onClose={() => setErrorModal({ isOpen: false, message: '' })}
+        message={errorModal.message}
+      />
     </div>
   )
 }

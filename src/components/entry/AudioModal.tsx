@@ -130,6 +130,7 @@ export default function AudioModal({ date, isOpen, onClose }: AudioModalProps) {
           >
             <AudioRecorder
               onRecordingComplete={handleRecordingComplete}
+              onError={(message) => setUploadError(message)}
               disabled={isUploading}
             />
             

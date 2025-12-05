@@ -8,13 +8,15 @@ interface AudioRecordModalProps {
   onClose: () => void
   onRecordingComplete: (audioBlob: Blob) => Promise<void>
   disabled?: boolean
+  onError?: (message: string) => void
 }
 
 export default function AudioRecordModal({ 
   isOpen, 
   onClose, 
   onRecordingComplete,
-  disabled = false
+  disabled = false,
+  onError
 }: AudioRecordModalProps) {
   const [isPaused, setIsPaused] = useState(false)
   const [recorderControls, setRecorderControls] = useState<{ pauseRecording: () => void; cancelRecording: () => void; sendRecording: () => void } | null>(null)
@@ -132,6 +134,7 @@ export default function AudioRecordModal({
                 onCancel={handleCancel}
                 onPause={(paused) => setIsPaused(paused)}
                 onSend={handleSend}
+                onError={onError}
                 disabled={disabled}
                 autoStart={true}
                 onControlsReady={setRecorderControls}

@@ -8,6 +8,7 @@ interface AudioRecorderProps {
   onPause?: (isPaused: boolean) => void
   onSend?: () => void
   onControlsReady?: (controls: { pauseRecording: () => void; cancelRecording: () => void; sendRecording: () => void }) => void
+  onError?: (message: string) => void
   disabled?: boolean
   autoStart?: boolean
 }
@@ -18,6 +19,7 @@ export default function AudioRecorder({
   onPause,
   onSend,
   onControlsReady,
+  onError,
   disabled = false,
   autoStart = false
 }: AudioRecorderProps) {
@@ -151,10 +153,12 @@ export default function AudioRecorder({
     } catch (error) {
       console.error('Failed to start recording:', error)
       setIsRecording(false)
+      if (onError) {
+        onError('Не удалось получить доступ к микрофону. Проверьте разрешения.')
+      }
       if (onCancel) {
         onCancel()
       }
-      alert('Не удалось получить доступ к микрофону. Проверьте разрешения.')
     }
   }
 

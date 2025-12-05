@@ -219,7 +219,7 @@ export default function EntryPage() {
     } catch (error) {
       console.error('Failed to save entry:', error)
       const errorMessage = error instanceof Error ? error.message : 'Ошибка при сохранении записи'
-      alert(`Ошибка при сохранении записи: ${errorMessage}`)
+      setErrorModal({ isOpen: true, message: `Ошибка при сохранении записи: ${errorMessage}` })
       throw error // Re-throw to allow caller to handle
     } finally {
       setSaving(false)
@@ -346,7 +346,7 @@ export default function EntryPage() {
     } catch (error) {
       console.error('Failed to save entry:', error)
       const errorMessage = error instanceof Error ? error.message : 'Ошибка при сохранении записи'
-      alert(`Ошибка при сохранении записи: ${errorMessage}`)
+      setErrorModal({ isOpen: true, message: `Ошибка при сохранении записи: ${errorMessage}` })
       throw error
     } finally {
       setSaving(false)
@@ -379,7 +379,7 @@ export default function EntryPage() {
     } catch (error) {
       // Revert on error
       setMessages(previousMessages)
-      alert('Ошибка при удалении сообщения')
+      setErrorModal({ isOpen: true, message: 'Ошибка при удалении сообщения' })
       setDeleteModalOpen(false)
       setMessageToDelete(null)
     }
@@ -520,6 +520,7 @@ export default function EntryPage() {
         isOpen={isAudioModalOpen}
         onClose={() => setIsAudioModalOpen(false)}
         onRecordingComplete={handleAudioRecording}
+        onError={(message) => setErrorModal({ isOpen: true, message })}
         disabled={saving}
       />
 
