@@ -120,8 +120,14 @@ function MaterialModal({ isOpen, onClose, onSave, post }: MaterialModalProps) {
               </h3>
               <button
                 onClick={onClose}
-                className="rounded-full p-2 hover:bg-opacity-20"
+                className="rounded-full p-2 transition-all hover:rotate-90"
                 style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'
+                }}
               >
                 <svg className="w-6 h-6" style={{ color: 'rgba(255, 255, 255, 0.9)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -139,11 +145,11 @@ function MaterialModal({ isOpen, onClose, onSave, post }: MaterialModalProps) {
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2"
+                  className="w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 focus:ring-opacity-50 transition-all"
                   style={{
                     backgroundColor: '#FFFFFF',
-                    borderColor: 'rgba(255, 255, 255, 0.1)',
-                    color: 'rgba(255, 255, 255, 0.9)',
+                    borderColor: '#D4C8B5',
+                    color: '#8B3A3A',
                   }}
                   placeholder="Введите заголовок"
                 />
@@ -154,7 +160,13 @@ function MaterialModal({ isOpen, onClose, onSave, post }: MaterialModalProps) {
                 <label className="block text-sm font-medium mb-2" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>
                   Текст
                 </label>
-                <div className="rounded-lg overflow-hidden" style={{ backgroundColor: '#FFFFFF' }}>
+                <div 
+                  className="rounded-xl overflow-hidden border" 
+                  style={{ 
+                    backgroundColor: '#FFFFFF',
+                    borderColor: '#D4C8B5'
+                  }}
+                >
                   {isOpen && <RichTextEditor value={content} onChange={setContent} />}
                 </div>
               </div>
@@ -168,14 +180,14 @@ function MaterialModal({ isOpen, onClose, onSave, post }: MaterialModalProps) {
                   type="datetime-local"
                   value={publishDate}
                   onChange={(e) => setPublishDate(e.target.value)}
-                  className="w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2"
+                  className="w-full px-4 py-3 rounded-xl border focus:outline-none focus:ring-2 focus:ring-opacity-50 transition-all"
                   style={{
                     backgroundColor: '#FFFFFF',
-                    borderColor: 'rgba(255, 255, 255, 0.1)',
-                    color: 'rgba(255, 255, 255, 0.9)',
+                    borderColor: '#D4C8B5',
+                    color: '#8B3A3A',
                   }}
                 />
-                <p className="mt-1 text-sm" style={{ color: 'rgba(255, 255, 255, 0.9)', opacity: 0.7 }}>
+                <p className="mt-2 text-sm" style={{ color: 'rgba(255, 255, 255, 0.7)' }}>
                   Если не заполнено, материал будет опубликован сразу
                 </p>
               </div>
@@ -186,10 +198,16 @@ function MaterialModal({ isOpen, onClose, onSave, post }: MaterialModalProps) {
             <button
               onClick={onClose}
               disabled={saving}
-              className="px-6 py-2 rounded-full font-medium transition-colors disabled:opacity-50"
+              className="px-6 py-2.5 rounded-xl font-medium transition-all disabled:opacity-50 hover:bg-opacity-80"
               style={{
                 backgroundColor: 'rgba(255, 255, 255, 0.1)',
                 color: 'rgba(255, 255, 255, 0.9)',
+              }}
+              onMouseEnter={(e) => {
+                if (!saving) e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)'
+              }}
+              onMouseLeave={(e) => {
+                if (!saving) e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'
               }}
             >
               Отмена
@@ -197,10 +215,16 @@ function MaterialModal({ isOpen, onClose, onSave, post }: MaterialModalProps) {
             <button
               onClick={handleSave}
               disabled={saving}
-              className="px-6 py-2 rounded-full font-medium transition-colors disabled:opacity-50"
+              className="px-6 py-2.5 rounded-xl font-medium transition-all disabled:opacity-50"
               style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                color: '#FFFFFF',
+                backgroundColor: '#7c5cff',
+                color: '#ffffff',
+              }}
+              onMouseEnter={(e) => {
+                if (!saving) e.currentTarget.style.backgroundColor = '#6b4de6'
+              }}
+              onMouseLeave={(e) => {
+                if (!saving) e.currentTarget.style.backgroundColor = '#7c5cff'
               }}
             >
               {saving ? 'Сохранение...' : 'Сохранить'}
