@@ -341,14 +341,13 @@ export default function EntryPage() {
   }
 
   return (
-    <div className="relative" style={{ marginTop: '-64px', minHeight: '100vh' }}> {/* Offset the main's paddingTop */}
+    <div className="relative" style={{ minHeight: '100vh' }}>
       {/* Scrollable content area - naturally scrolls */}
       <div 
         ref={chatContainerRef}
         style={{ 
           backgroundColor: '#1a1d2e',
           minHeight: '100vh',
-          paddingTop: '64px', // Space for fixed header
           paddingBottom: '180px', // Space for ChatInput (~100px) + BottomNav (80px)
         }}
       >

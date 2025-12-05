@@ -19,7 +19,7 @@ export default async function UserLayout({
     <div className="min-h-screen" style={{ backgroundColor: '#1a1d2e' }}>
       {/* Логотип сверху */}
       <header 
-        className="shadow-sm fixed top-0 left-0 right-0 z-40" 
+        className="shadow-sm" 
         style={{ backgroundColor: 'transparent' }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -41,8 +41,8 @@ export default async function UserLayout({
         </div>
       </header>
       
-      {/* Контент - pages handle their own scrolling */}
-      <main style={{ paddingTop: '64px' }}> {/* Space for fixed header */}
+      {/* Контент */}
+      <main>
         {children}
       </main>
       
