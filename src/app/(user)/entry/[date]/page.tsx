@@ -16,80 +16,27 @@ interface Message {
   type: 'text'
 }
 
-// Погодные иконки для настроения
-const MoodSymbol = ({ score, selected, size = 48 }: { score: number; selected: boolean; size?: number }) => {
-  const opacity = selected ? 1 : 0.3
-  const scale = selected ? 1.1 : 1
-  
-  const icons = [
-    // 1 - очень плохо (туча и молния)
-    <svg key="1" width={size} height={size} viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ opacity, transform: `scale(${scale})`, transition: 'all 0.3s' }}>
-      {/* Темная туча */}
-      <ellipse cx="32" cy="24" rx="18" ry="10" fill="#4A5568"/>
-      <ellipse cx="22" cy="26" rx="12" ry="8" fill="#4A5568"/>
-      <ellipse cx="42" cy="26" rx="12" ry="8" fill="#4A5568"/>
-      {/* Молния */}
-      <path d="M34 30 L30 40 L33 40 L31 50 L38 38 L35 38 L37 30 Z" fill="#FDB022"/>
-    </svg>,
-    // 2 - плохо (туча и дождь)
-    <svg key="2" width={size} height={size} viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ opacity, transform: `scale(${scale})`, transition: 'all 0.3s' }}>
-      {/* Серая туча */}
-      <ellipse cx="32" cy="22" rx="18" ry="10" fill="#718096"/>
-      <ellipse cx="22" cy="24" rx="12" ry="8" fill="#718096"/>
-      <ellipse cx="42" cy="24" rx="12" ry="8" fill="#718096"/>
-      {/* Капли дождя */}
-      <path d="M24 34 L24 42" stroke="#4299E1" strokeWidth="2.5" strokeLinecap="round"/>
-      <path d="M32 36 L32 44" stroke="#4299E1" strokeWidth="2.5" strokeLinecap="round"/>
-      <path d="M40 34 L40 42" stroke="#4299E1" strokeWidth="2.5" strokeLinecap="round"/>
-    </svg>,
-    // 3 - нейтрально (солнце и облако)
-    <svg key="3" width={size} height={size} viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ opacity, transform: `scale(${scale})`, transition: 'all 0.3s' }}>
-      {/* Солнце */}
-      <circle cx="38" cy="20" r="9" fill="#FDB022"/>
-      <path d="M38 8 L38 12" stroke="#FDB022" strokeWidth="2.5" strokeLinecap="round"/>
-      <path d="M48 10 L46 14" stroke="#FDB022" strokeWidth="2.5" strokeLinecap="round"/>
-      <path d="M52 20 L48 20" stroke="#FDB022" strokeWidth="2.5" strokeLinecap="round"/>
-      <path d="M48 30 L46 26" stroke="#FDB022" strokeWidth="2.5" strokeLinecap="round"/>
-      {/* Облако */}
-      <ellipse cx="28" cy="32" rx="16" ry="9" fill="#A0AEC0"/>
-      <ellipse cx="18" cy="34" rx="10" ry="7" fill="#A0AEC0"/>
-      <ellipse cx="38" cy="34" rx="10" ry="7" fill="#A0AEC0"/>
-    </svg>,
-    // 4 - хорошо (солнце)
-    <svg key="4" width={size} height={size} viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ opacity, transform: `scale(${scale})`, transition: 'all 0.3s' }}>
-      {/* Солнце */}
-      <circle cx="32" cy="32" r="12" fill="#FDB022"/>
-      {/* Лучи */}
-      <path d="M32 10 L32 16" stroke="#FDB022" strokeWidth="3" strokeLinecap="round"/>
-      <path d="M32 48 L32 54" stroke="#FDB022" strokeWidth="3" strokeLinecap="round"/>
-      <path d="M10 32 L16 32" stroke="#FDB022" strokeWidth="3" strokeLinecap="round"/>
-      <path d="M48 32 L54 32" stroke="#FDB022" strokeWidth="3" strokeLinecap="round"/>
-      <path d="M16 16 L20 20" stroke="#FDB022" strokeWidth="3" strokeLinecap="round"/>
-      <path d="M44 44 L48 48" stroke="#FDB022" strokeWidth="3" strokeLinecap="round"/>
-      <path d="M48 16 L44 20" stroke="#FDB022" strokeWidth="3" strokeLinecap="round"/>
-      <path d="M20 44 L16 48" stroke="#FDB022" strokeWidth="3" strokeLinecap="round"/>
-    </svg>,
-    // 5 - очень хорошо (солнце и нотка)
-    <svg key="5" width={size} height={size} viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ opacity, transform: `scale(${scale})`, transition: 'all 0.3s' }}>
-      {/* Солнце */}
-      <circle cx="28" cy="28" r="11" fill="#FDB022"/>
-      {/* Лучи */}
-      <path d="M28 8 L28 14" stroke="#FDB022" strokeWidth="2.5" strokeLinecap="round"/>
-      <path d="M28 42 L28 48" stroke="#FDB022" strokeWidth="2.5" strokeLinecap="round"/>
-      <path d="M8 28 L14 28" stroke="#FDB022" strokeWidth="2.5" strokeLinecap="round"/>
-      <path d="M42 28 L48 28" stroke="#FDB022" strokeWidth="2.5" strokeLinecap="round"/>
-      <path d="M14 14 L18 18" stroke="#FDB022" strokeWidth="2.5" strokeLinecap="round"/>
-      <path d="M38 38 L42 42" stroke="#FDB022" strokeWidth="2.5" strokeLinecap="round"/>
-      <path d="M42 14 L38 18" stroke="#FDB022" strokeWidth="2.5" strokeLinecap="round"/>
-      <path d="M18 38 L14 42" stroke="#FDB022" strokeWidth="2.5" strokeLinecap="round"/>
-      {/* Нотка */}
-      <ellipse cx="48" cy="44" rx="4" ry="3" fill="#8B3A3A"/>
-      <rect x="51.5" y="28" width="2.5" height="16" fill="#8B3A3A"/>
-      <path d="M54 28 Q58 26 58 30 L58 38" stroke="#8B3A3A" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
-    </svg>
-  ]
-  
-  return <div className="flex items-center justify-center">{icons[score - 1] || icons[2]}</div>
+// Функция для получения цвета настроения (такая же как в календаре)
+const getMoodColor = (score: number): string => {
+  const colors = {
+    1: 'rgba(239, 68, 68, 0.2)', // Красный/розовый
+    2: 'rgba(194, 120, 77, 0.25)', // Коричневый/оранжевый
+    3: 'rgba(148, 163, 184, 0.2)', // Серый
+    4: 'rgba(134, 239, 172, 0.25)', // Светло-зеленый
+    5: 'rgba(34, 197, 94, 0.3)', // Темно-зеленый
+  }
+  return colors[score as keyof typeof colors] || colors[3]
+}
+
+const getMoodLabel = (score: number): string => {
+  const labels = {
+    1: 'очень\nплохо',
+    2: 'плохо',
+    3: 'нейтрально',
+    4: 'хорошо',
+    5: 'очень\nхорошо',
+  }
+  return labels[score as keyof typeof labels] || ''
 }
 
 export default function EntryPage() {
@@ -428,17 +375,15 @@ export default function EntryPage() {
                       setMoodScore(level.value)
                       saveMoodAndFactors(level.value)
                     }}
-                    className="flex flex-col items-center p-2 sm:p-3 md:p-4 rounded-xl transition-all min-w-[56px] sm:min-w-[70px] md:min-w-[80px]"
+                    className="flex flex-col items-center justify-center p-3 sm:p-4 md:p-5 rounded-xl transition-all min-w-[80px] sm:min-w-[100px] md:min-w-[120px] min-h-[80px] sm:min-h-[100px] md:min-h-[120px]"
                     style={{
-                      backgroundColor: moodScore === level.value ? 'rgba(124, 92, 255, 0.2)' : 'rgba(255, 255, 255, 0.05)',
-                      border: moodScore === level.value ? '2px solid #7c5cff' : '2px solid rgba(255, 255, 255, 0.1)',
+                      backgroundColor: getMoodColor(level.value),
+                      border: moodScore === level.value ? '3px solid #7c5cff' : '1px solid rgba(255, 255, 255, 0.15)',
+                      backdropFilter: 'blur(10px)',
                     }}
                   >
-                    <div className="mb-1 sm:mb-2 flex justify-center">
-                      <MoodSymbol score={level.value} selected={moodScore === level.value} size={36} />
-                    </div>
-                    <div className="text-xs font-medium text-center leading-tight" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>
-                      {level.label}
+                    <div className="text-xs sm:text-sm font-semibold text-center leading-tight uppercase whitespace-pre-line" style={{ color: 'rgba(255, 255, 255, 0.95)' }}>
+                      {getMoodLabel(level.value)}
                     </div>
                   </button>
                 ))}

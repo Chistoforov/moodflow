@@ -150,11 +150,11 @@ export default function CalendarPage() {
 
   const getMoodLabel = (score: number): string => {
     const labels = {
-      1: 'Очень плохое',
-      2: 'Плохое',
-      3: 'Нейтральное',
-      4: 'Хорошее',
-      5: 'Отличное',
+      1: 'очень\nплохо',
+      2: 'плохо',
+      3: 'нейтрально',
+      4: 'хорошо',
+      5: 'очень\nхорошо',
     }
     return labels[score as keyof typeof labels] || ''
   }
@@ -297,10 +297,10 @@ export default function CalendarPage() {
                               {format(day, 'd')}
                             </div>
                             <div 
-                              className="text-[8px] sm:text-[9px] font-semibold text-center mt-0.5 leading-tight uppercase"
+                              className="text-[8px] sm:text-[9px] font-semibold text-center mt-0.5 leading-tight uppercase whitespace-pre-line"
                               style={{ color: 'rgba(255, 255, 255, 0.9)' }}
                             >
-                              {getMoodLabel(entry.mood_score!).replace('Очень плохое', 'Плохо').replace('Очень ', '')}
+                              {getMoodLabel(entry.mood_score!)}
                             </div>
                           </div>
                         ) : (
