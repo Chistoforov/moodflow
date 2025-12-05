@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { ChevronLeft, ChevronRight, ArrowLeft, Edit2, Save, X } from 'lucide-react'
+import SuccessModal from '@/components/shared/SuccessModal'
+import ErrorModal from '@/components/entry/ErrorModal'
 
 interface UserInfo {
   id: string
