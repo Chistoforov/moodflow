@@ -45,23 +45,24 @@ export async function GET(
     const endDate = new Date(parseInt(year), parseInt(month), 0, 23, 59, 59)
 
     // Get user info
-    type User = Pick<Database['public']['Tables']['users']['Row'], 'id' | 'email' | 'full_name'>
+    // userId in the URL is sso_uid, we need to find the internal id for daily_entries
+    type User = Pick<Database['public']['Tables']['users']['Row'], 'id' | 'sso_uid' | 'email' | 'full_name'>
     const { data: user, error: userError } = await (supabase
       .from('users')
-      .select('id, email, full_name')
-      .eq('id', userId)
+      .select('id, sso_uid, email, full_name')
+      .eq('sso_uid', userId)
       .single() as any) as { data: User | null; error: any }
 
     if (userError || !user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
-    // Get entries for the month
+    // Get entries for the month using internal user.id
     type DailyEntry = Database['public']['Tables']['daily_entries']['Row']
     const { data: entries, error: entriesError } = await (supabase
       .from('daily_entries')
       .select('*')
-      .eq('user_id', userId)
+      .eq('user_id', user.id)
       .eq('is_deleted', false)
       .gte('entry_date', startDate.toISOString().split('T')[0])
       .lte('entry_date', endDate.toISOString().split('T')[0])
@@ -161,7 +162,7 @@ export async function GET(
 
     return NextResponse.json({
       user: {
-        id: user.id,
+        id: user.sso_uid,
         email: user.email,
         full_name: user.full_name
       },

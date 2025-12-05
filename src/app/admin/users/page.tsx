@@ -168,7 +168,7 @@ export default function UsersPage() {
                   <td className="px-6 py-4 text-sm">
                     {user.full_name ? (
                       <Link
-                        href={`/admin/users/${user.id}`}
+                        href={`/admin/users/${user.sso_uid}`}
                         className="hover:underline font-medium"
                         style={{ color: '#7c5cff' }}
                       >

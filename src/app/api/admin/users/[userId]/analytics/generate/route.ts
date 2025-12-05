@@ -35,6 +35,19 @@ export async function POST(
 
     console.log(`[Admin Analytics Generate] Starting for user: ${userId}, year: ${year}, month: ${month}`)
 
+    // userId is sso_uid, we need to get the internal user.id for daily_entries
+    type UserData = { id: string; sso_uid: string }
+    const { data: userData, error: userError } = await (supabase
+      .from('users')
+      .select('id, sso_uid')
+      .eq('sso_uid', userId)
+      .single() as any) as { data: UserData | null; error: any }
+
+    if (userError || !userData) {
+      console.error('Error fetching user:', userError)
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+    }
+
     // Get all entries for this user for the specified month
     const startDate = new Date(year, month - 1, 1).toISOString().split('T')[0]
     const endDate = new Date(year, month, 0).toISOString().split('T')[0]
@@ -42,7 +55,7 @@ export async function POST(
     const { data: entries, error: entriesError } = await supabase
       .from('daily_entries')
       .select('entry_date, mood_score, factors, text_entry, transcript')
-      .eq('user_id', userId)
+      .eq('user_id', userData.id)
       .gte('entry_date', startDate)
       .lte('entry_date', endDate)
       .order('entry_date', { ascending: true })

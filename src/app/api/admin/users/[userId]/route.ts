@@ -35,11 +35,12 @@ export async function PATCH(
     const { subscription_tier, role } = body
 
     // If changing to admin role, add to psychologists table
+    // userId is now sso_uid
     if (role === 'admin') {
       const { data: user } = await supabase
         .from('users')
         .select('email, full_name, sso_uid')
-        .eq('id', userId)
+        .eq('sso_uid', userId)
         .single() as any
 
       if (user) {
@@ -60,7 +61,7 @@ export async function PATCH(
       const { data: user } = await supabase
         .from('users')
         .select('sso_uid')
-        .eq('id', userId)
+        .eq('sso_uid', userId)
         .single() as any
 
       if (user) {
@@ -76,7 +77,7 @@ export async function PATCH(
       const { data: updatedUser, error: updateError } = await (supabase as any)
         .from('users')
         .update({ subscription_tier })
-        .eq('id', userId)
+        .eq('sso_uid', userId)
         .select()
         .single()
 

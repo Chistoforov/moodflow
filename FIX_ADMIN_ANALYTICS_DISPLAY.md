@@ -1,241 +1,239 @@
-# Исправление отображения аналитики в админке
+# Исправление отображения аналитики в админ-панели
 
 ## Проблема
-Аналитика отображается у пользователя на странице календаря, но не отображается в админке.
+В админке у пользователя поле рекомендаций и аналитики пустое, хотя в календаре пользователя эти данные есть.
 
-## Причины
-1. ❌ Миграция 025 не применена на сервере (RLS политики для админа)
-2. ❌ API админки использовал неправильную логику получения данных
+## Причина
+Обнаружено несоответствие в использовании ID пользователей:
 
-## Исправления
+### Структура базы данных
+```
+┌─────────────────────────────────────────────────────┐
+│ auth.users.id (UUID)                                │
+│ "123e4567-e89b-12d3-a456-426614174000"             │
+└───────────────┬─────────────────────────────────────┘
+                │
+                │ Ссылается
+                ↓
+┌─────────────────────────────────────────────────────┐
+│ public.users                                         │
+├─────────────────────────────────────────────────────┤
+│ id (UUID) - Внутренний ID (ДРУГОЕ значение!)       │
+│ "98765432-abcd-1234-efgh-567890123456"             │
+│                                                      │
+│ sso_uid (TEXT) - То же что auth.users.id           │
+│ "123e4567-e89b-12d3-a456-426614174000"             │
+└─────────────────────────────────────────────────────┘
+                │                 │
+        ┌───────┘                 └────────┐
+        ↓                                  ↓
+┌──────────────────┐          ┌───────────────────────┐
+│ daily_entries    │          │ monthly_analytics     │
+├──────────────────┤          ├───────────────────────┤
+│ user_id → users.id│         │ user_id → auth.users.id│
+│ (внутренний ID)  │          │ (= sso_uid)           │
+└──────────────────┘          └───────────────────────┘
+```
 
-### ✅ Исправление 1: API админки
+**Проблема была:**
+- URL в админ-панели использовал `user.id` (внутренний ID)
+- API аналитики ожидал `sso_uid`
+- Результат: данные не находились
+
+## Решение
+
+### 1. Исправлен URL в списке пользователей
+**Файл:** `src/app/admin/users/page.tsx`
+
+```tsx
+// Было:
+<Link href={`/admin/users/${user.id}`}>
+
+// Стало:
+<Link href={`/admin/users/${user.sso_uid}`}>
+```
+
+### 2. Исправлен API получения записей пользователя
+**Файл:** `src/app/api/admin/users/[userId]/entries/route.ts`
+
+```typescript
+// Теперь userId интерпретируется как sso_uid
+const { data: user } = await supabase
+  .from('users')
+  .select('id, sso_uid, email, full_name')
+  .eq('sso_uid', userId)  // ← Было: .eq('id', userId)
+  .single()
+
+// Используем внутренний id для daily_entries
+const { data: entries } = await supabase
+  .from('daily_entries')
+  .select('*')
+  .eq('user_id', user.id)  // ← Используем users.id
+```
+
+### 3. API аналитики уже работает правильно
 **Файл:** `src/app/api/admin/users/[userId]/analytics/route.ts`
 
-**Что изменено:**
-- Заменили `.single()` на `.maybeSingle()` - теперь не будет ошибки если записи нет
-- Изменили сортировку на `.order('is_final', { ascending: false }).order('week_number', { ascending: false })` - теперь приоритет отдается финальной аналитике, как и в пользовательском API
-- Добавили логирование для отладки
-
-**Было:**
+Использует `userId` (sso_uid) напрямую, что правильно:
 ```typescript
-.order('created_at', { ascending: false })
-.limit(1)
-.single()  // ❌ Ошибка если записи нет
+const { data: analytics } = await supabase
+  .from('monthly_analytics')
+  .select('*')
+  .eq('user_id', userId)  // userId = sso_uid = auth.users.id ✓
 ```
 
-**Стало:**
+### 4. Исправлен API генерации аналитики
+**Файл:** `src/app/api/admin/users/[userId]/analytics/generate/route.ts`
+
 ```typescript
-.order('is_final', { ascending: false })
-.order('week_number', { ascending: false })
-.limit(1)
-.maybeSingle()  // ✅ Вернет null если записи нет
+// Получаем users.id по sso_uid для запроса к daily_entries
+const { data: userData } = await supabase
+  .from('users')
+  .select('id, sso_uid')
+  .eq('sso_uid', userId)
+  .single()
+
+// Используем users.id для daily_entries
+const { data: entries } = await supabase
+  .from('daily_entries')
+  .eq('user_id', userData.id)
+
+// Используем sso_uid для monthly_analytics
+await supabase
+  .from('monthly_analytics')
+  .insert({
+    user_id: userId,  // userId = sso_uid ✓
+    // ...
+  })
 ```
 
-### ✅ Исправление 2: Логирование
-Добавлено логирование в:
-- `GET /api/admin/users/[userId]/analytics` - получение аналитики
-- `POST /api/admin/users/[userId]/analytics/generate` - генерация аналитики
+### 5. Исправлен API обновления пользователя
+**Файл:** `src/app/api/admin/users/[userId]/route.ts`
 
-Теперь в логах Vercel можно увидеть:
-- Какой пользователь и период запрашивается
-- Найдена ли аналитика
-- Сколько записей найдено
-- Результат генерации
-
-### 🔧 Необходимо: Применить миграцию 025
-
-**Важно!** Миграция 025 еще не применена на сервере Supabase.
-
-#### Способ 1: Через Supabase Dashboard (Рекомендуется)
-
-1. Откройте Supabase Dashboard → ваш проект
-2. SQL Editor → New Query
-3. Скопируйте содержимое файла `supabase/migrations/025_fix_admin_analytics_access.sql`
-4. Вставьте в редактор и нажмите **Run**
-5. Убедитесь, что запрос выполнился успешно (в логах должно быть "Total policies created for monthly_analytics: 7")
-
-#### Способ 2: Через Supabase CLI
-
-```bash
-# Убедитесь, что миграция в git
-git add supabase/migrations/025_fix_admin_analytics_access.sql
-git commit -m "Add migration 025: fix admin analytics access"
-
-# Примените миграцию
-supabase db push
+```typescript
+// Все запросы к таблице users теперь используют sso_uid
+const { data: user } = await supabase
+  .from('users')
+  .select('email, full_name, sso_uid')
+  .eq('sso_uid', userId)  // ← Было: .eq('id', userId)
 ```
 
-#### Способ 3: Вручную через SQL
+## Список измененных файлов
 
-Выполните следующий SQL в Supabase SQL Editor:
-
-```sql
--- Проверить текущие политики
-SELECT policyname, cmd 
-FROM pg_policies 
-WHERE tablename = 'monthly_analytics' 
-AND schemaname = 'public';
-
--- Если админских политик нет, выполните содержимое файла
--- supabase/migrations/025_fix_admin_analytics_access.sql
-```
-
-### Проверка после применения миграции
-
-1. **Проверить RLS политики:**
-```sql
-SELECT policyname, cmd 
-FROM pg_policies 
-WHERE tablename = 'monthly_analytics' 
-AND schemaname = 'public';
-```
-
-Должны быть политики:
-- ✅ Users can read their own monthly analytics (SELECT)
-- ✅ Service role can manage monthly analytics (ALL)
-- ✅ Users can insert their own monthly analytics (INSERT)
-- ✅ Users can update their own monthly analytics (UPDATE)
-- ✅ Admins can read all monthly analytics (SELECT)
-- ✅ Admins can update all monthly analytics (UPDATE)
-- ✅ Admins can insert monthly analytics for any user (INSERT)
-
-2. **Проверить таблицу psychologists:**
-```sql
-SELECT user_id, email, role, active 
-FROM psychologists 
-WHERE role = 'admin';
-```
-
-Убедитесь, что ваш админ имеет:
-- `role = 'admin'`
-- `active = true`
-- `user_id` соответствует вашему auth.uid()
-
-3. **Проверить связь auth.uid() и psychologists:**
-```sql
--- Выполните от имени админа
-SELECT 
-  auth.uid() as my_auth_id,
-  p.user_id,
-  p.email,
-  p.role,
-  p.active
-FROM psychologists p
-WHERE p.user_id = auth.uid()::text;
-```
+1. ✅ `src/app/admin/users/page.tsx`
+2. ✅ `src/app/api/admin/users/[userId]/entries/route.ts`
+3. ✅ `src/app/api/admin/users/[userId]/route.ts`
+4. ✅ `src/app/api/admin/users/[userId]/analytics/generate/route.ts`
+5. ✅ `src/app/api/admin/users/[userId]/analytics/route.ts` (проверен, изменений не требуется)
 
 ## Тестирование
 
-### 1. Деплой изменений
+### Шаг 1: Убедитесь, что миграции применены
+Проверьте в Supabase SQL Editor:
 
-```bash
-# Закоммитить изменения
-git add .
-git commit -m "Fix admin analytics display: update API logic and add logging"
-git push origin main
-
-# Задеплоить на Vercel (автоматически или вручную)
-vercel --prod
-```
-
-### 2. Проверка в админке
-
-1. Откройте админку: `https://your-domain.vercel.app/admin/users`
-2. Выберите пользователя, у которого есть записи
-3. Перейдите на его страницу
-4. Справа должна быть панель "Аналитика и рекомендации"
-
-**Сценарий 1: Аналитика уже существует**
-- Должна отобразиться существующая аналитика
-- Кнопка должна быть "Обновить рекомендации"
-- Должна быть кнопка редактирования (карандаш)
-
-**Сценарий 2: Аналитики нет**
-- Должна быть кнопка "Получить рекомендации"
-- После клика должна сгенерироваться новая аналитика
-
-### 3. Проверка логов
-
-1. Откройте Vercel Dashboard → ваш проект
-2. Functions → Logs
-3. Отфильтруйте по `[Admin Analytics`
-4. Проверьте логи:
-   - `[Admin Analytics GET] Fetching analytics for user: ...`
-   - `[Admin Analytics GET] Found analytics: true/false`
-   - `[Admin Analytics Generate] Starting for user: ...`
-   - И т.д.
-
-## Диагностика проблем
-
-### Проблема: Аналитика все еще не отображается
-
-**Шаг 1: Проверить RLS политики**
 ```sql
--- В Supabase SQL Editor
+-- Должны быть политики для админов
 SELECT policyname, cmd 
 FROM pg_policies 
 WHERE tablename = 'monthly_analytics' 
-AND schemaname = 'public';
+AND schemaname = 'public'
+AND policyname LIKE '%admin%';
 ```
 
-**Шаг 2: Проверить что вы админ**
+Ожидаемый результат:
+- `Admins can read all monthly analytics` (SELECT)
+- `Admins can update all monthly analytics` (UPDATE)
+- `Admins can insert monthly analytics for any user` (INSERT)
+
+### Шаг 2: Проверьте наличие данных
 ```sql
 SELECT 
-  auth.uid()::text as my_uid,
-  p.*
-FROM psychologists p
-WHERE p.user_id = auth.uid()::text;
+    ma.user_id,
+    u.email,
+    u.sso_uid,
+    ma.year,
+    ma.month,
+    ma.week_number,
+    LENGTH(ma.recommendations) as rec_length
+FROM monthly_analytics ma
+LEFT JOIN users u ON u.sso_uid = ma.user_id::text
+ORDER BY ma.created_at DESC
+LIMIT 5;
 ```
 
-**Шаг 3: Проверить существование аналитики**
+### Шаг 3: Протестируйте в UI
+1. Соберите и запустите проект:
+   ```bash
+   npm run build
+   npm run dev
+   ```
+
+2. Войдите как админ
+
+3. Перейдите в раздел "Пользователи"
+
+4. Кликните на имя пользователя с существующей аналитикой
+
+5. **Ожидаемый результат:**
+   - ✅ Таблица с записями пользователя отображается
+   - ✅ Справа показана панель "Аналитика и рекомендации"
+   - ✅ Отображаются все секции: общее впечатление, положительные тенденции, рекомендации и т.д.
+   - ✅ Показывается информация о неделе и количестве дней
+
+6. Попробуйте нажать "Обновить рекомендации" - должна сгенерироваться новая аналитика
+
+### Шаг 4: Проверьте консоль браузера
+Не должно быть ошибок типа:
+- ❌ `Failed to fetch analytics`
+- ❌ `User not found`
+- ❌ `Forbidden`
+
+## Деплой
+
+После успешного тестирования локально:
+
+```bash
+# Закоммитьте изменения
+git add .
+git commit -m "Fix admin analytics display by using sso_uid in URLs"
+
+# Отправьте на Vercel
+git push origin main
+```
+
+## Если проблема не решена
+
+### 1. Проверьте, что пользователь - админ
 ```sql
--- Замените USER_ID на ID пользователя из админки
-SELECT * 
-FROM monthly_analytics 
-WHERE user_id = 'USER_ID'::uuid
-ORDER BY year DESC, month DESC, week_number DESC;
+SELECT 
+    p.user_id,
+    p.email,
+    p.role,
+    p.active,
+    u.sso_uid
+FROM psychologists p
+JOIN users u ON u.sso_uid = p.user_id
+WHERE p.role = 'admin';
 ```
 
-**Шаг 4: Проверить логи API**
-В Vercel Dashboard → Functions → Logs найдите запросы к:
-- `/api/admin/users/[userId]/analytics`
-- Посмотрите на сообщения `[Admin Analytics GET]`
+### 2. Проверьте RLS политики вручную
+```sql
+-- От имени админа
+SET request.jwt.claims = '{"sub": "YOUR_ADMIN_SSO_UID"}';
 
-### Проблема: "Forbidden" при попытке получить аналитику
+-- Попытка выбрать аналитику
+SELECT * FROM monthly_analytics LIMIT 1;
+```
 
-**Причина:** Пользователь не является админом или RLS политики не работают.
+### 3. Проверьте логи в Vercel
+- Откройте Dashboard > Your Project > Logs
+- Найдите запросы к `/api/admin/users/[userId]/analytics`
+- Проверьте сообщения `[Admin Analytics GET]`
 
-**Решение:**
-1. Проверьте таблицу `psychologists` - есть ли ваш пользователь с `role = 'admin'` и `active = true`
-2. Примените миграцию 025 если еще не применена
-3. Убедитесь что `user_id` в таблице `psychologists` это TEXT (не UUID) и соответствует `auth.uid()::text`
+## Дополнительно
 
-### Проблема: Ошибка при генерации аналитики
+Для упрощения работы в будущем рекомендуется:
 
-**Причина:** Нет API ключа Perplexity или нет записей у пользователя.
-
-**Решение:**
-1. Проверьте переменные окружения в Vercel:
-   - `PERPLEXITY_API_KEY` должен быть установлен
-2. Проверьте логи:
-   - `[Admin Analytics Generate] Found X entries for user: ...`
-   - Должно быть хотя бы 1 запись с `mood_score`
-
-## Итоговый чеклист
-
-- [ ] Применена миграция 025 в Supabase
-- [ ] Задеплоены изменения API на Vercel
-- [ ] Проверена таблица `psychologists` - есть админ
-- [ ] Протестировано в админке - аналитика отображается
-- [ ] Протестирована кнопка "Получить/Обновить рекомендации"
-- [ ] Протестировано редактирование аналитики
-- [ ] Проверены логи в Vercel - нет ошибок
-
-## Дополнительно: Улучшения для будущего
-
-1. **Добавить индикатор загрузки** при генерации аналитики (сейчас просто disabled кнопка)
-2. **Показывать прогресс** генерации (например, через WebSocket или polling)
-3. **Добавить уведомление** пользователю когда аналитика сгенерирована
-4. **Кэшировать аналитику** в SWR для быстрого отображения
-5. **Добавить фильтры** в админке (по месяцу, году, пользователю)
+1. **Стандартизировать ID:** Использовать везде `sso_uid` для внешних ссылок
+2. **Добавить проверки:** Валидировать UUID формат в API
+3. **Улучшить типизацию:** Создать отдельные типы для `InternalUserId` и `SsoUserId`
