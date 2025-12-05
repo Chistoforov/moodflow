@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase/server'
 
+/**
+ * Очищает текст от сносок в квадратных скобках (например, [6], [1], [123])
+ */
+function cleanCitations(text: string): string {
+  return text.replace(/\[\d+\]/g, '')
+}
+
 // POST - сгенерировать или обновить аналитику для пользователя
 export async function POST(
   request: NextRequest,
@@ -178,12 +185,15 @@ ${formattedEntries.join('\n\n')}
     }
 
     const perplexityData = await perplexityResponse.json()
-    const analysisText = perplexityData.choices[0]?.message?.content
+    const rawAnalysisText = perplexityData.choices[0]?.message?.content
 
-    if (!analysisText) {
+    if (!rawAnalysisText) {
       console.error('[Admin Analytics Generate] No analysis text in Perplexity response')
       return NextResponse.json({ error: 'No analysis generated' }, { status: 500 })
     }
+
+    // Очищаем от сносок Perplexity
+    const analysisText = cleanCitations(rawAnalysisText)
 
     console.log(`[Admin Analytics Generate] Perplexity analysis received, length: ${analysisText.length}`)
 

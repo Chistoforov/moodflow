@@ -42,6 +42,14 @@ export class PerplexityService {
     this.apiKey = process.env.PERPLEXITY_API_KEY!
   }
 
+  /**
+   * Очищает текст от сносок в квадратных скобках (например, [6], [1], [123])
+   */
+  private cleanCitations(text: string): string {
+    // Удаляем цифры в квадратных скобках
+    return text.replace(/\[\d+\]/g, '')
+  }
+
   async analyzeWeeklySummary(req: AnalysisRequest): Promise<AnalysisResponse> {
     const prompt = this.buildAnalysisPrompt(req.entries)
 
@@ -99,9 +107,11 @@ ${entriesText}
   }
 
   private parseAnalysisResponse(content: string): AnalysisResponse {
-    // Простой парсинг - можно улучшить
+    // Очищаем от сносок Perplexity
+    const cleanedContent = this.cleanCitations(content)
+    
     return {
-      summary: content,
+      summary: cleanedContent,
       keyThemes: [],
       moodTrend: 'stable',
       recommendations: []
@@ -143,7 +153,10 @@ ${entriesText}
       const data = await response.json()
       const content = data.choices[0].message.content
       
-      return this.parseMonthlyAnalysisResponse(content)
+      // Очищаем от сносок Perplexity
+      const cleanedContent = this.cleanCitations(content)
+      
+      return this.parseMonthlyAnalysisResponse(cleanedContent)
     } catch (error) {
       console.error('Perplexity monthly analysis error:', error)
       throw new Error('Failed to analyze monthly mood data')
