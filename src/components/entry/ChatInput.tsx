@@ -148,8 +148,9 @@ export default function ChatInput({
       ref={containerRef}
       className="w-full px-3 sm:px-4 py-3"
       style={{
-        backgroundColor: '#E8E2D5',
-        borderTop: '1px solid #D4C8B5',
+        backgroundColor: 'rgba(26, 29, 46, 0.95)',
+        borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+        backdropFilter: 'blur(10px)',
         // position, bottom, left, right, transform устанавливаются через JS в useEffect
         position: 'fixed',
         bottom: '80px',
@@ -175,11 +176,11 @@ export default function ChatInput({
           className="flex-shrink-0 p-2 rounded-full transition-all disabled:opacity-50 disabled:cursor-not-allowed min-w-[44px] min-h-[44px] flex items-center justify-center"
           style={{
             backgroundColor: 'transparent',
-            color: '#8B3A3A',
+            color: 'rgba(255, 255, 255, 0.7)',
           }}
           onMouseEnter={(e) => {
             if (!disabled) {
-              e.currentTarget.style.backgroundColor = 'rgba(139, 58, 58, 0.1)'
+              e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'
             }
           }}
           onMouseLeave={(e) => {
@@ -209,8 +210,8 @@ export default function ChatInput({
         <div
           className="flex-1 rounded-2xl px-3 sm:px-4 py-2 flex items-end"
           style={{
-            backgroundColor: '#E8E2D5',
-            border: '1px solid #C8BEB0',
+            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
             touchAction: 'auto', // Allow interaction with textarea
           }}
         >
@@ -233,7 +234,7 @@ export default function ChatInput({
               minHeight: '44px',
               maxHeight: '120px',
               fontFamily: 'inherit',
-              color: '#8B3A3A',
+              color: 'rgba(255, 255, 255, 0.9)',
               overflowY: 'auto',
               WebkitOverflowScrolling: 'touch',
               // Позволяем взаимодействие с textarea
@@ -248,16 +249,16 @@ export default function ChatInput({
           disabled={disabled || !text.trim()}
           className="flex-shrink-0 p-2 rounded-full transition-all disabled:opacity-50 disabled:cursor-not-allowed min-w-[44px] min-h-[44px] flex items-center justify-center"
           style={{
-            backgroundColor: text.trim() ? '#8B3A3A' : 'transparent',
-            color: text.trim() ? '#FFFFFF' : '#8B3A3A',
+            backgroundColor: text.trim() ? '#7c5cff' : 'transparent',
+            color: text.trim() ? '#FFFFFF' : 'rgba(255, 255, 255, 0.7)',
           }}
           onMouseEnter={(e) => {
             if (!disabled && text.trim()) {
-              e.currentTarget.style.backgroundColor = '#7A2F2F'
+              e.currentTarget.style.backgroundColor = '#6b4de6'
             }
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = text.trim() ? '#8B3A3A' : 'transparent'
+            e.currentTarget.style.backgroundColor = text.trim() ? '#7c5cff' : 'transparent'
           }}
           title="Отправить"
         >

@@ -30,8 +30,9 @@ export default function ChatMessage({ message, onDelete }: ChatMessageProps) {
       <div
         className="max-w-[85%] sm:max-w-[80%] rounded-2xl px-3 sm:px-4 py-2 sm:py-2.5 shadow-sm relative"
         style={{
-          backgroundColor: '#F5F1EB',
-          color: '#8B3A3A',
+          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          color: 'rgba(255, 255, 255, 0.9)',
         }}
       >
         {/* Message content */}
@@ -47,14 +48,14 @@ export default function ChatMessage({ message, onDelete }: ChatMessageProps) {
                 <button
                   onClick={() => onDelete(message.id)}
                   className="p-1 rounded-full transition-all opacity-60 hover:opacity-100 min-w-[24px] min-h-[24px] flex items-center justify-center"
-                  style={{ color: '#A67C6C' }}
+                  style={{ color: 'rgba(255, 255, 255, 0.5)' }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = 'rgba(139, 58, 58, 0.1)'
-                    e.currentTarget.style.color = '#8B3A3A'
+                    e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)'
+                    e.currentTarget.style.color = 'rgba(255, 255, 255, 0.9)'
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.backgroundColor = 'transparent'
-                    e.currentTarget.style.color = '#A67C6C'
+                    e.currentTarget.style.color = 'rgba(255, 255, 255, 0.5)'
                   }}
                   title="Удалить сообщение"
                 >
@@ -86,7 +87,7 @@ export default function ChatMessage({ message, onDelete }: ChatMessageProps) {
             <div className="flex items-center">
               <span 
                 className="text-xs"
-                style={{ color: '#A67C6C' }}
+                style={{ color: 'rgba(255, 255, 255, 0.5)' }}
               >
                 {formatTime(message.timestamp)}
               </span>
@@ -96,7 +97,7 @@ export default function ChatMessage({ message, onDelete }: ChatMessageProps) {
                 height="10" 
                 viewBox="0 0 14 10" 
                 className="ml-1"
-                style={{ color: '#8B3A3A' }}
+                style={{ color: 'rgba(255, 255, 255, 0.7)' }}
                 fill="currentColor"
               >
                 <path d="M0 5.5L3.5 9L14 0L12.5 0L3.5 7.5L1.5 5.5L0 5.5Z" />
