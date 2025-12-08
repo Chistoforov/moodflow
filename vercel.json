@@ -1,0 +1,12 @@
+{
+  "buildCommand": "npm run vercel-build",
+  "installCommand": "npm install",
+  "outputDirectory": ".next",
+  "crons": [
+    {
+      "path": "/api/cron/weekly-summaries",
+      "schedule": "0 23 * * 0"
+    }
+  ]
+}
+

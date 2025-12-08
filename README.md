@@ -1,36 +1,181 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MoodFlow - Дневник настроения
 
-## Getting Started
+Персональный дневник настроения с поддержкой психологов и ИИ-анализом.
 
-First, run the development server:
+## 📱 Исправление OAuth для мобильного приложения (APK)
+
+**Если ваше APK приложение висит на экране "Вход..." после OAuth логина:**
+
+→ Откройте **[START_HERE_MOBILE_AUTH.md](./START_HERE_MOBILE_AUTH.md)** для быстрого решения (10 минут)
+
+Или см. полный индекс документации: **[MOBILE_AUTH_INDEX.md](./MOBILE_AUTH_INDEX.md)**
+
+---
+
+## 🚀 Быстрый старт
+
+### 1. Установка зависимостей
+
+Все зависимости уже установлены. Если нужно переустановить:
+
+```bash
+npm install
+```
+
+### 2. Настройка окружения
+
+Создайте файл `.env.local` в корне проекта и заполните следующие переменные:
+
+```bash
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=your-project-url.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+
+# Perplexity
+PERPLEXITY_API_KEY=your-perplexity-key
+
+# Telegram
+TELEGRAM_BOT_TOKEN=your-bot-token
+
+# Stripe
+STRIPE_SECRET_KEY=sk_test_your-key
+STRIPE_WEBHOOK_SECRET=whsec_your-secret
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_your-key
+STRIPE_PRICE_SUBSCRIPTION=price_subscription_id
+STRIPE_PRICE_PERSONAL=price_personal_id
+
+# App
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+CRON_SECRET=your-random-secret-for-cron
+```
+
+### 3. Настройка Supabase
+
+1. Создайте проект на [supabase.com](https://supabase.com)
+2. Запустите миграцию базы данных:
+   ```bash
+   # Скопируйте содержимое файла supabase/migrations/001_initial_schema.sql
+   # И выполните в SQL Editor вашего проекта Supabase
+   ```
+3. Настройте Authentication:
+   - Включите Email provider
+   - Настройте Email templates (опционально)
+
+### 4. Настройка интеграций (опционально)
+
+#### Perplexity AI
+1. Получите API ключ на [perplexity.ai](https://www.perplexity.ai)
+2. Добавьте в `.env.local`
+
+#### Telegram
+1. Создайте бота через [@BotFather](https://t.me/botfather)
+2. Добавьте токен в `.env.local`
+
+#### Stripe
+1. Создайте аккаунт на [stripe.com](https://stripe.com)
+2. Создайте Products и Price IDs
+3. Добавьте ключи в `.env.local`
+
+### 5. Запуск проекта
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Откройте [http://localhost:3000](http://localhost:3000) в браузере.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📁 Структура проекта
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+moodflow/
+├── src/
+│   ├── app/                    # Next.js App Router
+│   │   ├── (auth)/            # Auth routes
+│   │   │   └── login/
+│   │   ├── (user)/            # User routes
+│   │   │   ├── calendar/      # Календарь настроения
+│   │   │   ├── entry/[date]/  # Создание/редактирование записи
+│   │   │   ├── recommendations/ # Рекомендации
+│   │   │   └── profile/       # Профиль пользователя
+│   │   ├── (admin)/           # Admin routes
+│   │   │   ├── dashboard/
+│   │   │   └── users/
+│   │   └── api/               # API routes
+│   │       ├── auth/
+│   │       ├── entries/
+│   │       ├── recommendations/
+│   │       └── cron/
+│   ├── components/            # React компоненты
+│   │   ├── ui/               # UI компоненты
+│   │   ├── layout/           # Layout компоненты
+│   │   ├── calendar/         # Календарь компоненты
+│   │   └── entry/            # Entry компоненты
+│   ├── lib/                  # Библиотеки и утилиты
+│   │   ├── supabase/        # Supabase clients
+│   │   ├── integrations/    # Интеграции (Perplexity, Telegram, Stripe)
+│   │   └── utils/           # Утилиты и константы
+│   └── types/               # TypeScript типы
+├── supabase/
+│   └── migrations/          # SQL миграции
+├── middleware.ts            # Next.js middleware
+├── next.config.js          # Next.js конфигурация
+└── vercel.json             # Vercel конфигурация (cron jobs)
+```
 
-## Learn More
+## 🎯 Основные функции
 
-To learn more about Next.js, take a look at the following resources:
+### Для пользователей
+- 📅 **Календарь настроения** - отслеживание настроения каждый день
+- 📝 **Дневниковые записи** - текст и аудио заметки
+- 🏷️ **Факторы** - отметка факторов, влияющих на настроение
+- 📊 **ИИ-анализ** - еженедельные отчеты от Perplexity AI
+- 💬 **Рекомендации** - советы от психологов
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Для психологов
+- 👥 **Управление пользователями** - просмотр списка клиентов
+- 📈 **Статистика** - аналитика по пользователям
+- ✍️ **Рекомендации** - написание персональных советов
+- 💬 **Чат** - общение с клиентами (для Personal tier)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🔒 Безопасность
 
-## Deploy on Vercel
+- **Row Level Security (RLS)** настроена в Supabase
+- **Middleware** защищает роуты от неавторизованного доступа
+- **Server Components** для безопасной работы с API
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🚀 Деплой
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Vercel (рекомендуется)
+
+1. Подключите репозиторий к Vercel
+2. Добавьте environment variables
+3. Деплой произойдет автоматически
+
+### Другие платформы
+
+Проект совместим с любыми платформами, поддерживающими Next.js 14+.
+
+## 📝 Тарифы
+
+- **Бесплатно** - базовый функционал
+- **Подписка (990₽/мес)** - рекомендации психолога раз в неделю
+- **Личный психолог (4990₽/мес)** - постоянный чат с психологом
+
+## 🛠️ Технологии
+
+- **Next.js 14** - React framework
+- **TypeScript** - типизация
+- **Tailwind CSS** - стили
+- **Supabase** - база данных и аутентификация
+- **Perplexity AI** - ИИ-анализ
+- **Stripe** - платежи
+- **Telegram Bot** - уведомления
+
+## 📞 Поддержка
+
+Если у вас возникли вопросы или проблемы, создайте Issue в репозитории.
+
+## 📄 Лицензия
+
+MIT

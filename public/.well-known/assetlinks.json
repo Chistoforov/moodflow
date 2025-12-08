@@ -1,0 +1,13 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "app.vercel.moodflow_six.twa",
+      "sha256_cert_fingerprints": [
+        "ЗАМЕНИТЕ_НА_ВАШ_SHA256_FINGERPRINT"
+      ]
+    }
+  }
+]
+

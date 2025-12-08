@@ -1,0 +1,9 @@
+# Игнорируем только ненужные файлы, но не src/app
+node_modules
+.next
+.vercel
+*.log
+.DS_Store
+
+
+
